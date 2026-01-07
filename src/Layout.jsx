@@ -10,8 +10,8 @@ import {
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-    { name: "Kunden & Lieferanten", icon: Building2, page: "Customers" },
     { name: "Projekte", icon: FolderKanban, page: "Projects" },
+    { name: "Kunden & Lieferanten", icon: Building2, page: "Customers" },
     { name: "Abgeschlossene Projekte", icon: CheckCircle2, page: "CompletedProjects" },
     { name: "Datensicherung", icon: Database, page: "DataBackup" }
 ];
