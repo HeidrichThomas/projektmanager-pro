@@ -5,20 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FolderKanban, Save, X, Check } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { FolderKanban, Save, X, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProjectForm({ open, onClose, onSave, project, customers, suppliers }) {
     const availableSuppliers = suppliers || customers.filter(c => c.type === 'supplier' || c.type === 'both');
+    const [selectedSupplierId, setSelectedSupplierId] = useState("");
     
-    const toggleSupplier = (supplierId) => {
-        const currentIds = formData.supplier_ids || [];
-        if (currentIds.includes(supplierId)) {
-            setFormData({...formData, supplier_ids: currentIds.filter(id => id !== supplierId)});
-        } else {
-            setFormData({...formData, supplier_ids: [...currentIds, supplierId]});
-        }
-    };
     const [formData, setFormData] = useState({
         name: "",
         customer_id: "",
@@ -45,7 +38,22 @@ export default function ProjectForm({ open, onClose, onSave, project, customers,
                 end_date: ""
             });
         }
+        setSelectedSupplierId("");
     }, [project, open]);
+
+    const addSupplier = () => {
+        if (!selectedSupplierId) return;
+        const currentIds = formData.supplier_ids || [];
+        if (!currentIds.includes(selectedSupplierId)) {
+            setFormData({...formData, supplier_ids: [...currentIds, selectedSupplierId]});
+        }
+        setSelectedSupplierId("");
+    };
+
+    const removeSupplier = (supplierId) => {
+        const currentIds = formData.supplier_ids || [];
+        setFormData({...formData, supplier_ids: currentIds.filter(id => id !== supplierId)});
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -96,23 +104,54 @@ export default function ProjectForm({ open, onClose, onSave, project, customers,
                     
                     <div>
                         <Label className="text-slate-700 font-medium">Lieferanten</Label>
-                        <div className="mt-1.5 max-h-40 overflow-y-auto border rounded-lg p-3 space-y-2">
-                            {availableSuppliers.length > 0 ? (
-                                availableSuppliers.map((supplier) => (
-                                    <div key={supplier.id} className="flex items-center gap-2">
-                                        <Checkbox
-                                            checked={(formData.supplier_ids || []).includes(supplier.id)}
-                                            onCheckedChange={() => toggleSupplier(supplier.id)}
-                                        />
-                                        <label className="text-sm cursor-pointer" onClick={() => toggleSupplier(supplier.id)}>
+                        <div className="flex gap-2 mt-1.5">
+                            <Select
+                                value={selectedSupplierId}
+                                onValueChange={setSelectedSupplierId}
+                            >
+                                <SelectTrigger className="flex-1">
+                                    <SelectValue placeholder="Lieferant auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableSuppliers.filter(s => !(formData.supplier_ids || []).includes(s.id)).map((supplier) => (
+                                        <SelectItem key={supplier.id} value={supplier.id}>
                                             {supplier.company}
-                                        </label>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-sm text-slate-500">Keine Lieferanten verfügbar</p>
-                            )}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Button 
+                                type="button" 
+                                onClick={addSupplier}
+                                disabled={!selectedSupplierId}
+                                size="icon"
+                            >
+                                <Plus className="w-4 h-4" />
+                            </Button>
                         </div>
+                        
+                        {formData.supplier_ids && formData.supplier_ids.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                                {formData.supplier_ids.map(supplierId => {
+                                    const supplier = availableSuppliers.find(s => s.id === supplierId);
+                                    if (!supplier) return null;
+                                    return (
+                                        <div key={supplierId} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200">
+                                            <span className="text-sm font-medium text-slate-700">{supplier.company}</span>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => removeSupplier(supplierId)}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                     
                     <div>

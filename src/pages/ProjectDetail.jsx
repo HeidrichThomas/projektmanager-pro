@@ -327,8 +327,24 @@ export default function ProjectDetail() {
                                     const supplier = customers.find(c => c.id === supplierId);
                                     if (!supplier) return null;
                                     return (
-                                        <div key={supplierId} className="p-3 border rounded-lg hover:border-purple-300 transition-colors">
-                                            <p className="font-medium text-slate-900">{supplier.company}</p>
+                                        <div key={supplierId} className="group p-3 border rounded-lg hover:border-purple-300 transition-colors relative">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                onClick={() => {
+                                                    if (confirm(`${supplier.company} wirklich entfernen?`)) {
+                                                        const newSupplierIds = project.supplier_ids.filter(id => id !== supplierId);
+                                                        updateProjectMutation.mutate({ 
+                                                            id: projectId, 
+                                                            data: { ...project, supplier_ids: newSupplierIds } 
+                                                        });
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                            </Button>
+                                            <p className="font-medium text-slate-900 pr-6">{supplier.company}</p>
                                             {supplier.contact_name && (
                                                 <p className="text-sm text-slate-500">{supplier.contact_name}</p>
                                             )}
