@@ -12,6 +12,7 @@ import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2 } fr
 const typeConfig = {
     telefonat: { label: "Telefonat", icon: Phone, color: "text-green-600" },
     meeting: { label: "Meeting", icon: Users, color: "text-blue-600" },
+    besuch: { label: "Besuch", icon: Users, color: "text-indigo-600" },
     email: { label: "E-Mail", icon: Mail, color: "text-purple-600" },
     notiz: { label: "Notiz", icon: StickyNote, color: "text-amber-600" },
     dokument: { label: "Dokument", icon: FileText, color: "text-slate-600" }
