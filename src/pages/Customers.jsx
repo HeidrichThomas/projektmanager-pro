@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import CustomerForm from "@/components/customers/CustomerForm";
 import CustomerCard from "@/components/customers/CustomerCard";
 import CustomerListItem from "@/components/customers/CustomerListItem";
+import CustomerProjectsDialog from "@/components/customers/CustomerProjectsDialog";
 
 export default function Customers() {
     const [showForm, setShowForm] = useState(false);
@@ -18,6 +19,8 @@ export default function Customers() {
     const [search, setSearch] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [viewMode, setViewMode] = useState("grid");
+    const [showProjectsDialog, setShowProjectsDialog] = useState(false);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
 
     const queryClient = useQueryClient();
 
@@ -85,6 +88,15 @@ export default function Customers() {
 
     const getProjectCount = (customerId) => {
         return projects.filter(p => p.customer_id === customerId).length;
+    };
+
+    const getCustomerProjects = (customerId) => {
+        return projects.filter(p => p.customer_id === customerId);
+    };
+
+    const handleShowProjects = (customer) => {
+        setSelectedCustomer(customer);
+        setShowProjectsDialog(true);
     };
 
     const filteredCustomers = customers.filter(c => {
@@ -222,6 +234,13 @@ export default function Customers() {
                 onClose={() => { setShowForm(false); setEditingCustomer(null); }}
                 onSave={handleSave}
                 customer={editingCustomer}
+            />
+
+            <CustomerProjectsDialog
+                open={showProjectsDialog}
+                onClose={() => setShowProjectsDialog(false)}
+                customer={selectedCustomer}
+                projects={selectedCustomer ? getCustomerProjects(selectedCustomer.id) : []}
             />
         </div>
     );

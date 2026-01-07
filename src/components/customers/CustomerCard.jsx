@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Pencil, Copy, Trash2 } from "lucide-react";
 
-export default function CustomerCard({ customer, onEdit, onCopy, onDelete, projectCount }) {
+export default function CustomerCard({ customer, onEdit, onCopy, onDelete, projectCount, onShowProjects }) {
     const typeConfig = {
         customer: { label: "Kunde", color: "bg-blue-50 text-blue-700 border-blue-200" },
         supplier: { label: "Lieferant", color: "bg-purple-50 text-purple-700 border-purple-200" },
@@ -35,7 +35,14 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
                         {type.label}
                     </Badge>
                     {projectCount > 0 && (
-                        <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                        <Badge 
+                            variant="secondary" 
+                            className="bg-emerald-50 text-emerald-700 border-emerald-200 cursor-pointer hover:bg-emerald-100 transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onShowProjects(customer);
+                            }}
+                        >
                             {projectCount} {projectCount === 1 ? 'Projekt' : 'Projekte'}
                         </Badge>
                     )}
