@@ -1,0 +1,168 @@
+import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Search, Building2 } from "lucide-react";
+import { toast } from "sonner";
+
+import CustomerForm from "@/components/customers/CustomerForm";
+import CustomerCard from "@/components/customers/CustomerCard";
+
+export default function Customers() {
+    const [showForm, setShowForm] = useState(false);
+    const [editingCustomer, setEditingCustomer] = useState(null);
+    const [search, setSearch] = useState("");
+
+    const queryClient = useQueryClient();
+
+    const { data: customers = [], isLoading } = useQuery({
+        queryKey: ['customers'],
+        queryFn: () => base44.entities.Customer.list()
+    });
+
+    const { data: projects = [] } = useQuery({
+        queryKey: ['projects'],
+        queryFn: () => base44.entities.Project.list()
+    });
+
+    const createMutation = useMutation({
+        mutationFn: (data) => base44.entities.Customer.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customers'] });
+            setShowForm(false);
+            toast.success("Kunde erfolgreich angelegt");
+        }
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.Customer.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customers'] });
+            setShowForm(false);
+            setEditingCustomer(null);
+            toast.success("Kunde erfolgreich aktualisiert");
+        }
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id) => base44.entities.Customer.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customers'] });
+            toast.success("Kunde gelöscht");
+        }
+    });
+
+    const handleSave = (data) => {
+        if (editingCustomer) {
+            updateMutation.mutate({ id: editingCustomer.id, data });
+        } else {
+            createMutation.mutate(data);
+        }
+    };
+
+    const handleEdit = (customer) => {
+        setEditingCustomer(customer);
+        setShowForm(true);
+    };
+
+    const handleCopy = (customer) => {
+        const { id, created_date, updated_date, created_by, ...copyData } = customer;
+        copyData.company = `${copyData.company} (Kopie)`;
+        createMutation.mutate(copyData);
+    };
+
+    const handleDelete = (customer) => {
+        if (confirm("Möchten Sie diesen Kunden wirklich löschen?")) {
+            deleteMutation.mutate(customer.id);
+        }
+    };
+
+    const getProjectCount = (customerId) => {
+        return projects.filter(p => p.customer_id === customerId).length;
+    };
+
+    const filteredCustomers = customers.filter(c =>
+        c.company?.toLowerCase().includes(search.toLowerCase()) ||
+        c.contact_name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.city?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-900">Kunden</h1>
+                        <p className="text-slate-500 mt-1">Verwalten Sie Ihre Kundendatenbank</p>
+                    </div>
+                    <Button onClick={() => { setEditingCustomer(null); setShowForm(true); }} className="bg-slate-800 hover:bg-slate-900">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Neuer Kunde
+                    </Button>
+                </div>
+
+                <div className="relative mb-6">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <Input
+                        placeholder="Suche nach Firma, Ansprechpartner oder Stadt..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="pl-10 max-w-md"
+                    />
+                </div>
+
+                {isLoading ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Array(6).fill(0).map((_, i) => (
+                            <div key={i} className="p-5 border rounded-xl">
+                                <Skeleton className="h-12 w-12 rounded-xl mb-4" />
+                                <Skeleton className="h-6 w-48 mb-2" />
+                                <Skeleton className="h-4 w-32 mb-4" />
+                                <Skeleton className="h-4 w-full mb-2" />
+                                <Skeleton className="h-4 w-3/4" />
+                            </div>
+                        ))}
+                    </div>
+                ) : filteredCustomers.length > 0 ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredCustomers.map((customer) => (
+                            <CustomerCard
+                                key={customer.id}
+                                customer={customer}
+                                onEdit={handleEdit}
+                                onCopy={handleCopy}
+                                onDelete={handleDelete}
+                                projectCount={getProjectCount(customer.id)}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-16">
+                        <Building2 className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+                        <h3 className="text-lg font-medium text-slate-700 mb-2">
+                            {search ? "Keine Kunden gefunden" : "Noch keine Kunden angelegt"}
+                        </h3>
+                        <p className="text-slate-500 mb-6">
+                            {search ? "Versuchen Sie eine andere Suche" : "Legen Sie Ihren ersten Kunden an"}
+                        </p>
+                        {!search && (
+                            <Button onClick={() => setShowForm(true)} className="bg-slate-800 hover:bg-slate-900">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Ersten Kunden anlegen
+                            </Button>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            <CustomerForm
+                open={showForm}
+                onClose={() => { setShowForm(false); setEditingCustomer(null); }}
+                onSave={handleSave}
+                customer={editingCustomer}
+            />
+        </div>
+    );
+}
