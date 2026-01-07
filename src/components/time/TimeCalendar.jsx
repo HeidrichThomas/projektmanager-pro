@@ -14,9 +14,14 @@ export default function TimeCalendar({ timeEntries, selectedMonth, onMonthChange
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
     
     const getHoursForDay = (day) => {
-        const dayEntries = timeEntries.filter(entry => 
-            isSameDay(parseISO(entry.date), day)
-        );
+        const dayEntries = timeEntries.filter(entry => {
+            if (!entry.date) return false;
+            try {
+                return isSameDay(parseISO(entry.date), day);
+            } catch {
+                return false;
+            }
+        });
         const totalMinutes = dayEntries.reduce((sum, entry) => sum + (entry.duration_minutes || 0), 0);
         return (totalMinutes / 60).toFixed(1);
     };
@@ -27,9 +32,14 @@ export default function TimeCalendar({ timeEntries, selectedMonth, onMonthChange
     };
 
     const handleDayClick = (day) => {
-        const dayEntries = timeEntries.filter(entry => 
-            isSameDay(parseISO(entry.date), day)
-        );
+        const dayEntries = timeEntries.filter(entry => {
+            if (!entry.date) return false;
+            try {
+                return isSameDay(parseISO(entry.date), day);
+            } catch {
+                return false;
+            }
+        });
         if (dayEntries.length > 0) {
             setSelectedDay({ day, entries: dayEntries });
             setShowDayDetails(true);
@@ -131,11 +141,17 @@ export default function TimeCalendar({ timeEntries, selectedMonth, onMonthChange
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold text-lg">{(entry.duration_minutes / 60).toFixed(2)}h</span>
-                                        {entry.start_time && entry.end_time && (
-                                            <span className="text-sm text-slate-500">
-                                                {format(parseISO(entry.start_time), "HH:mm")} - {format(parseISO(entry.end_time), "HH:mm")}
-                                            </span>
-                                        )}
+                                        {entry.start_time && entry.end_time && (() => {
+                                            try {
+                                                return (
+                                                    <span className="text-sm text-slate-500">
+                                                        {format(parseISO(entry.start_time), "HH:mm")} - {format(parseISO(entry.end_time), "HH:mm")}
+                                                    </span>
+                                                );
+                                            } catch {
+                                                return null;
+                                            }
+                                        })()}
                                     </div>
                                     {entry.description && (
                                         <p className="text-sm text-slate-600 mt-1">{entry.description}</p>

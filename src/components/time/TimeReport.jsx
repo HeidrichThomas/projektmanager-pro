@@ -9,6 +9,7 @@ export default function TimeReport({ open, onClose, timeEntries, project, custom
     // Gruppiere Einträge nach Tag
     const entriesByDay = timeEntries.reduce((acc, entry) => {
         const date = entry.date;
+        if (!date) return acc;
         if (!acc[date]) {
             acc[date] = [];
         }
@@ -55,12 +56,20 @@ export default function TimeReport({ open, onClose, timeEntries, project, custom
         sortedDays.forEach(date => {
             const dayEntries = entriesByDay[date];
             const dayTotal = dayEntries.reduce((sum, e) => sum + (e.duration_minutes || 0), 0);
-            text += `\n=== ${format(parseISO(date), "dd.MM.yyyy (EEEE)", { locale: de })} ===\n`;
+            try {
+                text += `\n=== ${format(parseISO(date), "dd.MM.yyyy (EEEE)", { locale: de })} ===\n`;
+            } catch {
+                text += `\n=== ${date} ===\n`;
+            }
             text += `Tagesgesamt: ${(dayTotal / 60).toFixed(2)}h\n\n`;
             dayEntries.forEach(entry => {
                 text += `  - ${(entry.duration_minutes / 60).toFixed(2)}h`;
                 if (entry.start_time && entry.end_time) {
-                    text += ` (${format(parseISO(entry.start_time), "HH:mm")} - ${format(parseISO(entry.end_time), "HH:mm")})`;
+                    try {
+                        text += ` (${format(parseISO(entry.start_time), "HH:mm")} - ${format(parseISO(entry.end_time), "HH:mm")})`;
+                    } catch {
+                        // Skip invalid times
+                    }
                 }
                 text += `\n`;
                 if (entry.description) text += `    Beschreibung: ${entry.description}\n`;
@@ -123,11 +132,17 @@ export default function TimeReport({ open, onClose, timeEntries, project, custom
                             {sortedDays.map(date => {
                                 const dayEntries = entriesByDay[date];
                                 const dayTotal = dayEntries.reduce((sum, e) => sum + (e.duration_minutes || 0), 0);
+                                let formattedDate = date;
+                                try {
+                                    formattedDate = format(parseISO(date), "dd. MMMM yyyy (EEEE)", { locale: de });
+                                } catch {
+                                    // Use raw date if parsing fails
+                                }
                                 return (
                                     <div key={date} className="border rounded-lg p-4 bg-slate-50">
                                         <div className="flex justify-between items-center mb-3 pb-2 border-b">
                                             <h4 className="font-semibold text-slate-900">
-                                                {format(parseISO(date), "dd. MMMM yyyy (EEEE)", { locale: de })}
+                                                {formattedDate}
                                             </h4>
                                             <span className="text-lg font-bold text-slate-900">
                                                 {(dayTotal / 60).toFixed(2)}h
@@ -138,11 +153,17 @@ export default function TimeReport({ open, onClose, timeEntries, project, custom
                                                 <div key={entry.id} className={`p-2 rounded border ${entry.is_billed ? 'bg-green-50 border-green-200' : 'bg-white border-slate-200'}`}>
                                                     <div className="flex justify-between items-start text-sm">
                                                         <div className="flex-1">
-                                                            {entry.start_time && entry.end_time && (
-                                                                <div className="text-slate-500 mb-1">
-                                                                    {format(parseISO(entry.start_time), "HH:mm")} - {format(parseISO(entry.end_time), "HH:mm")}
-                                                                </div>
-                                                            )}
+                                                            {entry.start_time && entry.end_time && (() => {
+                                                                try {
+                                                                    return (
+                                                                        <div className="text-slate-500 mb-1">
+                                                                            {format(parseISO(entry.start_time), "HH:mm")} - {format(parseISO(entry.end_time), "HH:mm")}
+                                                                        </div>
+                                                                    );
+                                                                } catch {
+                                                                    return null;
+                                                                }
+                                                            })()}
                                                             {entry.description && (
                                                                 <div className="text-slate-600">{entry.description}</div>
                                                             )}
