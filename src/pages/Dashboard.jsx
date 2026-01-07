@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isTomorrow, isPast } from "date-fns";
 import { de } from "date-fns/locale";
+import ActiveTimers from "@/components/dashboard/ActiveTimers";
 
 export default function Dashboard() {
     const { data: customers = [], isLoading: loadingCustomers } = useQuery({
@@ -81,8 +82,11 @@ export default function Dashboard() {
                     <p className="text-slate-500 mt-1">Willkommen zurück! Hier ist Ihre Projektübersicht.</p>
                 </div>
 
+                {/* Active Timers */}
+                <ActiveTimers projects={projects} />
+
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 mt-8">
                     {stats.map((stat, i) => (
                         <Link key={i} to={createPageUrl(stat.link)}>
                             <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
