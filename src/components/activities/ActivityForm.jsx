@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,11 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
         file_names: []
     });
     const [uploading, setUploading] = useState(false);
+
+    const { data: customers = [] } = useQuery({
+        queryKey: ['customers'],
+        queryFn: () => base44.entities.Customer.list()
+    });
 
     useEffect(() => {
         if (activity) {
@@ -127,12 +133,25 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label className="text-slate-700 font-medium">Gesprächspartner</Label>
-                            <Input
+                            <Select
                                 value={formData.contact_person}
-                                onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
-                                placeholder="Name"
-                                className="mt-1.5"
-                            />
+                                onValueChange={(value) => setFormData({...formData, contact_person: value})}
+                            >
+                                <SelectTrigger className="mt-1.5">
+                                    <SelectValue placeholder="Auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {customers.map((customer) => (
+                                        <SelectItem 
+                                            key={customer.id} 
+                                            value={customer.contact_name || customer.company}
+                                        >
+                                            {customer.company}
+                                            {customer.contact_name && ` (${customer.contact_name})`}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                         
                         <div>
