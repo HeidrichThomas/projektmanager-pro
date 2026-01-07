@@ -107,7 +107,7 @@ export default function Layout({ children, currentPageName }) {
                     <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
                         <FolderKanban className="w-4 h-4 text-white" />
                     </div>
-                    <span className="font-bold text-slate-900">ProjektManager</span>
+                    <span className="font-bold text-slate-900 dark:text-white">ProjektManager</span>
                 </div>
                 
                 <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
