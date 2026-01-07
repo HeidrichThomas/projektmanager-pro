@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2, Handshake } from "lucide-react";
+import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2, Handshake, Plus, Trash2 } from "lucide-react";
 
 const typeConfig = {
     telefonat: { label: "Telefonat", icon: Phone, color: "text-green-600" },
@@ -30,6 +30,8 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
         file_names: []
     });
     const [uploading, setUploading] = useState(false);
+    const [selectedContactPerson, setSelectedContactPerson] = useState("");
+    const [contactPersonsList, setContactPersonsList] = useState([]);
 
     const { data: customers = [] } = useQuery({
         queryKey: ['customers'],
@@ -42,6 +44,9 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                 ...activity,
                 activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16)
             });
+            // Parse existing contact persons (comma-separated string to array)
+            const existingContacts = activity.contact_person ? activity.contact_person.split(', ').filter(c => c.trim()) : [];
+            setContactPersonsList(existingContacts);
         } else {
             setFormData({
                 project_id: projectId,
@@ -53,7 +58,9 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                 file_urls: [],
                 file_names: []
             });
+            setContactPersonsList([]);
         }
+        setSelectedContactPerson("");
     }, [activity, projectId, open]);
 
     const handleFileUpload = async (e) => {
@@ -78,6 +85,20 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
         const newUrls = formData.file_urls.filter((_, i) => i !== index);
         const newNames = formData.file_names.filter((_, i) => i !== index);
         setFormData({...formData, file_urls: newUrls, file_names: newNames});
+    };
+
+    const addContactPerson = () => {
+        if (!selectedContactPerson || contactPersonsList.includes(selectedContactPerson)) return;
+        const newList = [...contactPersonsList, selectedContactPerson];
+        setContactPersonsList(newList);
+        setFormData({...formData, contact_person: newList.join(', ')});
+        setSelectedContactPerson("");
+    };
+
+    const removeContactPerson = (index) => {
+        const newList = contactPersonsList.filter((_, i) => i !== index);
+        setContactPersonsList(newList);
+        setFormData({...formData, contact_person: newList.join(', ')});
     };
 
     const handleSubmit = (e) => {
@@ -131,39 +152,92 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                         />
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label className="text-slate-700 font-medium">Gesprächspartner</Label>
+                    <div>
+                        <Label className="text-slate-700 font-medium">Gesprächspartner</Label>
+                        <div className="flex gap-2 mt-1.5">
                             <Select
-                                value={formData.contact_person}
-                                onValueChange={(value) => setFormData({...formData, contact_person: value})}
+                                value={selectedContactPerson}
+                                onValueChange={setSelectedContactPerson}
                             >
-                                <SelectTrigger className="mt-1.5">
+                                <SelectTrigger className="flex-1">
                                     <SelectValue placeholder="Auswählen" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {customers.map((customer) => (
-                                        <SelectItem 
-                                            key={customer.id} 
-                                            value={customer.contact_name || customer.company}
-                                        >
-                                            {customer.company}
-                                            {customer.contact_name && ` (${customer.contact_name})`}
+                                    {customers.flatMap((customer) => {
+                                        const contacts = [];
+                                        // Add all contact persons from contact_persons array
+                                        if (customer.contact_persons && customer.contact_persons.length > 0) {
+                                            customer.contact_persons.forEach(contact => {
+                                                contacts.push({
+                                                    value: `${contact.name} (${customer.company})`,
+                                                    label: `${contact.name} (${customer.company})`,
+                                                    position: contact.position
+                                                });
+                                            });
+                                        }
+                                        // Also add main contact if exists
+                                        if (customer.contact_name) {
+                                            contacts.push({
+                                                value: `${customer.contact_name} (${customer.company})`,
+                                                label: `${customer.contact_name} (${customer.company})`,
+                                                position: null
+                                            });
+                                        }
+                                        // Add company as fallback
+                                        if (contacts.length === 0) {
+                                            contacts.push({
+                                                value: customer.company,
+                                                label: customer.company,
+                                                position: null
+                                            });
+                                        }
+                                        return contacts;
+                                    }).map((contact, index) => (
+                                        <SelectItem key={index} value={contact.value}>
+                                            {contact.label}
+                                            {contact.position && <span className="text-xs text-slate-500"> - {contact.position}</span>}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                            <Button 
+                                type="button" 
+                                onClick={addContactPerson}
+                                disabled={!selectedContactPerson}
+                                size="icon"
+                            >
+                                <Plus className="w-4 h-4" />
+                            </Button>
                         </div>
                         
-                        <div>
-                            <Label className="text-slate-700 font-medium">Datum & Uhrzeit</Label>
-                            <Input
-                                type="datetime-local"
-                                value={formData.activity_date}
-                                onChange={(e) => setFormData({...formData, activity_date: e.target.value})}
-                                className="mt-1.5"
-                            />
-                        </div>
+                        {contactPersonsList.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                                {contactPersonsList.map((person, index) => (
+                                    <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200">
+                                        <span className="text-sm font-medium text-slate-700">{person}</span>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeContactPerson(index)}
+                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div>
+                        <Label className="text-slate-700 font-medium">Datum & Uhrzeit</Label>
+                        <Input
+                            type="datetime-local"
+                            value={formData.activity_date}
+                            onChange={(e) => setFormData({...formData, activity_date: e.target.value})}
+                            className="mt-1.5"
+                        />
                     </div>
                     
                     <div>
