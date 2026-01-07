@@ -553,11 +553,21 @@ export default function ProjectDetail() {
                         ) : (
                             <div className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <TimeTracker onSave={handleTimeSave} projectId={projectId} />
+                                    <TimeTracker 
+                                        onSave={handleTimeSave} 
+                                        projectId={projectId}
+                                        todayEntries={timeEntries.filter(e => e.date === new Date().toISOString().slice(0, 10))}
+                                    />
                                     <TimeCalendar 
                                         timeEntries={timeEntries}
                                         selectedMonth={selectedMonth}
                                         onMonthChange={setSelectedMonth}
+                                        onEditEntry={handleEditTimeEntry}
+                                        onDeleteEntry={(entry) => {
+                                            if (confirm("Zeiteintrag wirklich löschen?")) {
+                                                deleteTimeEntryMutation.mutate(entry.id);
+                                            }
+                                        }}
                                     />
                                 </div>
 

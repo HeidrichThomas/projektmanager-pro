@@ -2,10 +2,21 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FileText, Download, Printer } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isSameDay } from "date-fns";
 import { de } from "date-fns/locale";
 
 export default function TimeReport({ open, onClose, timeEntries, project, customer }) {
+    // Gruppiere Einträge nach Tag
+    const entriesByDay = timeEntries.reduce((acc, entry) => {
+        const date = entry.date;
+        if (!acc[date]) {
+            acc[date] = [];
+        }
+        acc[date].push(entry);
+        return acc;
+    }, {});
+
+    const sortedDays = Object.keys(entriesByDay).sort();
     const totalMinutes = timeEntries.reduce((sum, entry) => sum + (entry.duration_minutes || 0), 0);
     const totalHours = (totalMinutes / 60).toFixed(2);
     const billedEntries = timeEntries.filter(e => e.is_billed);
@@ -39,18 +50,27 @@ export default function TimeReport({ open, onClose, timeEntries, project, custom
         text += `Nicht abgerechnet: ${unbilledEntries.length} Einträge\n`;
         text += `Abgerechnet: ${billedEntries.length} Einträge (${totalBilledAmount.toFixed(2)} EUR)\n\n`;
         
-        text += `DETAILLIERTE ZEITEINTRÄGE\n`;
+        text += `DETAILLIERTE ZEITEINTRÄGE (NACH TAG)\n`;
         text += `-------------------\n`;
-        timeEntries.forEach(entry => {
-            text += `\nDatum: ${format(parseISO(entry.date), "dd.MM.yyyy", { locale: de })}\n`;
-            text += `Dauer: ${(entry.duration_minutes / 60).toFixed(2)}h\n`;
-            if (entry.description) text += `Beschreibung: ${entry.description}\n`;
-            if (entry.is_billed) {
-                text += `Status: ABGERECHNET (${entry.amount?.toFixed(2)} EUR)\n`;
-            } else {
-                text += `Status: Nicht abgerechnet\n`;
-            }
-            text += `---\n`;
+        sortedDays.forEach(date => {
+            const dayEntries = entriesByDay[date];
+            const dayTotal = dayEntries.reduce((sum, e) => sum + (e.duration_minutes || 0), 0);
+            text += `\n=== ${format(parseISO(date), "dd.MM.yyyy (EEEE)", { locale: de })} ===\n`;
+            text += `Tagesgesamt: ${(dayTotal / 60).toFixed(2)}h\n\n`;
+            dayEntries.forEach(entry => {
+                text += `  - ${(entry.duration_minutes / 60).toFixed(2)}h`;
+                if (entry.start_time && entry.end_time) {
+                    text += ` (${format(parseISO(entry.start_time), "HH:mm")} - ${format(parseISO(entry.end_time), "HH:mm")})`;
+                }
+                text += `\n`;
+                if (entry.description) text += `    Beschreibung: ${entry.description}\n`;
+                if (entry.is_billed) {
+                    text += `    Status: ABGERECHNET (${entry.amount?.toFixed(2)} EUR)\n`;
+                } else {
+                    text += `    Status: Nicht abgerechnet\n`;
+                }
+            });
+            text += `\n`;
         });
         
         return text;
@@ -98,28 +118,48 @@ export default function TimeReport({ open, onClose, timeEntries, project, custom
                     </div>
 
                     <div>
-                        <h3 className="font-semibold text-lg mb-3">Zeiteinträge</h3>
-                        <div className="space-y-2">
-                            {timeEntries.map(entry => (
-                                <div key={entry.id} className={`p-3 rounded-lg border ${entry.is_billed ? 'bg-green-50 border-green-200' : 'bg-white border-slate-200'}`}>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <div className="font-medium">
-                                                {format(parseISO(entry.date), "dd. MMMM yyyy", { locale: de })}
-                                            </div>
-                                            {entry.description && (
-                                                <div className="text-sm text-slate-600 mt-1">{entry.description}</div>
-                                            )}
+                        <h3 className="font-semibold text-lg mb-3">Zeiteinträge nach Tag</h3>
+                        <div className="space-y-4">
+                            {sortedDays.map(date => {
+                                const dayEntries = entriesByDay[date];
+                                const dayTotal = dayEntries.reduce((sum, e) => sum + (e.duration_minutes || 0), 0);
+                                return (
+                                    <div key={date} className="border rounded-lg p-4 bg-slate-50">
+                                        <div className="flex justify-between items-center mb-3 pb-2 border-b">
+                                            <h4 className="font-semibold text-slate-900">
+                                                {format(parseISO(date), "dd. MMMM yyyy (EEEE)", { locale: de })}
+                                            </h4>
+                                            <span className="text-lg font-bold text-slate-900">
+                                                {(dayTotal / 60).toFixed(2)}h
+                                            </span>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="font-bold">{(entry.duration_minutes / 60).toFixed(2)}h</div>
-                                            {entry.is_billed && (
-                                                <div className="text-sm text-green-700">{entry.amount?.toFixed(2)} EUR</div>
-                                            )}
+                                        <div className="space-y-2">
+                                            {dayEntries.map(entry => (
+                                                <div key={entry.id} className={`p-2 rounded border ${entry.is_billed ? 'bg-green-50 border-green-200' : 'bg-white border-slate-200'}`}>
+                                                    <div className="flex justify-between items-start text-sm">
+                                                        <div className="flex-1">
+                                                            {entry.start_time && entry.end_time && (
+                                                                <div className="text-slate-500 mb-1">
+                                                                    {format(parseISO(entry.start_time), "HH:mm")} - {format(parseISO(entry.end_time), "HH:mm")}
+                                                                </div>
+                                                            )}
+                                                            {entry.description && (
+                                                                <div className="text-slate-600">{entry.description}</div>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-right ml-3">
+                                                            <div className="font-bold">{(entry.duration_minutes / 60).toFixed(2)}h</div>
+                                                            {entry.is_billed && (
+                                                                <div className="text-xs text-green-700">{entry.amount?.toFixed(2)} EUR</div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
