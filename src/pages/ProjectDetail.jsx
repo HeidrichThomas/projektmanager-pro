@@ -347,7 +347,7 @@ export default function ProjectDetail() {
                                 <p className="text-xs text-slate-500 mb-2">Fortschritt anpassen:</p>
                                 <Slider
                                     value={[project.progress || 0]}
-                                    onValueCommit={handleProgressChange}
+                                    onValueChange={handleProgressChange}
                                     max={100}
                                     step={5}
                                 />
