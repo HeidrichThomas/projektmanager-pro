@@ -11,9 +11,13 @@ export default function CustomerListItem({ customer, onEdit, onCopy, onDelete, p
     };
     
     const type = typeConfig[customer.type] || typeConfig.customer;
+    const isSupplierOnly = customer.type === 'supplier';
     
     return (
-        <div className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 group">
+        <div 
+            className={`bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 group ${isSupplierOnly ? 'cursor-pointer' : ''}`}
+            onClick={isSupplierOnly ? () => onShowProjects(customer) : undefined}
+        >
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center shrink-0">
@@ -26,7 +30,7 @@ export default function CustomerListItem({ customer, onEdit, onCopy, onDelete, p
                             <Badge variant="secondary" className={`${type.color} border shrink-0`}>
                                 {type.label}
                             </Badge>
-                            {projectCount > 0 && (
+                            {projectCount > 0 && customer.type !== 'supplier' && (
                                 <Badge 
                                     variant="secondary" 
                                     className="bg-emerald-50 text-emerald-700 border-emerald-200 shrink-0 cursor-pointer hover:bg-emerald-100 transition-colors"
@@ -77,13 +81,13 @@ export default function CustomerListItem({ customer, onEdit, onCopy, onDelete, p
                 </div>
                 
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                    <Button size="sm" variant="ghost" onClick={() => onEdit(customer)}>
+                    <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onEdit(customer); }}>
                         <Pencil className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => onCopy(customer)}>
+                    <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onCopy(customer); }}>
                         <Copy className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => onDelete(customer)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                    <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onDelete(customer); }} className="text-red-600 hover:text-red-700 hover:bg-red-50">
                         <Trash2 className="w-4 h-4" />
                     </Button>
                 </div>
