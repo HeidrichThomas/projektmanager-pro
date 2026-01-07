@@ -24,7 +24,7 @@ export default function CustomerProjectsDialog({ open, onClose, customer, projec
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Building2 className="w-5 h-5 text-slate-600" />
-                        Projekte von {customer.company}
+                        {customer.type === 'supplier' ? 'Projekte mit' : 'Projekte von'} {customer.company}
                     </DialogTitle>
                 </DialogHeader>
                 
@@ -87,7 +87,7 @@ export default function CustomerProjectsDialog({ open, onClose, customer, projec
                         })
                     ) : (
                         <div className="text-center py-8 text-slate-500">
-                            Keine Projekte für diesen Kunden vorhanden
+                            Keine Projekte für diesen {customer.type === 'supplier' ? 'Lieferanten' : 'Kunden'} vorhanden
                         </div>
                     )}
                 </div>

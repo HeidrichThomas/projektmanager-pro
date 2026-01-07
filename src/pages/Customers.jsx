@@ -86,12 +86,18 @@ export default function Customers() {
         }
     };
 
-    const getProjectCount = (customerId) => {
-        return projects.filter(p => p.customer_id === customerId).length;
+    const getProjectCount = (contactId) => {
+        return projects.filter(p => 
+            p.customer_id === contactId || 
+            (p.supplier_ids && p.supplier_ids.includes(contactId))
+        ).length;
     };
 
-    const getCustomerProjects = (customerId) => {
-        return projects.filter(p => p.customer_id === customerId);
+    const getCustomerProjects = (contactId) => {
+        return projects.filter(p => 
+            p.customer_id === contactId || 
+            (p.supplier_ids && p.supplier_ids.includes(contactId))
+        );
     };
 
     const handleShowProjects = (customer) => {
