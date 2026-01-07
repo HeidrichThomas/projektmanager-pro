@@ -162,6 +162,7 @@ export default function Projects() {
                 onSave={handleSave}
                 project={editingProject}
                 customers={customers}
+                suppliers={customers.filter(c => c.type === 'supplier' || c.type === 'both')}
             />
         </div>
     );

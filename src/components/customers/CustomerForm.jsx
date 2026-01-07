@@ -4,17 +4,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Building2, User, MapPin, Phone, Mail, Globe, Save, X } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Save, X } from "lucide-react";
 
 export default function CustomerForm({ open, onClose, onSave, customer }) {
     const [formData, setFormData] = useState({
         company: "",
         contact_name: "",
+        type: "customer",
         street: "",
         postal_code: "",
         city: "",
         country: "Deutschland",
         phone: "",
+        mobile_phone: "",
         fax: "",
         email: "",
         website: "",
@@ -28,11 +30,13 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
             setFormData({
                 company: "",
                 contact_name: "",
+                type: "customer",
                 street: "",
                 postal_code: "",
                 city: "",
                 country: "Deutschland",
                 phone: "",
+                mobile_phone: "",
                 fax: "",
                 email: "",
                 website: "",
@@ -83,6 +87,23 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                                     placeholder="Name des Ansprechpartners"
                                 />
                             </div>
+                        </div>
+                        
+                        <div>
+                            <Label className="text-slate-700 font-medium">Typ *</Label>
+                            <Select
+                                value={formData.type}
+                                onValueChange={(value) => setFormData({...formData, type: value})}
+                            >
+                                <SelectTrigger className="mt-1.5">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="customer">Kunde</SelectItem>
+                                    <SelectItem value="supplier">Lieferant</SelectItem>
+                                    <SelectItem value="both">Kunde & Lieferant</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         
                         <div>
@@ -137,6 +158,19 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                                     className="pl-10"
                                     placeholder="+49 123 456789"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <Label className="text-slate-700 font-medium">Handy</Label>
+                            <div className="relative mt-1.5">
+                                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <Input
+                                    value={formData.mobile_phone}
+                                    onChange={(e) => setFormData({...formData, mobile_phone: e.target.value})}
+                                    className="pl-10"
+                                    placeholder="+49 170 1234567"
                                 />
                             </div>
                         </div>

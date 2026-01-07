@@ -2,9 +2,17 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, User, MapPin, Phone, Mail, Globe, Pencil, Copy, Trash2 } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Pencil, Copy, Trash2 } from "lucide-react";
 
 export default function CustomerCard({ customer, onEdit, onCopy, onDelete, projectCount }) {
+    const typeConfig = {
+        customer: { label: "Kunde", color: "bg-blue-50 text-blue-700 border-blue-200" },
+        supplier: { label: "Lieferant", color: "bg-purple-50 text-purple-700 border-purple-200" },
+        both: { label: "Kunde & Lieferant", color: "bg-indigo-50 text-indigo-700 border-indigo-200" }
+    };
+    
+    const type = typeConfig[customer.type] || typeConfig.customer;
+    
     return (
         <Card className="p-5 hover:shadow-lg transition-all duration-300 border-slate-200 group">
             <div className="flex justify-between items-start mb-4">
@@ -22,11 +30,16 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
                         )}
                     </div>
                 </div>
-                {projectCount > 0 && (
-                    <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                        {projectCount} {projectCount === 1 ? 'Projekt' : 'Projekte'}
+                <div className="flex flex-col items-end gap-2">
+                    <Badge variant="secondary" className={`${type.color} border`}>
+                        {type.label}
                     </Badge>
-                )}
+                    {projectCount > 0 && (
+                        <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                            {projectCount} {projectCount === 1 ? 'Projekt' : 'Projekte'}
+                        </Badge>
+                    )}
+                </div>
             </div>
             
             <div className="space-y-2 text-sm text-slate-600 mb-4">
@@ -46,6 +59,15 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
                         <Phone className="w-4 h-4 text-slate-400" />
                         <a href={`tel:${customer.phone}`} className="hover:text-slate-900 transition-colors">
                             {customer.phone}
+                        </a>
+                    </div>
+                )}
+                
+                {customer.mobile_phone && (
+                    <div className="flex items-center gap-2">
+                        <Smartphone className="w-4 h-4 text-slate-400" />
+                        <a href={`tel:${customer.mobile_phone}`} className="hover:text-slate-900 transition-colors">
+                            {customer.mobile_phone}
                         </a>
                     </div>
                 )}

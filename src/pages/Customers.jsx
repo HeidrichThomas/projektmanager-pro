@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Building2 } from "lucide-react";
+import { Plus, Search, Building2, Filter } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 import CustomerForm from "@/components/customers/CustomerForm";
@@ -14,6 +15,7 @@ export default function Customers() {
     const [showForm, setShowForm] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState(null);
     const [search, setSearch] = useState("");
+    const [typeFilter, setTypeFilter] = useState("all");
 
     const queryClient = useQueryClient();
 
@@ -83,11 +85,13 @@ export default function Customers() {
         return projects.filter(p => p.customer_id === customerId).length;
     };
 
-    const filteredCustomers = customers.filter(c =>
-        c.company?.toLowerCase().includes(search.toLowerCase()) ||
-        c.contact_name?.toLowerCase().includes(search.toLowerCase()) ||
-        c.city?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredCustomers = customers.filter(c => {
+        const matchesSearch = c.company?.toLowerCase().includes(search.toLowerCase()) ||
+            c.contact_name?.toLowerCase().includes(search.toLowerCase()) ||
+            c.city?.toLowerCase().includes(search.toLowerCase());
+        const matchesType = typeFilter === "all" || c.type === typeFilter || (typeFilter === "customer" && c.type === "both") || (typeFilter === "supplier" && c.type === "both");
+        return matchesSearch && matchesType;
+    });
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
@@ -103,14 +107,24 @@ export default function Customers() {
                     </Button>
                 </div>
 
-                <div className="relative mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <Input
-                        placeholder="Suche nach Firma, Ansprechpartner oder Stadt..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10 max-w-md"
-                    />
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <Input
+                            placeholder="Suche nach Firma, Ansprechpartner oder Stadt..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="pl-10"
+                        />
+                    </div>
+                    
+                    <Tabs value={typeFilter} onValueChange={setTypeFilter}>
+                        <TabsList className="bg-slate-100">
+                            <TabsTrigger value="all">Alle</TabsTrigger>
+                            <TabsTrigger value="customer">Kunden</TabsTrigger>
+                            <TabsTrigger value="supplier">Lieferanten</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
                 </div>
 
                 {isLoading ? (

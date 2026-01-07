@@ -265,7 +265,7 @@ export default function ProjectDetail() {
                     </CardContent>
                 </Card>
 
-                {/* Customer Info */}
+                {/* Customer & Suppliers Info */}
                 {customer && (
                     <Card className="mb-8 shadow-sm">
                         <CardHeader className="pb-3">
@@ -307,6 +307,39 @@ export default function ProjectDetail() {
                                         </p>
                                     </div>
                                 )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+                
+                {/* Suppliers */}
+                {project.supplier_ids && project.supplier_ids.length > 0 && (
+                    <Card className="mb-8 shadow-sm">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Building2 className="w-5 h-5 text-purple-600" />
+                                Beteiligte Lieferanten
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {project.supplier_ids.map(supplierId => {
+                                    const supplier = customers.find(c => c.id === supplierId);
+                                    if (!supplier) return null;
+                                    return (
+                                        <div key={supplierId} className="p-3 border rounded-lg hover:border-purple-300 transition-colors">
+                                            <p className="font-medium text-slate-900">{supplier.company}</p>
+                                            {supplier.contact_name && (
+                                                <p className="text-sm text-slate-500">{supplier.contact_name}</p>
+                                            )}
+                                            {supplier.phone && (
+                                                <a href={`tel:${supplier.phone}`} className="text-sm text-purple-600 hover:text-purple-700">
+                                                    {supplier.phone}
+                                                </a>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>
@@ -392,6 +425,7 @@ export default function ProjectDetail() {
                 onSave={(data) => updateProjectMutation.mutate({ id: projectId, data })}
                 project={project}
                 customers={customers}
+                suppliers={customers.filter(c => c.type === 'supplier' || c.type === 'both')}
             />
 
             <ActivityForm

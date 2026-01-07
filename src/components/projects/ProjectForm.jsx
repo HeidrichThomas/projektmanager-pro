@@ -5,12 +5,24 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FolderKanban, Save, X } from "lucide-react";
+import { FolderKanban, Save, X, Check } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
-export default function ProjectForm({ open, onClose, onSave, project, customers }) {
+export default function ProjectForm({ open, onClose, onSave, project, customers, suppliers }) {
+    const availableSuppliers = suppliers || customers.filter(c => c.type === 'supplier' || c.type === 'both');
+    
+    const toggleSupplier = (supplierId) => {
+        const currentIds = formData.supplier_ids || [];
+        if (currentIds.includes(supplierId)) {
+            setFormData({...formData, supplier_ids: currentIds.filter(id => id !== supplierId)});
+        } else {
+            setFormData({...formData, supplier_ids: [...currentIds, supplierId]});
+        }
+    };
     const [formData, setFormData] = useState({
         name: "",
         customer_id: "",
+        supplier_ids: [],
         description: "",
         status: "geplant",
         progress: 0,
@@ -25,6 +37,7 @@ export default function ProjectForm({ open, onClose, onSave, project, customers 
             setFormData({
                 name: "",
                 customer_id: "",
+                supplier_ids: [],
                 description: "",
                 status: "geplant",
                 progress: 0,
@@ -72,13 +85,34 @@ export default function ProjectForm({ open, onClose, onSave, project, customers 
                                 <SelectValue placeholder="Kunde auswählen" />
                             </SelectTrigger>
                             <SelectContent>
-                                {customers.map((c) => (
+                                {customers.filter(c => c.type === 'customer' || c.type === 'both').map((c) => (
                                     <SelectItem key={c.id} value={c.id}>
                                         {c.company}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
+                    </div>
+                    
+                    <div>
+                        <Label className="text-slate-700 font-medium">Lieferanten</Label>
+                        <div className="mt-1.5 max-h-40 overflow-y-auto border rounded-lg p-3 space-y-2">
+                            {availableSuppliers.length > 0 ? (
+                                availableSuppliers.map((supplier) => (
+                                    <div key={supplier.id} className="flex items-center gap-2">
+                                        <Checkbox
+                                            checked={(formData.supplier_ids || []).includes(supplier.id)}
+                                            onCheckedChange={() => toggleSupplier(supplier.id)}
+                                        />
+                                        <label className="text-sm cursor-pointer" onClick={() => toggleSupplier(supplier.id)}>
+                                            {supplier.company}
+                                        </label>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-sm text-slate-500">Keine Lieferanten verfügbar</p>
+                            )}
+                        </div>
                     </div>
                     
                     <div>
