@@ -20,31 +20,31 @@ export default function ProjectCard({ project, customer }) {
     
     return (
         <Link to={createPageUrl("ProjectDetail") + `?id=${project.id}`}>
-            <Card className="p-5 hover:shadow-lg transition-all duration-300 border-slate-200 group cursor-pointer">
+            <Card className="p-5 hover:shadow-lg transition-all duration-300 border-slate-200 dark:border-zinc-800 dark:bg-zinc-900 group cursor-pointer">
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center">
-                            <FolderKanban className="w-6 h-6 text-indigo-600" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900 dark:to-indigo-800 flex items-center justify-center">
+                            <FolderKanban className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">
+                            <h3 className="font-semibold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                 {project.name}
                             </h3>
                             {customer && (
-                                <p className="text-sm text-slate-500 flex items-center gap-1">
+                                <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                                     <Building2 className="w-3 h-3" />
                                     {customer.company}
                                 </p>
                             )}
                         </div>
                     </div>
-                    <Badge variant="secondary" className={`${status.color} border`}>
+                    <Badge variant="secondary" className={`${status.color} border dark:bg-opacity-20`}>
                         {status.label}
                     </Badge>
                 </div>
                 
                 {project.description && (
-                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                    <p className="text-sm text-slate-600 dark:text-slate-300 mb-4 line-clamp-2">
                         {project.description}
                     </p>
                 )}
@@ -52,14 +52,14 @@ export default function ProjectCard({ project, customer }) {
                 <div className="space-y-3">
                     <div>
                         <div className="flex justify-between text-sm mb-1">
-                            <span className="text-slate-500">Fortschritt</span>
-                            <span className="font-medium text-slate-700">{project.progress || 0}%</span>
+                            <span className="text-slate-500 dark:text-slate-400">Fortschritt</span>
+                            <span className="font-medium text-slate-700 dark:text-slate-200">{project.progress || 0}%</span>
                         </div>
                         <Progress value={project.progress || 0} className="h-2" />
                     </div>
                     
                     {(project.start_date || project.end_date) && (
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                             <Calendar className="w-4 h-4" />
                             {project.start_date && format(new Date(project.start_date), "dd.MM.yyyy", { locale: de })}
                             {project.start_date && project.end_date && " - "}
@@ -68,8 +68,8 @@ export default function ProjectCard({ project, customer }) {
                     )}
                 </div>
                 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
-                    <span className="text-sm text-slate-400 group-hover:text-indigo-600 flex items-center gap-1 transition-colors">
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-zinc-800 flex justify-end">
+                    <span className="text-sm text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 flex items-center gap-1 transition-colors">
                         Details anzeigen
                         <ArrowRight className="w-4 h-4" />
                     </span>
