@@ -98,12 +98,12 @@ export default function Customers() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">Kunden</h1>
-                        <p className="text-slate-500 mt-1">Verwalten Sie Ihre Kundendatenbank</p>
+                        <h1 className="text-3xl font-bold text-slate-900">Kunden & Lieferanten</h1>
+                        <p className="text-slate-500 mt-1">Verwalten Sie Ihre Kunden- und Lieferantenkontakte</p>
                     </div>
                     <Button onClick={() => { setEditingCustomer(null); setShowForm(true); }} className="bg-slate-800 hover:bg-slate-900">
                         <Plus className="w-4 h-4 mr-2" />
-                        Neuer Kunde
+                        Neuer Kontakt
                     </Button>
                 </div>
 
