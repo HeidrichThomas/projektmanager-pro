@@ -19,15 +19,25 @@ export default function ManualTimeEntry({ open, onClose, onSave, projectId }) {
         e.preventDefault();
         
         let duration = formData.duration_minutes;
+        let startTimeISO = null;
+        let endTimeISO = null;
+        
         if (formData.start_time && formData.end_time) {
             const start = new Date(`2000-01-01T${formData.start_time}`);
             const end = new Date(`2000-01-01T${formData.end_time}`);
             duration = Math.round((end - start) / 60000);
+            
+            // Speichere die Zeiten im ISO-Format
+            startTimeISO = `${formData.date}T${formData.start_time}:00`;
+            endTimeISO = `${formData.date}T${formData.end_time}:00`;
         }
         
         onSave({
-            ...formData,
-            duration_minutes: parseInt(duration)
+            date: formData.date,
+            start_time: startTimeISO,
+            end_time: endTimeISO,
+            duration_minutes: parseInt(duration),
+            description: formData.description
         });
         
         setFormData({
