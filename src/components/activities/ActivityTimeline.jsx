@@ -9,6 +9,7 @@ import { de } from "date-fns/locale";
 const typeConfig = {
     telefonat: { label: "Telefonat", icon: Phone, color: "bg-green-100 text-green-600 border-green-200" },
     meeting: { label: "Meeting", icon: Users, color: "bg-blue-100 text-blue-600 border-blue-200" },
+    besuch: { label: "Besuch", icon: Users, color: "bg-indigo-100 text-indigo-600 border-indigo-200" },
     email: { label: "E-Mail", icon: Mail, color: "bg-purple-100 text-purple-600 border-purple-200" },
     notiz: { label: "Notiz", icon: StickyNote, color: "bg-amber-100 text-amber-600 border-amber-200" },
     dokument: { label: "Dokument", icon: FileText, color: "bg-slate-100 text-slate-600 border-slate-200" }
