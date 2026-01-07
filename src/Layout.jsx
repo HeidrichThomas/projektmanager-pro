@@ -4,16 +4,16 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
-    LayoutDashboard, Building2, FolderKanban, Package,
+    LayoutDashboard, Building2, FolderKanban, Database,
     Menu, X, ChevronRight, CheckCircle2
 } from "lucide-react";
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-    { name: "Kunden", icon: Building2, page: "Customers" },
-    { name: "Lieferanten", icon: Package, page: "Suppliers" },
+    { name: "Kunden & Lieferanten", icon: Building2, page: "Customers" },
     { name: "Projekte", icon: FolderKanban, page: "Projects" },
-    { name: "Abgeschlossene Projekte", icon: CheckCircle2, page: "CompletedProjects" }
+    { name: "Abgeschlossene Projekte", icon: CheckCircle2, page: "CompletedProjects" },
+    { name: "Datensicherung", icon: Database, page: "DataBackup" }
 ];
 
 export default function Layout({ children, currentPageName }) {
