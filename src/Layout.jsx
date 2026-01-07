@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
     LayoutDashboard, Building2, FolderKanban, Database,
-    Menu, X, ChevronRight, CheckCircle2, Sun, Moon
+    Menu, ChevronRight, CheckCircle2
 } from "lucide-react";
 
 const navigation = [
@@ -18,21 +18,6 @@ const navigation = [
 
 export default function Layout({ children, currentPageName }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
-
-    useEffect(() => {
-        const saved = localStorage.getItem('theme');
-        const isDark = saved === 'dark';
-        setDarkMode(isDark);
-        document.documentElement.classList.toggle('dark', isDark);
-    }, []);
-
-    const toggleTheme = () => {
-        const newMode = !darkMode;
-        setDarkMode(newMode);
-        localStorage.setItem('theme', newMode ? 'dark' : 'light');
-        document.documentElement.classList.toggle('dark', newMode);
-    };
 
     const NavLink = ({ item, mobile = false }) => {
         const isActive = currentPageName === item.page;
@@ -77,29 +62,8 @@ export default function Layout({ children, currentPageName }) {
                             <NavLink key={item.name} item={item} />
                         ))}
                     </nav>
-
-                    <div className="px-4 pb-4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={toggleTheme}
-                            className="w-full flex items-center justify-center gap-2"
-                        >
-                            {darkMode ? (
-                                <>
-                                    <Sun className="w-4 h-4" />
-                                    Hell
-                                </>
-                            ) : (
-                                <>
-                                    <Moon className="w-4 h-4" />
-                                    Dunkel
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                    </div>
-                    </aside>
+                </div>
+            </aside>
 
             {/* Mobile Header */}
             <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-4 py-3">
@@ -132,40 +96,10 @@ export default function Layout({ children, currentPageName }) {
                                     <NavLink key={item.name} item={item} mobile />
                                 ))}
                             </nav>
-
-                            <div className="px-4 pb-4">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={toggleTheme}
-                                    className="w-full flex items-center justify-center gap-2"
-                                >
-                                    {darkMode ? (
-                                        <>
-                                            <Sun className="w-4 h-4" />
-                                            Hell
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Moon className="w-4 h-4" />
-                                            Dunkel
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                            </div>
-                            </SheetContent>
-                            </Sheet>
-
-                            <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={toggleTheme}
-                            className="flex items-center gap-2"
-                            >
-                            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                            </Button>
-                            </div>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+            </div>
 
             {/* Main Content */}
             <main className="lg:pl-72">
