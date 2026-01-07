@@ -3,12 +3,42 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Play, Pause, Square, Clock } from "lucide-react";
 
-export default function TimeTracker({ onSave }) {
+export default function TimeTracker({ onSave, projectId }) {
     const [isRunning, setIsRunning] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [seconds, setSeconds] = useState(0);
     const [startTime, setStartTime] = useState(null);
     const intervalRef = useRef(null);
+
+    // Persistenz: Timer-State aus localStorage laden
+    useEffect(() => {
+        const savedTimer = localStorage.getItem(`timer_${projectId}`);
+        if (savedTimer) {
+            const data = JSON.parse(savedTimer);
+            setIsRunning(data.isRunning);
+            setIsPaused(data.isPaused);
+            setStartTime(data.startTime);
+            
+            if (data.isRunning && !data.isPaused) {
+                const elapsed = Math.floor((Date.now() - new Date(data.startTime).getTime()) / 1000);
+                setSeconds(elapsed);
+            } else {
+                setSeconds(data.seconds);
+            }
+        }
+    }, [projectId]);
+
+    // Persistenz: Timer-State in localStorage speichern
+    useEffect(() => {
+        if (projectId) {
+            localStorage.setItem(`timer_${projectId}`, JSON.stringify({
+                isRunning,
+                isPaused,
+                seconds,
+                startTime
+            }));
+        }
+    }, [isRunning, isPaused, seconds, startTime, projectId]);
 
     useEffect(() => {
         if (isRunning && !isPaused) {
@@ -59,6 +89,9 @@ export default function TimeTracker({ onSave }) {
         setIsPaused(false);
         setSeconds(0);
         setStartTime(null);
+        if (projectId) {
+            localStorage.removeItem(`timer_${projectId}`);
+        }
     };
 
     return (
@@ -69,36 +102,39 @@ export default function TimeTracker({ onSave }) {
                     Arbeitszeit-Timer
                 </CardTitle>
             </CardHeader>
-            <CardContent>
-                <div className="flex flex-col items-center gap-4">
-                    <div className="text-5xl font-bold text-slate-900 font-mono">
+            <CardContent className="p-4">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="text-3xl font-bold text-slate-900 font-mono">
                         {formatTime(seconds)}
                     </div>
                     <div className="flex gap-2">
                         {!isRunning || isPaused ? (
                             <Button 
                                 onClick={handleStart}
+                                size="sm"
                                 className="bg-green-600 hover:bg-green-700"
                             >
-                                <Play className="w-4 h-4 mr-2" />
+                                <Play className="w-3 h-3 mr-1" />
                                 {isPaused ? 'Fortsetzen' : 'Start'}
                             </Button>
                         ) : (
                             <Button 
                                 onClick={handlePause}
+                                size="sm"
                                 variant="outline"
                             >
-                                <Pause className="w-4 h-4 mr-2" />
+                                <Pause className="w-3 h-3 mr-1" />
                                 Pause
                             </Button>
                         )}
                         <Button 
                             onClick={handleStop}
                             disabled={!isRunning && seconds === 0}
+                            size="sm"
                             variant="outline"
                             className="text-red-600 hover:text-red-700"
                         >
-                            <Square className="w-4 h-4 mr-2" />
+                            <Square className="w-3 h-3 mr-1" />
                             Stopp
                         </Button>
                     </div>

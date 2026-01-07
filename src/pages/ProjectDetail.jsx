@@ -29,6 +29,9 @@ import ManualTimeEntry from "@/components/time/ManualTimeEntry";
 import TimeCalendar from "@/components/time/TimeCalendar";
 import BillingDialog from "@/components/time/BillingDialog";
 import BilledTimesList from "@/components/time/BilledTimesList";
+import EditTimeEntry from "@/components/time/EditTimeEntry";
+import TimeReport from "@/components/time/TimeReport";
+import FloatingTimer from "@/components/time/FloatingTimer";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -49,7 +52,11 @@ export default function ProjectDetail() {
     const [activeTab, setActiveTab] = useState("activities");
     const [showManualTime, setShowManualTime] = useState(false);
     const [showBilling, setShowBilling] = useState(false);
+    const [showEditTime, setShowEditTime] = useState(false);
+    const [editingTimeEntry, setEditingTimeEntry] = useState(null);
+    const [showTimeReport, setShowTimeReport] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
+    const [showFloatingTimer, setShowFloatingTimer] = useState(true);
 
     const queryClient = useQueryClient();
 
@@ -174,6 +181,24 @@ export default function ProjectDetail() {
         }
     });
 
+    const updateTimeEntryMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.TimeEntry.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['timeEntries', projectId] });
+            toast.success("Zeiteintrag aktualisiert");
+            setShowEditTime(false);
+            setEditingTimeEntry(null);
+        }
+    });
+
+    const deleteTimeEntryMutation = useMutation({
+        mutationFn: (id) => base44.entities.TimeEntry.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['timeEntries', projectId] });
+            toast.success("Zeiteintrag gelöscht");
+        }
+    });
+
     const handleProgressChange = (value) => {
         updateProjectMutation.mutate({ id: projectId, data: { progress: value[0] } });
     };
@@ -219,6 +244,15 @@ export default function ProjectDetail() {
         };
         updateTimeEntriesMutation.mutate({ ids: entryIds, data: updates });
         setShowBilling(false);
+    };
+
+    const handleEditTimeEntry = (entry) => {
+        setEditingTimeEntry(entry);
+        setShowEditTime(true);
+    };
+
+    const handleTimeEntrySave = (data) => {
+        updateTimeEntryMutation.mutate({ id: editingTimeEntry.id, data });
     };
 
     if (!project) {
@@ -459,10 +493,14 @@ export default function ProjectDetail() {
                                 </Button>
                                 <Button onClick={() => setShowBilling(true)} className="bg-green-600 hover:bg-green-700">
                                     <Euro className="w-4 h-4 mr-2" />
-                                    Zeiten abrechnen
+                                    Abrechnen
                                 </Button>
-                            </div>
-                        )}
+                                <Button onClick={() => setShowTimeReport(true)} variant="outline">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    Bericht
+                                </Button>
+                                </div>
+                                )}
                     </div>
 
                     <TabsContent value="activities">
@@ -514,15 +552,24 @@ export default function ProjectDetail() {
                             </div>
                         ) : (
                             <div className="space-y-6">
-                                <TimeTracker onSave={handleTimeSave} />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <TimeTracker onSave={handleTimeSave} projectId={projectId} />
+                                    <TimeCalendar 
+                                        timeEntries={timeEntries}
+                                        selectedMonth={selectedMonth}
+                                        onMonthChange={setSelectedMonth}
+                                    />
+                                </div>
 
-                                <TimeCalendar 
+                                <BilledTimesList 
                                     timeEntries={timeEntries}
-                                    selectedMonth={selectedMonth}
-                                    onMonthChange={setSelectedMonth}
+                                    onEdit={handleEditTimeEntry}
+                                    onDelete={(entry) => {
+                                        if (confirm("Zeiteintrag wirklich löschen?")) {
+                                            deleteTimeEntryMutation.mutate(entry.id);
+                                        }
+                                    }}
                                 />
-
-                                <BilledTimesList timeEntries={timeEntries} />
                             </div>
                         )}
                     </TabsContent>
@@ -568,6 +615,29 @@ export default function ProjectDetail() {
                 onBill={handleBilling}
                 timeEntries={timeEntries}
             />
+
+            <EditTimeEntry
+                open={showEditTime}
+                onClose={() => { setShowEditTime(false); setEditingTimeEntry(null); }}
+                onSave={handleTimeEntrySave}
+                entry={editingTimeEntry}
+            />
+
+            <TimeReport
+                open={showTimeReport}
+                onClose={() => setShowTimeReport(false)}
+                timeEntries={timeEntries}
+                project={project}
+                customer={customer}
+            />
+
+            {showFloatingTimer && project && (
+                <FloatingTimer
+                    projectId={projectId}
+                    projectName={project.name}
+                    onClose={() => setShowFloatingTimer(false)}
+                />
+            )}
             </div>
             );
             }

@@ -24,41 +24,41 @@ export default function TimeCalendar({ timeEntries, selectedMonth, onMonthChange
     
     return (
         <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+            <CardHeader className="p-4">
+                <CardTitle className="flex items-center justify-between text-base">
                     <div className="flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-slate-600" />
-                        Zeitübersicht
+                        <Calendar className="w-4 h-4 text-slate-600" />
+                        Kalender
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                         <button
                             onClick={() => onMonthChange(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1))}
-                            className="px-3 py-1 text-sm hover:bg-slate-100 rounded"
+                            className="px-2 py-1 text-xs hover:bg-slate-100 rounded"
                         >
                             ←
                         </button>
-                        <span className="text-sm font-normal">
-                            {format(selectedMonth, "MMMM yyyy", { locale: de })}
+                        <span className="text-xs font-normal">
+                            {format(selectedMonth, "MMM yyyy", { locale: de })}
                         </span>
                         <button
                             onClick={() => onMonthChange(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1))}
-                            className="px-3 py-1 text-sm hover:bg-slate-100 rounded"
+                            className="px-2 py-1 text-xs hover:bg-slate-100 rounded"
                         >
                             →
                         </button>
                     </div>
                 </CardTitle>
             </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-7 gap-2 mb-4">
+            <CardContent className="p-4">
+                <div className="grid grid-cols-7 gap-1 mb-2">
                     {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
-                        <div key={day} className="text-center text-xs font-semibold text-slate-500 py-2">
+                        <div key={day} className="text-center text-[10px] font-semibold text-slate-500 py-1">
                             {day}
                         </div>
                     ))}
                 </div>
                 
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-7 gap-1">
                     {Array((monthStart.getDay() + 6) % 7).fill(null).map((_, i) => (
                         <div key={`empty-${i}`} />
                     ))}
@@ -71,16 +71,16 @@ export default function TimeCalendar({ timeEntries, selectedMonth, onMonthChange
                             <div
                                 key={day.toISOString()}
                                 className={`
-                                    p-2 rounded-lg text-center text-sm transition-all
+                                    p-1 rounded text-center text-[10px] transition-all
                                     ${hasHours 
-                                        ? 'bg-blue-50 border-2 border-blue-200 font-semibold' 
+                                        ? 'bg-blue-50 border border-blue-200 font-semibold' 
                                         : 'bg-slate-50 border border-slate-200'
                                     }
                                 `}
                             >
-                                <div className="text-xs text-slate-600">{format(day, 'd')}</div>
+                                <div className="text-slate-600">{format(day, 'd')}</div>
                                 {hasHours && (
-                                    <div className="text-xs text-blue-700 font-bold mt-1">
+                                    <div className="text-blue-700 font-bold">
                                         {hours}h
                                     </div>
                                 )}
@@ -89,9 +89,9 @@ export default function TimeCalendar({ timeEntries, selectedMonth, onMonthChange
                     })}
                 </div>
                 
-                <div className="mt-6 pt-4 border-t flex items-center justify-between">
-                    <span className="text-slate-600 font-medium">Gesamt diesen Monat:</span>
-                    <span className="text-2xl font-bold text-slate-900">{getTotalHours()}h</span>
+                <div className="mt-3 pt-3 border-t flex items-center justify-between">
+                    <span className="text-xs text-slate-600">Gesamt:</span>
+                    <span className="text-lg font-bold text-slate-900">{getTotalHours()}h</span>
                 </div>
             </CardContent>
         </Card>
