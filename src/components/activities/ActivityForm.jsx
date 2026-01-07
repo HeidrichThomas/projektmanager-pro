@@ -7,12 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2 } from "lucide-react";
+import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2, Handshake } from "lucide-react";
 
 const typeConfig = {
     telefonat: { label: "Telefonat", icon: Phone, color: "text-green-600" },
     meeting: { label: "Meeting", icon: Users, color: "text-blue-600" },
-    besuch: { label: "Besuch", icon: Users, color: "text-indigo-600" },
+    besuch: { label: "Besuch", icon: Handshake, color: "text-indigo-600" },
     email: { label: "E-Mail", icon: Mail, color: "text-purple-600" },
     notiz: { label: "Notiz", icon: StickyNote, color: "text-amber-600" },
     dokument: { label: "Dokument", icon: FileText, color: "text-slate-600" }
