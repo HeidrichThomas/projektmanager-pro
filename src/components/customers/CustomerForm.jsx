@@ -12,6 +12,7 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
         company: "",
         contact_name: "",
         type: "customer",
+        products_services: "",
         street: "",
         postal_code: "",
         city: "",
@@ -32,6 +33,7 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                 company: "",
                 contact_name: "",
                 type: "customer",
+                products_services: "",
                 street: "",
                 postal_code: "",
                 city: "",
@@ -106,6 +108,18 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                                 </SelectContent>
                             </Select>
                         </div>
+                        
+                        {(formData.type === "supplier" || formData.type === "both") && (
+                            <div className="md:col-span-2">
+                                <Label className="text-slate-700 font-medium">Produkte / Dienstleistungen</Label>
+                                <Textarea
+                                    value={formData.products_services}
+                                    onChange={(e) => setFormData({...formData, products_services: e.target.value})}
+                                    placeholder="Welche Produkte oder Dienstleistungen bietet dieser Lieferant an?"
+                                    className="mt-1.5"
+                                />
+                            </div>
+                        )}
                         
                         <div>
                             <Label className="text-slate-700 font-medium">Straße</Label>

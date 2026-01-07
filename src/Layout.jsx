@@ -4,13 +4,14 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
-    LayoutDashboard, Building2, FolderKanban, 
+    LayoutDashboard, Building2, FolderKanban, Package,
     Menu, X, ChevronRight
 } from "lucide-react";
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
     { name: "Kunden", icon: Building2, page: "Customers" },
+    { name: "Lieferanten", icon: Package, page: "Suppliers" },
     { name: "Projekte", icon: FolderKanban, page: "Projects" }
 ];
 

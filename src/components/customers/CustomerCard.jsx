@@ -92,6 +92,13 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
                         </a>
                     </div>
                 )}
+                
+                {customer.products_services && (customer.type === 'supplier' || customer.type === 'both') && (
+                    <div className="mt-3 pt-3 border-t border-slate-100">
+                        <p className="text-xs text-slate-500 mb-1">Produkte / Dienstleistungen:</p>
+                        <p className="text-sm text-slate-600 line-clamp-2">{customer.products_services}</p>
+                    </div>
+                )}
             </div>
             
             <div className="flex gap-2 pt-3 border-t border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -2,6 +2,7 @@ import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
+import Suppliers from './pages/Suppliers';
 import __Layout from './Layout.jsx';
 
 
@@ -10,6 +11,7 @@ export const PAGES = {
     "Customers": Customers,
     "Projects": Projects,
     "ProjectDetail": ProjectDetail,
+    "Suppliers": Suppliers,
 }
 
 export const pagesConfig = {
