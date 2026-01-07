@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
 import { FolderKanban, Save, X, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -214,16 +215,16 @@ export default function ProjectForm({ open, onClose, onSave, project, customers,
                         </div>
                         
                         <div>
-                            <Label className="text-slate-700 font-medium">Fortschritt</Label>
-                            <div className="flex items-center gap-2 mt-1.5">
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={formData.progress}
-                                    onChange={(e) => setFormData({...formData, progress: parseInt(e.target.value) || 0})}
+                            <Label className="text-slate-700 font-medium">Fortschritt ({formData.progress}%)</Label>
+                            <div className="flex items-center gap-3 mt-3">
+                                <Slider
+                                    value={[formData.progress]}
+                                    onValueChange={(value) => setFormData({...formData, progress: value[0]})}
+                                    min={0}
+                                    max={100}
+                                    step={5}
+                                    className="flex-1"
                                 />
-                                <span className="text-slate-500">%</span>
                             </div>
                         </div>
                     </div>
