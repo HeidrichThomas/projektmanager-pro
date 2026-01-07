@@ -1,19 +1,19 @@
-import Dashboard from './pages/Dashboard';
-import Customers from './pages/Customers';
-import Projects from './pages/Projects';
-import ProjectDetail from './pages/ProjectDetail';
 import CompletedProjects from './pages/CompletedProjects';
+import Customers from './pages/Customers';
+import Dashboard from './pages/Dashboard';
 import DataBackup from './pages/DataBackup';
+import ProjectDetail from './pages/ProjectDetail';
+import Projects from './pages/Projects';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Dashboard": Dashboard,
-    "Customers": Customers,
-    "Projects": Projects,
-    "ProjectDetail": ProjectDetail,
     "CompletedProjects": CompletedProjects,
+    "Customers": Customers,
+    "Dashboard": Dashboard,
     "DataBackup": DataBackup,
+    "ProjectDetail": ProjectDetail,
+    "Projects": Projects,
 }
 
 export const pagesConfig = {

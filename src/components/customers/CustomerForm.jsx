@@ -5,12 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Save, X } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Save, X, Plus, Trash2 } from "lucide-react";
 
 export default function CustomerForm({ open, onClose, onSave, customer }) {
     const [formData, setFormData] = useState({
         company: "",
         contact_name: "",
+        contact_persons: [],
         type: "customer",
         products_services: "",
         street: "",
@@ -24,14 +25,22 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
         website: "",
         notes: ""
     });
+    
+    const [newContact, setNewContact] = useState({
+        name: "",
+        position: "",
+        phone: "",
+        email: ""
+    });
 
     useEffect(() => {
         if (customer) {
-            setFormData(customer);
+            setFormData({...customer, contact_persons: customer.contact_persons || []});
         } else {
             setFormData({
                 company: "",
                 contact_name: "",
+                contact_persons: [],
                 type: "customer",
                 products_services: "",
                 street: "",
@@ -46,7 +55,24 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                 notes: ""
             });
         }
+        setNewContact({ name: "", position: "", phone: "", email: "" });
     }, [customer, open]);
+
+    const addContactPerson = () => {
+        if (!newContact.name) return;
+        setFormData({
+            ...formData,
+            contact_persons: [...(formData.contact_persons || []), newContact]
+        });
+        setNewContact({ name: "", position: "", phone: "", email: "" });
+    };
+
+    const removeContactPerson = (index) => {
+        setFormData({
+            ...formData,
+            contact_persons: formData.contact_persons.filter((_, i) => i !== index)
+        });
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -79,16 +105,70 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                             </div>
                         </div>
                         
-                        <div>
+                        <div className="md:col-span-2">
                             <Label className="text-slate-700 font-medium">Ansprechpartner</Label>
-                            <div className="relative mt-1.5">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <Input
-                                    value={formData.contact_name}
-                                    onChange={(e) => setFormData({...formData, contact_name: e.target.value})}
-                                    className="pl-10"
-                                    placeholder="Name des Ansprechpartners"
-                                />
+                            <div className="mt-3 space-y-3">
+                                {formData.contact_persons && formData.contact_persons.length > 0 && (
+                                    <div className="space-y-2">
+                                        {formData.contact_persons.map((contact, index) => (
+                                            <div key={index} className="flex items-start justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                                <div className="flex-1">
+                                                    <p className="font-medium text-slate-900">{contact.name}</p>
+                                                    {contact.position && <p className="text-sm text-slate-600">{contact.position}</p>}
+                                                    <div className="flex gap-3 mt-1 text-xs text-slate-500">
+                                                        {contact.phone && <span>{contact.phone}</span>}
+                                                        {contact.email && <span>{contact.email}</span>}
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => removeContactPerson(index)}
+                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="border-2 border-dashed border-slate-200 rounded-lg p-3">
+                                    <p className="text-sm font-medium text-slate-700 mb-2">Neuer Ansprechpartner</p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Input
+                                            placeholder="Name *"
+                                            value={newContact.name}
+                                            onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                                        />
+                                        <Input
+                                            placeholder="Position"
+                                            value={newContact.position}
+                                            onChange={(e) => setNewContact({...newContact, position: e.target.value})}
+                                        />
+                                        <Input
+                                            placeholder="Telefon"
+                                            value={newContact.phone}
+                                            onChange={(e) => setNewContact({...newContact, phone: e.target.value})}
+                                        />
+                                        <Input
+                                            placeholder="E-Mail"
+                                            value={newContact.email}
+                                            onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                                        />
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={addContactPerson}
+                                        disabled={!newContact.name}
+                                        className="mt-2 w-full"
+                                    >
+                                        <Plus className="w-3 h-3 mr-1" />
+                                        Hinzufügen
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                         

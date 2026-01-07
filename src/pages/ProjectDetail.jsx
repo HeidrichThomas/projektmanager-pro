@@ -12,7 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     ArrowLeft, Building2, Calendar, FolderKanban, 
-    Plus, Phone, FileText, CheckSquare, Pencil, Trash2
+    Plus, Phone, FileText, CheckSquare, Pencil, Trash2, User
 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -198,10 +198,18 @@ export default function ProjectDetail() {
                             <div>
                                 <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{project.name}</h1>
                                 {customer && (
-                                    <p className="text-slate-500 flex items-center gap-2 mt-1">
-                                        <Building2 className="w-4 h-4" />
-                                        {customer.company}
-                                    </p>
+                                    <div className="mt-1">
+                                        <p className="text-slate-500 flex items-center gap-2">
+                                            <Building2 className="w-4 h-4" />
+                                            {customer.company}
+                                        </p>
+                                        {project.contact_person && (
+                                            <p className="text-slate-500 flex items-center gap-2 text-sm">
+                                                <User className="w-3 h-3" />
+                                                {project.contact_person}
+                                            </p>
+                                        )}
+                                    </div>
                                 )}
                                 <div className="flex flex-wrap gap-2 mt-3">
                                     <Badge variant="secondary" className={`${status.color} border`}>

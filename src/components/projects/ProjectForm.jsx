@@ -15,6 +15,7 @@ export default function ProjectForm({ open, onClose, onSave, project, customers,
     const [formData, setFormData] = useState({
         name: "",
         customer_id: "",
+        contact_person: "",
         supplier_ids: [],
         description: "",
         status: "geplant",
@@ -30,6 +31,7 @@ export default function ProjectForm({ open, onClose, onSave, project, customers,
             setFormData({
                 name: "",
                 customer_id: "",
+                contact_person: "",
                 supplier_ids: [],
                 description: "",
                 status: "geplant",
@@ -86,7 +88,9 @@ export default function ProjectForm({ open, onClose, onSave, project, customers,
                         <Label className="text-slate-700 font-medium">Kunde *</Label>
                         <Select
                             value={formData.customer_id}
-                            onValueChange={(value) => setFormData({...formData, customer_id: value})}
+                            onValueChange={(value) => {
+                                setFormData({...formData, customer_id: value, contact_person: ""});
+                            }}
                             required
                         >
                             <SelectTrigger className="mt-1.5">
@@ -102,57 +106,31 @@ export default function ProjectForm({ open, onClose, onSave, project, customers,
                         </Select>
                     </div>
                     
-                    <div>
-                        <Label className="text-slate-700 font-medium">Lieferanten</Label>
-                        <div className="flex gap-2 mt-1.5">
-                            <Select
-                                value={selectedSupplierId}
-                                onValueChange={setSelectedSupplierId}
-                            >
-                                <SelectTrigger className="flex-1">
-                                    <SelectValue placeholder="Lieferant auswählen" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableSuppliers.filter(s => !(formData.supplier_ids || []).includes(s.id)).map((supplier) => (
-                                        <SelectItem key={supplier.id} value={supplier.id}>
-                                            {supplier.company}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Button 
-                                type="button" 
-                                onClick={addSupplier}
-                                disabled={!selectedSupplierId}
-                                size="icon"
-                            >
-                                <Plus className="w-4 h-4" />
-                            </Button>
-                        </div>
-                        
-                        {formData.supplier_ids && formData.supplier_ids.length > 0 && (
-                            <div className="mt-3 space-y-2">
-                                {formData.supplier_ids.map(supplierId => {
-                                    const supplier = availableSuppliers.find(s => s.id === supplierId);
-                                    if (!supplier) return null;
-                                    return (
-                                        <div key={supplierId} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200">
-                                            <span className="text-sm font-medium text-slate-700">{supplier.company}</span>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => removeSupplier(supplierId)}
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                            </Button>
-                                        </div>
-                                    );
-                                })}
+                    {formData.customer_id && (() => {
+                        const selectedCustomer = customers.find(c => c.id === formData.customer_id);
+                        const contactPersons = selectedCustomer?.contact_persons || [];
+                        return contactPersons.length > 0 ? (
+                            <div>
+                                <Label className="text-slate-700 font-medium">Ansprechpartner</Label>
+                                <Select
+                                    value={formData.contact_person}
+                                    onValueChange={(value) => setFormData({...formData, contact_person: value})}
+                                >
+                                    <SelectTrigger className="mt-1.5">
+                                        <SelectValue placeholder="Ansprechpartner auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {contactPersons.map((contact, index) => (
+                                            <SelectItem key={index} value={contact.name}>
+                                                {contact.name}
+                                                {contact.position && ` - ${contact.position}`}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                        )}
-                    </div>
+                        ) : null;
+                    })()}
                     
                     <div>
                         <Label className="text-slate-700 font-medium">Beschreibung</Label>
