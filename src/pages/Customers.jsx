@@ -193,6 +193,7 @@ export default function Customers() {
                                     onCopy={handleCopy}
                                     onDelete={handleDelete}
                                     projectCount={getProjectCount(customer.id)}
+                                    onShowProjects={handleShowProjects}
                                 />
                             ))}
                         </div>
@@ -206,6 +207,7 @@ export default function Customers() {
                                     onCopy={handleCopy}
                                     onDelete={handleDelete}
                                     projectCount={getProjectCount(customer.id)}
+                                    onShowProjects={handleShowProjects}
                                 />
                             ))}
                         </div>
