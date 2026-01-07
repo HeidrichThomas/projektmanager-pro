@@ -133,6 +133,58 @@ export default function ProjectForm({ open, onClose, onSave, project, customers,
                     })()}
                     
                     <div>
+                        <Label className="text-slate-700 font-medium">Beteiligte Lieferanten</Label>
+                        <div className="flex gap-2 mt-1.5">
+                            <Select
+                                value={selectedSupplierId}
+                                onValueChange={setSelectedSupplierId}
+                            >
+                                <SelectTrigger className="flex-1">
+                                    <SelectValue placeholder="Lieferant auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableSuppliers.filter(s => !(formData.supplier_ids || []).includes(s.id)).map((supplier) => (
+                                        <SelectItem key={supplier.id} value={supplier.id}>
+                                            {supplier.company}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Button 
+                                type="button" 
+                                onClick={addSupplier}
+                                disabled={!selectedSupplierId}
+                                size="icon"
+                            >
+                                <Plus className="w-4 h-4" />
+                            </Button>
+                        </div>
+                        
+                        {formData.supplier_ids && formData.supplier_ids.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                                {formData.supplier_ids.map(supplierId => {
+                                    const supplier = availableSuppliers.find(s => s.id === supplierId);
+                                    if (!supplier) return null;
+                                    return (
+                                        <div key={supplierId} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200">
+                                            <span className="text-sm font-medium text-slate-700">{supplier.company}</span>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => removeSupplier(supplierId)}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div>
                         <Label className="text-slate-700 font-medium">Beschreibung</Label>
                         <Textarea
                             value={formData.description}

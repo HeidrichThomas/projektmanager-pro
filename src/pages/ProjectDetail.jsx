@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format as formatDate } from "date-fns";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     ArrowLeft, Building2, Calendar, FolderKanban, 
-    Plus, Phone, FileText, CheckSquare, Pencil, Trash2, User
+    Plus, Phone, FileText, CheckSquare, Pencil, Trash2, User, Clock, Euro
 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -23,6 +24,11 @@ import ActivityForm from "@/components/activities/ActivityForm";
 import ActivityTimeline from "@/components/activities/ActivityTimeline";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskList from "@/components/tasks/TaskList";
+import TimeTracker from "@/components/time/TimeTracker";
+import ManualTimeEntry from "@/components/time/ManualTimeEntry";
+import TimeCalendar from "@/components/time/TimeCalendar";
+import BillingDialog from "@/components/time/BillingDialog";
+import BilledTimesList from "@/components/time/BilledTimesList";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -41,6 +47,9 @@ export default function ProjectDetail() {
     const [showTaskForm, setShowTaskForm] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
     const [activeTab, setActiveTab] = useState("activities");
+    const [showManualTime, setShowManualTime] = useState(false);
+    const [showBilling, setShowBilling] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState(new Date());
 
     const queryClient = useQueryClient();
 
@@ -63,6 +72,12 @@ export default function ProjectDetail() {
     const { data: tasks = [], isLoading: loadingTasks } = useQuery({
         queryKey: ['tasks', projectId],
         queryFn: () => base44.entities.Task.filter({ project_id: projectId }),
+        enabled: !!projectId
+    });
+
+    const { data: timeEntries = [], isLoading: loadingTime } = useQuery({
+        queryKey: ['timeEntries', projectId],
+        queryFn: () => base44.entities.TimeEntry.filter({ project_id: projectId }, '-date'),
         enabled: !!projectId
     });
 
@@ -141,6 +156,24 @@ export default function ProjectDetail() {
         }
     });
 
+    const createTimeEntryMutation = useMutation({
+        mutationFn: (data) => base44.entities.TimeEntry.create({ ...data, project_id: projectId }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['timeEntries', projectId] });
+            toast.success("Arbeitszeit erfasst");
+        }
+    });
+
+    const updateTimeEntriesMutation = useMutation({
+        mutationFn: async ({ ids, data }) => {
+            await Promise.all(ids.map(id => base44.entities.TimeEntry.update(id, data)));
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['timeEntries', projectId] });
+            toast.success("Zeiten abgerechnet");
+        }
+    });
+
     const handleProgressChange = (value) => {
         updateProjectMutation.mutate({ id: projectId, data: { progress: value[0] } });
     };
@@ -167,6 +200,25 @@ export default function ProjectDetail() {
 
     const handleTaskLogWork = (task, data) => {
         updateTaskMutation.mutate({ id: task.id, data: { ...task, ...data } });
+    };
+
+    const handleTimeSave = (data) => {
+        createTimeEntryMutation.mutate({
+            ...data,
+            date: data.date || new Date().toISOString().slice(0, 10)
+        });
+        setShowManualTime(false);
+    };
+
+    const handleBilling = (entryIds, hourlyRate, totalAmount) => {
+        const updates = {
+            is_billed: true,
+            billing_date: new Date().toISOString().slice(0, 10),
+            hourly_rate: hourlyRate,
+            amount: totalAmount / entryIds.length
+        };
+        updateTimeEntriesMutation.mutate({ ids: entryIds, data: updates });
+        setShowBilling(false);
     };
 
     if (!project) {
@@ -383,18 +435,33 @@ export default function ProjectDetail() {
                                 Aufgaben
                                 <Badge variant="secondary" className="ml-1">{tasks.length}</Badge>
                             </TabsTrigger>
-                        </TabsList>
+                            <TabsTrigger value="time" className="flex items-center gap-2">
+                                <Clock className="w-4 h-4" />
+                                Zeiterfassung
+                            </TabsTrigger>
+                            </TabsList>
                         
                         {activeTab === "activities" ? (
                             <Button onClick={() => { setEditingActivity(null); setShowActivityForm(true); }} className="bg-slate-800 hover:bg-slate-900">
                                 <Plus className="w-4 h-4 mr-2" />
                                 Neue Aktivität
                             </Button>
-                        ) : (
+                        ) : activeTab === "tasks" ? (
                             <Button onClick={() => { setEditingTask(null); setShowTaskForm(true); }} className="bg-slate-800 hover:bg-slate-900">
                                 <Plus className="w-4 h-4 mr-2" />
                                 Neue Aufgabe
                             </Button>
+                        ) : (
+                            <div className="flex gap-2">
+                                <Button onClick={() => setShowManualTime(true)} variant="outline">
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Manuell nachtragen
+                                </Button>
+                                <Button onClick={() => setShowBilling(true)} className="bg-green-600 hover:bg-green-700">
+                                    <Euro className="w-4 h-4 mr-2" />
+                                    Zeiten abrechnen
+                                </Button>
+                            </div>
                         )}
                     </div>
 
@@ -439,8 +506,28 @@ export default function ProjectDetail() {
                             />
                         )}
                     </TabsContent>
-                </Tabs>
-            </div>
+
+                    <TabsContent value="time">
+                        {loadingTime ? (
+                            <div className="space-y-4">
+                                <Skeleton className="h-64 w-full" />
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                <TimeTracker onSave={handleTimeSave} />
+
+                                <TimeCalendar 
+                                    timeEntries={timeEntries}
+                                    selectedMonth={selectedMonth}
+                                    onMonthChange={setSelectedMonth}
+                                />
+
+                                <BilledTimesList timeEntries={timeEntries} />
+                            </div>
+                        )}
+                    </TabsContent>
+                    </Tabs>
+                    </div>
 
             {/* Forms */}
             <ProjectForm
@@ -467,6 +554,20 @@ export default function ProjectDetail() {
                 task={editingTask}
                 projectId={projectId}
             />
-        </div>
-    );
-}
+
+            <ManualTimeEntry
+                open={showManualTime}
+                onClose={() => setShowManualTime(false)}
+                onSave={handleTimeSave}
+                projectId={projectId}
+            />
+
+            <BillingDialog
+                open={showBilling}
+                onClose={() => setShowBilling(false)}
+                onBill={handleBilling}
+                timeEntries={timeEntries}
+            />
+            </div>
+            );
+            }
