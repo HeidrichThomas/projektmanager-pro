@@ -105,14 +105,7 @@ export default function DateTimeWeather() {
             }
             }, []);
 
-    const handleSavePostalCode = () => {
-        if (tempPostalCode && tempPostalCode.length === 5) {
-            setPostalCode(tempPostalCode);
-            localStorage.setItem('weatherPostalCode', tempPostalCode);
-            setEditMode(false);
-            setLoading(true);
-        }
-    };
+
 
     const getWeatherIcon = (condition) => {
         if (!condition) return Cloud;
