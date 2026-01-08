@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeCard from "@/components/themes/ThemeCard";
+import ThemeKanban from "@/components/themes/ThemeKanban";
 import SectorManagement from "@/components/themes/SectorManagement";
 import ThemeCalendar from "@/components/themes/ThemeCalendar";
 import ThemeCompanyManagement from "@/components/themes/ThemeCompanyManagement";
