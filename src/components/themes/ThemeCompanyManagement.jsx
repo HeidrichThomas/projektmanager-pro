@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, Trash2, User, Save, X, Pencil } from "lucide-react";
+import { Building2, Plus, Trash2, User, Save, X, Pencil, Upload } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 export default function ThemeCompanyManagement({ open, onClose }) {
     const [editingCompany, setEditingCompany] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const [importing, setImporting] = useState(false);
     const [formData, setFormData] = useState({
         company_name: "",
         street: "",
@@ -121,6 +122,80 @@ export default function ThemeCompanyManagement({ open, onClose }) {
         }
     };
 
+    const handleImport = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setImporting(true);
+        try {
+            const { file_url } = await base44.integrations.Core.UploadFile({ file });
+            
+            const schema = {
+                type: "array",
+                items: {
+                    type: "object",
+                    properties: {
+                        company_name: { type: "string" },
+                        street: { type: "string" },
+                        postal_code: { type: "string" },
+                        city: { type: "string" },
+                        country: { type: "string" },
+                        website: { type: "string" },
+                        contact_name: { type: "string" },
+                        contact_position: { type: "string" },
+                        contact_phone: { type: "string" },
+                        contact_mobile: { type: "string" },
+                        contact_email: { type: "string" },
+                        notes: { type: "string" }
+                    }
+                }
+            };
+
+            const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
+                file_url,
+                json_schema: schema
+            });
+
+            if (result.status === "success" && result.output) {
+                const companies = result.output.map(row => {
+                    const company = {
+                        company_name: row.company_name || "",
+                        street: row.street || "",
+                        postal_code: row.postal_code || "",
+                        city: row.city || "",
+                        country: row.country || "Deutschland",
+                        website: row.website || "",
+                        notes: row.notes || "",
+                        contact_persons: []
+                    };
+
+                    if (row.contact_name) {
+                        company.contact_persons.push({
+                            name: row.contact_name,
+                            position: row.contact_position || "",
+                            phone: row.contact_phone || "",
+                            mobile_phone: row.contact_mobile || "",
+                            email: row.contact_email || ""
+                        });
+                    }
+
+                    return company;
+                }).filter(c => c.company_name);
+
+                await base44.entities.ThemeCompany.bulkCreate(companies);
+                queryClient.invalidateQueries({ queryKey: ['themeCompanies'] });
+                toast.success(`${companies.length} Firmen importiert`);
+            } else {
+                toast.error("Fehler beim Import: " + (result.details || "Unbekannter Fehler"));
+            }
+        } catch (error) {
+            toast.error("Import fehlgeschlagen");
+        } finally {
+            setImporting(false);
+            e.target.value = "";
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -133,10 +208,30 @@ export default function ThemeCompanyManagement({ open, onClose }) {
 
                 {!showForm ? (
                     <div className="mt-4">
-                        <Button onClick={handleNew} className="mb-4 bg-slate-800 hover:bg-slate-900">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Neue Firma anlegen
-                        </Button>
+                        <div className="flex gap-2 mb-4">
+                            <Button onClick={handleNew} className="bg-slate-800 hover:bg-slate-900">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Neue Firma anlegen
+                            </Button>
+                            <label>
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    disabled={importing}
+                                    onClick={() => document.getElementById('excel-import').click()}
+                                >
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    {importing ? "Importiere..." : "Excel Import"}
+                                </Button>
+                                <input
+                                    id="excel-import"
+                                    type="file"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={handleImport}
+                                    className="hidden"
+                                />
+                            </label>
+                        </div>
 
                         <div className="space-y-3">
                             {companies.map((company) => (
