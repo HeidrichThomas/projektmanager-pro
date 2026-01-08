@@ -12,15 +12,41 @@ export default function CompanyStatusColumns({ open, onClose, companies }) {
     const queryClient = useQueryClient();
 
     const updateStatusMutation = useMutation({
-        mutationFn: async ({ id, status, oldStatus, customerId }) => {
+        mutationFn: async ({ id, status, oldStatus, customerId, company }) => {
+            // Wenn zu "transferred" bewegt wird, Customer erstellen
+            if (status === "transferred" && oldStatus !== "transferred") {
+                const customerData = {
+                    company: company.company_name,
+                    contact_name: company.contact_persons?.[0]?.name || "",
+                    contact_persons: company.contact_persons || [],
+                    type: "customer",
+                    street: company.street,
+                    postal_code: company.postal_code,
+                    city: company.city,
+                    country: company.country,
+                    phone: company.phone,
+                    mobile_phone: company.mobile_phone,
+                    email: company.email,
+                    website: company.website,
+                    notes: company.notes
+                };
+                
+                const customer = await base44.entities.Customer.create(customerData);
+                await base44.entities.ThemeCompany.update(id, { 
+                    transfer_status: status,
+                    customer_id: customer.id
+                });
+            } 
             // Wenn von "transferred" wegbewegt wird, Customer löschen
-            if (oldStatus === "transferred" && status !== "transferred" && customerId) {
+            else if (oldStatus === "transferred" && status !== "transferred" && customerId) {
                 await base44.entities.Customer.delete(customerId);
                 await base44.entities.ThemeCompany.update(id, { 
                     transfer_status: status,
                     customer_id: null
                 });
-            } else {
+            } 
+            // Sonst nur Status aktualisieren
+            else {
                 await base44.entities.ThemeCompany.update(id, { transfer_status: status });
             }
         },
@@ -44,7 +70,8 @@ export default function CompanyStatusColumns({ open, onClose, companies }) {
             id: companyId, 
             status: newStatus,
             oldStatus: oldStatus,
-            customerId: company?.customer_id
+            customerId: company?.customer_id,
+            company: company
         });
     };
     const statusGroups = {
