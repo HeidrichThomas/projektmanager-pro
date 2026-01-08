@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Circle, XCircle, User, Phone, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Circle, XCircle, User, Phone, Mail, AlertCircle } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 
 export default function CompanyStatusColumns({ open, onClose, companies }) {
     const queryClient = useQueryClient();
+    const [confirmDialog, setConfirmDialog] = useState(null);
 
     const updateStatusMutation = useMutation({
         mutationFn: async ({ id, status, oldStatus, customerId, company }) => {
@@ -66,13 +68,36 @@ export default function CompanyStatusColumns({ open, onClose, companies }) {
         
         const company = companies.find(c => c.id === companyId);
         
-        updateStatusMutation.mutate({ 
-            id: companyId, 
-            status: newStatus,
-            oldStatus: oldStatus,
-            customerId: company?.customer_id,
-            company: company
+        // Wenn eine übertragene Firma wegbewegt wird, Bestätigung erforderlich
+        if (oldStatus === "transferred" && newStatus !== "transferred") {
+            setConfirmDialog({
+                company,
+                newStatus,
+                oldStatus
+            });
+        } else {
+            updateStatusMutation.mutate({ 
+                id: companyId, 
+                status: newStatus,
+                oldStatus: oldStatus,
+                customerId: company?.customer_id,
+                company: company
+            });
+        }
+    };
+
+    const handleConfirmMove = () => {
+        if (!confirmDialog) return;
+        
+        updateStatusMutation.mutate({
+            id: confirmDialog.company.id,
+            status: confirmDialog.newStatus,
+            oldStatus: confirmDialog.oldStatus,
+            customerId: confirmDialog.company.customer_id,
+            company: confirmDialog.company
         });
+        
+        setConfirmDialog(null);
     };
     const statusGroups = {
         transferred: {
