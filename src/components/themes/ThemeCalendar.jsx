@@ -72,7 +72,7 @@ export default function ThemeCalendar({ activities, themes }) {
     };
 
     const gaugeActivityCount = getActivityCountForDate(gaugeDate);
-    const activityAngle = Math.min(gaugeActivityCount * 30, 180); // Max 180 degrees for 6+ activities
+    const activityAngle = Math.min(gaugeActivityCount * 30, 162); // Max 162 degrees for 90% arc
     const activityPercentage = Math.min(Math.round((gaugeActivityCount / 6) * 100), 100); // 6 activities = 100%
 
     const getActivitiesForDay = (day) => {
@@ -205,7 +205,7 @@ export default function ThemeCalendar({ activities, themes }) {
                             strokeWidth="12"
                             strokeLinecap="round"
                         />
-                        {/* Progress Arc */}
+                        {/* Static Progress Arc - 90% of circle */}
                         <circle
                             cx="72"
                             cy="72"
@@ -214,8 +214,7 @@ export default function ThemeCalendar({ activities, themes }) {
                             stroke="url(#gradient)"
                             strokeWidth="12"
                             strokeLinecap="round"
-                            strokeDasharray={`${(activityAngle / 180) * 377} 377`}
-                            className="transition-all duration-500"
+                            strokeDasharray="339 377"
                         />
                         <defs>
                             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
