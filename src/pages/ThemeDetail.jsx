@@ -61,6 +61,12 @@ export default function ThemeDetail() {
         enabled: !!themeId
     });
 
+    const { data: documents = [] } = useQuery({
+        queryKey: ['themeDocuments', themeId],
+        queryFn: () => base44.entities.ThemeDocument.filter({ theme_id: themeId }, '-created_date'),
+        enabled: !!themeId
+    });
+
     const theme = themes.find(t => t.id === themeId);
     const sector = theme?.sector_id ? sectors.find(s => s.id === theme.sector_id) : null;
     const status = theme ? (statusConfig[theme.status] || statusConfig.geplant) : null;
