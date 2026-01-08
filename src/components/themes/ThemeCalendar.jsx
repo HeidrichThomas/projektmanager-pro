@@ -127,7 +127,8 @@ export default function ThemeCalendar({ activities, themes }) {
                                         const dayActivities = getActivitiesForDay(day);
                                         const hasActivities = dayActivities.length > 0;
                                         const today = isToday(day);
-                                        
+                                        const isSelected = isSameDay(day, gaugeDate);
+
                                         return (
                                             <button
                                                 key={day.toString()}
@@ -135,6 +136,7 @@ export default function ThemeCalendar({ activities, themes }) {
                                                 className={`
                                                     aspect-square p-1 rounded text-xs transition-all
                                                     ${today ? 'ring-1 ring-red-500 bg-red-50' : 'hover:bg-slate-100'}
+                                                    ${isSelected ? 'ring-2 ring-indigo-500 bg-indigo-50' : ''}
                                                     ${hasActivities ? 'cursor-pointer font-semibold' : 'cursor-default'}
                                                     ${!isSameMonth(day, currentMonth) ? 'text-slate-300' : 'text-slate-700'}
                                                 `}
@@ -202,17 +204,19 @@ export default function ThemeCalendar({ activities, themes }) {
                     
                     {/* Pointer Line */}
                     <svg className="absolute inset-0 w-full h-full transition-transform duration-500" style={{ transform: `rotate(${(activityAngle / 180) * 180 - 90}deg)` }}>
-                        <line
-                            x1="72"
-                            y1="72"
-                            x2="72"
-                            y2="12"
-                            stroke="#1e293b"
-                            strokeWidth="4"
-                            strokeLinecap="round"
+                        <defs>
+                            <linearGradient id="pointerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#0f172a" />
+                                <stop offset="100%" stopColor="#475569" />
+                            </linearGradient>
+                        </defs>
+                        <polygon
+                            points="72,12 69,72 75,72"
+                            fill="url(#pointerGradient)"
                             className="drop-shadow-lg"
                         />
-                        <circle cx="72" cy="72" r="6" fill="#1e293b" />
+                        <circle cx="72" cy="72" r="8" fill="#1e293b" className="drop-shadow-md" />
+                        <circle cx="72" cy="72" r="3" fill="#64748b" />
                     </svg>
                 </div>
                 
