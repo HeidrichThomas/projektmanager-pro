@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, FileText, Phone, Users, Mail, Milestone } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, FileText, Phone, Users, Mail, Milestone, ChevronUp, ChevronDown } from "lucide-react";
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, isToday, isSameMonth, getWeek, startOfWeek, endOfWeek } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -49,6 +49,20 @@ export default function ThemeCalendar({ activities, themes }) {
     const goToToday = () => {
         setCurrentMonth(new Date());
         setGaugeDate(new Date());
+    };
+
+    const previousDay = () => {
+        const newDate = new Date(gaugeDate);
+        newDate.setDate(newDate.getDate() - 1);
+        setGaugeDate(newDate);
+        setCurrentMonth(newDate);
+    };
+
+    const nextDay = () => {
+        const newDate = new Date(gaugeDate);
+        newDate.setDate(newDate.getDate() + 1);
+        setGaugeDate(newDate);
+        setCurrentMonth(newDate);
     };
 
     const getActivityCountForDate = (date) => {
@@ -167,6 +181,17 @@ export default function ThemeCalendar({ activities, themes }) {
             {/* Activity Gauge */}
             <Card className="w-48 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-white to-slate-50">
                 <h3 className="text-sm font-semibold text-slate-700 mb-2">Aktivität</h3>
+                <div className="flex items-center gap-2 mb-4">
+                    <Button variant="outline" size="sm" onClick={previousDay} className="h-6 w-6 p-0">
+                        <ChevronUp className="w-3 h-3" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={goToToday} className="h-6 px-2 text-xs">
+                        Heute
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={nextDay} className="h-6 w-6 p-0">
+                        <ChevronDown className="w-3 h-3" />
+                    </Button>
+                </div>
                 <p className="text-xs text-slate-500 mb-4">{format(gaugeDate, "dd. MMM yyyy", { locale: de })}</p>
                 <div className="relative w-36 h-36 flex items-center justify-center">
                     {/* Background Circle */}
