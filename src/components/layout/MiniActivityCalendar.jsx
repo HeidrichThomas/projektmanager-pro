@@ -43,9 +43,15 @@ export default function MiniActivityCalendar() {
         return map;
     }, [activities]);
 
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    const firstDayOfWeek = monthStart.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const adjustedFirstDay = new Date(monthStart);
+    adjustedFirstDay.setDate(adjustedFirstDay.getDate() - (firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1));
+    
     const days = eachDayOfInterval({
-        start: startOfMonth(currentDate),
-        end: endOfMonth(currentDate)
+        start: adjustedFirstDay,
+        end: monthEnd
     });
 
     const handlePrevMonth = () => {
