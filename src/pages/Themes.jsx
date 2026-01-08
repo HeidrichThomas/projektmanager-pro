@@ -15,6 +15,7 @@ import SectorManagement from "@/components/themes/SectorManagement";
 import ThemeCalendar from "@/components/themes/ThemeCalendar";
 import ThemeCompanyManagement from "@/components/themes/ThemeCompanyManagement";
 import DocumentManagement from "@/components/themes/DocumentManagement";
+import CompaniesAndSectorsOverview from "@/components/themes/CompaniesAndSectorsOverview";
 
 export default function Themes() {
     const [showForm, setShowForm] = useState(false);
@@ -24,6 +25,7 @@ export default function Themes() {
     const [showSectorManagement, setShowSectorManagement] = useState(false);
     const [showCompanyManagement, setShowCompanyManagement] = useState(false);
     const [showDocuments, setShowDocuments] = useState(false);
+    const [showCompaniesAndSectorsOverview, setShowCompaniesAndSectorsOverview] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -201,7 +203,10 @@ export default function Themes() {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card 
+                        className="cursor-pointer hover:shadow-lg transition-all"
+                        onClick={() => setShowCompaniesAndSectorsOverview(true)}
+                    >
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-slate-600">Firmen & Sparten</CardTitle>
                             <Users className="w-4 h-4 text-purple-600" />
@@ -303,6 +308,13 @@ export default function Themes() {
             <DocumentManagement
                 open={showDocuments}
                 onClose={() => setShowDocuments(false)}
+            />
+
+            <CompaniesAndSectorsOverview
+                open={showCompaniesAndSectorsOverview}
+                onClose={() => setShowCompaniesAndSectorsOverview(false)}
+                companies={companies}
+                sectors={sectors}
             />
         </div>
     );
