@@ -3,15 +3,32 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
 import { de } from "date-fns/locale";
 
+const activityTypeConfig = {
+    notiz: { label: "Notiz", icon: "📝" },
+    telefonat: { label: "Telefonat", icon: "☎️" },
+    meeting: { label: "Meeting", icon: "👥" },
+    email: { label: "E-Mail", icon: "✉️" },
+    dokument: { label: "Dokument", icon: "📄" },
+    meilenstein: { label: "Meilenstein", icon: "🎯" }
+};
+
 export default function MiniActivityCalendar() {
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDay, setSelectedDay] = useState(null);
+    const [showDialog, setShowDialog] = useState(false);
 
     const { data: activities = [] } = useQuery({
         queryKey: ['themeActivities'],
         queryFn: () => base44.entities.ThemeActivity.list()
+    });
+
+    const { data: themes = [] } = useQuery({
+        queryKey: ['themes'],
+        queryFn: () => base44.entities.Theme.list()
     });
 
     const activitiesByDate = useMemo(() => {
