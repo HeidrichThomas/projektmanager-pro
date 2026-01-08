@@ -32,7 +32,7 @@ export default function ProjectKanban({ projects, customers, onStatusChange }) {
 
         return (
             <Link to={createPageUrl("ProjectDetail") + `?id=${project.id}`}>
-                <Card className="p-4 hover:shadow-lg transition-all duration-300 border-slate-200 group cursor-pointer h-72 flex flex-col">
+                <Card className="p-4 hover:shadow-lg transition-all duration-300 border-slate-200 group cursor-pointer h-80 flex flex-col justify-between">
                     <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-2 flex-1">
                             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shrink-0">
