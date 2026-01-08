@@ -70,7 +70,7 @@ export default function CompanyStatusColumns({ open, onClose, companies }) {
             borderColor: "border-yellow-200"
         },
         not_transferred: {
-            title: "Noch nicht bewertet",
+            title: "Nicht bewertet",
             icon: Circle,
             color: "text-red-500",
             bgColor: "bg-red-50",
