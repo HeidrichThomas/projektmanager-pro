@@ -14,6 +14,7 @@ import {
 import { format, isToday, isTomorrow, isPast } from "date-fns";
 import { de } from "date-fns/locale";
 import ActiveTimers from "@/components/dashboard/ActiveTimers";
+import DateTimeWeather from "@/components/dashboard/DateTimeWeather";
 
 export default function Dashboard() {
     const { data: customers = [], isLoading: loadingCustomers } = useQuery({
@@ -81,6 +82,9 @@ export default function Dashboard() {
                     <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
                     <p className="text-slate-500 mt-1">Willkommen zurück! Hier ist Ihre Projektübersicht.</p>
                 </div>
+
+                {/* Date, Time and Weather */}
+                <DateTimeWeather />
 
                 {/* Active Timers */}
                 <ActiveTimers projects={projects} />
