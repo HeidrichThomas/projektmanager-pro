@@ -5,17 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, FolderKanban } from "lucide-react";
+import { Plus, Search, FolderKanban, LayoutGrid, Columns3 } from "lucide-react";
 import { toast } from "sonner";
 
 import ProjectForm from "@/components/projects/ProjectForm";
 import ProjectCard from "@/components/projects/ProjectCard";
+import ProjectKanban from "@/components/projects/ProjectKanban";
 
 export default function Projects() {
     const [showForm, setShowForm] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [viewMode, setViewMode] = useState("kanban");
 
     const queryClient = useQueryClient();
 
@@ -47,6 +49,13 @@ export default function Projects() {
             toast.success("Projekt erfolgreich aktualisiert");
         }
     });
+
+    const handleStatusChange = (projectId, newStatus) => {
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+            updateMutation.mutate({ id: projectId, data: { ...project, status: newStatus } });
+        }
+    };
 
     const handleSave = (data) => {
         if (editingProject) {
@@ -99,14 +108,35 @@ export default function Projects() {
                         />
                     </div>
                     
-                    <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-                        <TabsList className="bg-slate-100">
-                            <TabsTrigger value="all">Alle</TabsTrigger>
-                            <TabsTrigger value="geplant">Geplant</TabsTrigger>
-                            <TabsTrigger value="in_arbeit">In Arbeit</TabsTrigger>
-                            <TabsTrigger value="abgeschlossen">Abgeschlossen</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
+                    {viewMode === "grid" && (
+                        <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                            <TabsList className="bg-slate-100">
+                                <TabsTrigger value="all">Alle</TabsTrigger>
+                                <TabsTrigger value="geplant">Geplant</TabsTrigger>
+                                <TabsTrigger value="in_arbeit">In Arbeit</TabsTrigger>
+                                <TabsTrigger value="abgeschlossen">Abgeschlossen</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                    )}
+
+                    <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+                        <Button
+                            size="sm"
+                            variant={viewMode === "kanban" ? "secondary" : "ghost"}
+                            onClick={() => setViewMode("kanban")}
+                            className="px-3"
+                        >
+                            <Columns3 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={viewMode === "grid" ? "secondary" : "ghost"}
+                            onClick={() => setViewMode("grid")}
+                            className="px-3"
+                        >
+                            <LayoutGrid className="w-4 h-4" />
+                        </Button>
+                    </div>
                 </div>
 
                 {customers.length === 0 && !isLoading && (
@@ -127,16 +157,24 @@ export default function Projects() {
                             </div>
                         ))}
                     </div>
-                ) : filteredProjects.length > 0 ? (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredProjects.map((project) => (
-                            <ProjectCard
-                                key={project.id}
-                                project={project}
-                                customer={getCustomer(project.customer_id)}
-                            />
-                        ))}
-                    </div>
+                ) : projects.length > 0 ? (
+                    viewMode === "kanban" ? (
+                        <ProjectKanban 
+                            projects={projects} 
+                            customers={customers}
+                            onStatusChange={handleStatusChange}
+                        />
+                    ) : (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredProjects.map((project) => (
+                                <ProjectCard
+                                    key={project.id}
+                                    project={project}
+                                    customer={getCustomer(project.customer_id)}
+                                />
+                            ))}
+                        </div>
+                    )
                 ) : (
                     <div className="text-center py-16">
                         <FolderKanban className="w-16 h-16 mx-auto mb-4 text-slate-300" />
