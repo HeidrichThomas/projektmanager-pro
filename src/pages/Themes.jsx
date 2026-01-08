@@ -94,6 +94,13 @@ export default function Themes() {
         setShowForm(true);
     };
 
+    const handleStatusChange = (themeId, newStatus) => {
+        const theme = themes.find(t => t.id === themeId);
+        if (theme) {
+            updateMutation.mutate({ id: themeId, data: { ...theme, status: newStatus } });
+        }
+    };
+
     const getCustomer = (id) => customers.find(c => c.id === id);
 
     const filteredThemes = themes.filter(t => {
