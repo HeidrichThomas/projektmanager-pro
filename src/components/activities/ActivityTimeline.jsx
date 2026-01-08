@@ -27,7 +27,7 @@ export default function ActivityTimeline({ activities, onEdit, onDelete }) {
 
     return (
         <div className="relative">
-            <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200" />
+            <div className="absolute left-9 top-0 bottom-0 w-0.5 bg-slate-200" />
             
             {activities.map((activity) => {
                 const config = typeConfig[activity.type] || typeConfig.notiz;
