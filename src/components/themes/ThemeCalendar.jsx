@@ -195,7 +195,14 @@ export default function ThemeCalendar({ activities, themes }) {
                 <p className="text-xs text-slate-500 mb-4">{format(gaugeDate, "dd. MMM yyyy", { locale: de })}</p>
                 <div className="relative w-36 h-36 flex items-center justify-center">
                     {/* Background Circle */}
-                    <svg className="absolute inset-0 w-full h-full -rotate-90">
+                    <svg className="absolute inset-0 w-full h-full" style={{ transform: 'rotate(-90deg)' }}>
+                        <defs>
+                            <linearGradient id="arcGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#22c55e" />
+                                <stop offset="33%" stopColor="#eab308" />
+                                <stop offset="100%" stopColor="#ef4444" />
+                            </linearGradient>
+                        </defs>
                         <circle
                             cx="72"
                             cy="72"
@@ -205,24 +212,42 @@ export default function ThemeCalendar({ activities, themes }) {
                             strokeWidth="12"
                             strokeLinecap="round"
                         />
-                        {/* Static Progress Arc - 3/4 of circle */}
+                        {/* Green segment (12:00 to ~15:00) */}
                         <circle
                             cx="72"
                             cy="72"
                             r="60"
                             fill="none"
-                            stroke="url(#gradient)"
+                            stroke="#22c55e"
                             strokeWidth="12"
                             strokeLinecap="round"
-                            strokeDasharray="283 377"
+                            strokeDasharray="94 377"
+                            strokeDashoffset="0"
                         />
-                        <defs>
-                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#22c55e" />
-                                <stop offset="50%" stopColor="#eab308" />
-                                <stop offset="100%" stopColor="#ef4444" />
-                            </linearGradient>
-                        </defs>
+                        {/* Yellow segment (~15:00 to ~18:00) */}
+                        <circle
+                            cx="72"
+                            cy="72"
+                            r="60"
+                            fill="none"
+                            stroke="#eab308"
+                            strokeWidth="12"
+                            strokeLinecap="round"
+                            strokeDasharray="94 377"
+                            strokeDashoffset="-94"
+                        />
+                        {/* Red segment (~18:00 to 21:00) */}
+                        <circle
+                            cx="72"
+                            cy="72"
+                            r="60"
+                            fill="none"
+                            stroke="#ef4444"
+                            strokeWidth="12"
+                            strokeLinecap="round"
+                            strokeDasharray="95 377"
+                            strokeDashoffset="-188"
+                        />
                     </svg>
                     
                     {/* Pointer Line */}
