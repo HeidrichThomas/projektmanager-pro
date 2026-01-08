@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, FileText, Phone, Users, Mail, Milestone } from "lucide-react";
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, isToday, isSameMonth } from "date-fns";
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, isToday, isSameMonth, getWeek, startOfWeek, endOfWeek } from "date-fns";
 import { de } from "date-fns/locale";
 
 const activityTypes = {
@@ -27,6 +27,15 @@ export default function ThemeCalendar({ activities, themes }) {
     
     const firstDayOfWeek = monthStart.getDay();
     const paddingDays = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+
+    // Calculate weeks to display
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+    const weeks = [];
+    for (let i = 0; i < calendarDays.length; i += 7) {
+        weeks.push(calendarDays.slice(i, i + 7));
+    }
 
     const previousMonth = () => {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
@@ -75,49 +84,59 @@ export default function ThemeCalendar({ activities, themes }) {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-7 gap-2">
-                        {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
-                            <div key={day} className="text-center text-xs font-semibold text-slate-600 py-2">
-                                {day}
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-[auto_1fr] gap-2">
+                        <div className="text-center text-xs font-semibold text-slate-600 py-2">
+                            KW
+                        </div>
+                        <div className="grid grid-cols-7 gap-2">
+                            {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
+                                <div key={day} className="text-center text-xs font-semibold text-slate-600 py-2">
+                                    {day}
+                                </div>
+                            ))}
+                        </div>
                         
-                        {Array(paddingDays).fill(null).map((_, index) => (
-                            <div key={`padding-${index}`} className="aspect-square" />
+                        {weeks.map((week, weekIndex) => (
+                            <React.Fragment key={weekIndex}>
+                                <div className="flex items-center justify-center text-xs font-medium text-slate-500">
+                                    {getWeek(week[0], { weekStartsOn: 1, firstWeekContainsDate: 4 })}
+                                </div>
+                                <div className="grid grid-cols-7 gap-2">
+                                    {week.map(day => {
+                                        const dayActivities = getActivitiesForDay(day);
+                                        const hasActivities = dayActivities.length > 0;
+                                        const today = isToday(day);
+                                        
+                                        return (
+                                            <button
+                                                key={day.toString()}
+                                                onClick={() => handleDayClick(day)}
+                                                className={`
+                                                    aspect-square p-1 rounded-lg text-sm transition-all
+                                                    ${today ? 'ring-2 ring-red-500 bg-red-50' : 'hover:bg-slate-100'}
+                                                    ${hasActivities ? 'cursor-pointer font-semibold' : 'cursor-default'}
+                                                    ${!isSameMonth(day, currentMonth) ? 'text-slate-300' : 'text-slate-700'}
+                                                `}
+                                            >
+                                                <div className="flex flex-col items-center justify-center h-full">
+                                                    <span>{format(day, 'd')}</span>
+                                                    {hasActivities && (
+                                                        <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
+                                                            {dayActivities.slice(0, 3).map((activity, idx) => (
+                                                                <div
+                                                                    key={idx}
+                                                                    className="w-1.5 h-1.5 rounded-full bg-indigo-500"
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </React.Fragment>
                         ))}
-                        
-                        {daysInMonth.map(day => {
-                            const dayActivities = getActivitiesForDay(day);
-                            const hasActivities = dayActivities.length > 0;
-                            const today = isToday(day);
-                            
-                            return (
-                                <button
-                                    key={day.toString()}
-                                    onClick={() => handleDayClick(day)}
-                                    className={`
-                                        aspect-square p-1 rounded-lg text-sm transition-all
-                                        ${today ? 'ring-2 ring-red-500 bg-red-50' : 'hover:bg-slate-100'}
-                                        ${hasActivities ? 'cursor-pointer font-semibold' : 'cursor-default'}
-                                        ${!isSameMonth(day, currentMonth) ? 'text-slate-300' : 'text-slate-700'}
-                                    `}
-                                >
-                                    <div className="flex flex-col items-center justify-center h-full">
-                                        <span>{format(day, 'd')}</span>
-                                        {hasActivities && (
-                                            <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
-                                                {dayActivities.slice(0, 3).map((activity, idx) => (
-                                                    <div
-                                                        key={idx}
-                                                        className="w-1.5 h-1.5 rounded-full bg-indigo-500"
-                                                    />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </button>
-                            );
-                        })}
                     </div>
                 </CardContent>
             </Card>
