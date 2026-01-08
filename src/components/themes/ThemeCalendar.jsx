@@ -218,8 +218,9 @@ export default function ThemeCalendar({ activities, themes }) {
                         />
                         <defs>
                             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#eab308" />
-                                <stop offset="50%" stopColor="#84cc16" />
+                                <stop offset="0%" stopColor="#ef4444" />
+                                <stop offset="33%" stopColor="#f97316" />
+                                <stop offset="66%" stopColor="#eab308" />
                                 <stop offset="100%" stopColor="#22c55e" />
                             </linearGradient>
                         </defs>
