@@ -158,11 +158,12 @@ export default function Customers() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex gap-6">
-                    <div className="flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <DragDropContext onDragEnd={handleDragEnd}>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="flex gap-6">
+                        <div className="flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-slate-900">Kunden & Lieferanten</h1>
                         <p className="text-slate-500 mt-1">Verwalten Sie Ihre Kunden- und Lieferantenkontakte</p>
@@ -236,44 +237,42 @@ export default function Customers() {
                     )
                 ) : filteredCustomers.length > 0 ? (
                     viewMode === "grid" ? (
-                        <DragDropContext onDragEnd={handleDragEnd}>
-                            <Droppable droppableId="customers-grid">
-                                {(provided, snapshot) => (
-                                    <div 
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-colors ${
-                                            snapshot.isDraggingOver ? 'bg-slate-100 p-4 rounded-lg' : ''
-                                        }`}
-                                    >
-                                        {filteredCustomers.map((customer, index) => (
-                                            <Draggable key={customer.id} draggableId={customer.id} index={index}>
-                                                {(provided, snapshot) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        className={`${
-                                                            snapshot.isDragging ? 'shadow-2xl rotate-2' : ''
-                                                        } transition-all`}
-                                                    >
-                                                        <CustomerCard
-                                                            customer={customer}
-                                                            onEdit={handleEdit}
-                                                            onCopy={handleCopy}
-                                                            onDelete={handleDelete}
-                                                            projectCount={getProjectCount(customer.id)}
-                                                            onShowProjects={handleShowProjects}
-                                                        />
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))}
-                                        {provided.placeholder}
-                                    </div>
-                                )}
-                            </Droppable>
-                        </DragDropContext>
+                        <Droppable droppableId="customers-grid">
+                            {(provided, snapshot) => (
+                                <div 
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-colors ${
+                                        snapshot.isDraggingOver ? 'bg-slate-100 p-4 rounded-lg' : ''
+                                    }`}
+                                >
+                                    {filteredCustomers.map((customer, index) => (
+                                        <Draggable key={customer.id} draggableId={customer.id} index={index}>
+                                            {(provided, snapshot) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    className={`${
+                                                        snapshot.isDragging ? 'shadow-2xl rotate-2' : ''
+                                                    } transition-all`}
+                                                >
+                                                    <CustomerCard
+                                                        customer={customer}
+                                                        onEdit={handleEdit}
+                                                        onCopy={handleCopy}
+                                                        onDelete={handleDelete}
+                                                        projectCount={getProjectCount(customer.id)}
+                                                        onShowProjects={handleShowProjects}
+                                                    />
+                                                </div>
+                                            )}
+                                        </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
                     ) : (
                         <div className="space-y-3">
                             {filteredCustomers.map((customer) => (
@@ -308,7 +307,8 @@ export default function Customers() {
                 )}
                     </div>
                     
-                    <InactiveCustomersSidebar inactiveCustomers={inactiveCustomers} />
+                        <InactiveCustomersSidebar inactiveCustomers={inactiveCustomers} />
+                    </div>
                 </div>
             </div>
 
@@ -325,6 +325,6 @@ export default function Customers() {
                 customer={selectedCustomer}
                 projects={selectedCustomer ? getCustomerProjects(selectedCustomer.id) : []}
             />
-        </div>
+        </DragDropContext>
     );
 }
