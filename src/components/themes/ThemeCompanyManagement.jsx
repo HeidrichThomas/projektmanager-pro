@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, Trash2, User, Save, X, Pencil, Upload, ArrowRight, CheckCircle2, Circle, XCircle } from "lucide-react";
+import { Building2, Plus, Trash2, User, Save, X, Pencil, Upload, ArrowRight, CheckCircle2, XCircle, MinusCircle, HelpCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
@@ -294,34 +294,34 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                         </div>
 
                         <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                    <span className="text-slate-700">Erfolgreich übertragen</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Circle className="w-4 h-4 text-red-500" />
-                                    <span className="text-slate-700">Noch nicht übertragen</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <XCircle className="w-4 h-4 text-yellow-500" />
-                                    <span className="text-slate-700">Kein Interesse</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Circle className="w-4 h-4 text-blue-500" />
-                                    <span className="text-slate-700">Vielleicht später</span>
-                                </div>
-                            </div>
-                        </div>
+                                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                                                <div className="flex items-center gap-2">
+                                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                                    <span className="text-slate-700">Erfolgreich übertragen</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <MinusCircle className="w-4 h-4 text-red-500" />
+                                                    <span className="text-slate-700">Nicht übertragen</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <XCircle className="w-4 h-4 text-yellow-500" />
+                                                    <span className="text-slate-700">Kein Interesse</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <HelpCircle className="w-4 h-4 text-blue-500" />
+                                                    <span className="text-slate-700">Vielleicht später</span>
+                                                </div>
+                                            </div>
+                                        </div>
 
                         <div className="space-y-3">
                             {companies.map((company) => {
                                 const statusConfig = {
-                                    not_transferred: { icon: Circle, color: "text-red-500", label: "Nicht übertragen" },
-                                    transferred: { icon: CheckCircle2, color: "text-green-500", label: "Übertragen" },
-                                    no_interest: { icon: XCircle, color: "text-yellow-500", label: "Kein Interesse" },
-                                    maybe_later: { icon: Circle, color: "text-blue-500", label: "Vielleicht später" }
-                                };
+                                                            not_transferred: { icon: MinusCircle, color: "text-red-500", label: "Nicht übertragen" },
+                                                            transferred: { icon: CheckCircle2, color: "text-green-500", label: "Übertragen" },
+                                                            no_interest: { icon: XCircle, color: "text-yellow-500", label: "Kein Interesse" },
+                                                            maybe_later: { icon: HelpCircle, color: "text-blue-500", label: "Vielleicht später" }
+                                                        };
                                 const status = statusConfig[company.transfer_status || "not_transferred"];
                                 const StatusIcon = status.icon;
                                 
@@ -363,38 +363,38 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                                             </div>
                                         </div>
                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            {company.transfer_status !== "transferred" && (
-                                                <>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => setTransferDialog(company)}
-                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                        title="Zu Kunden/Lieferanten übertragen"
-                                                    >
-                                                        <ArrowRight className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => {
-                                                            let newStatus;
-                                                            if (company.transfer_status === "not_transferred") {
-                                                                newStatus = "no_interest";
-                                                            } else if (company.transfer_status === "no_interest") {
-                                                                newStatus = "maybe_later";
-                                                            } else {
-                                                                newStatus = "not_transferred";
-                                                            }
-                                                            updateStatusMutation.mutate({ id: company.id, status: newStatus });
-                                                        }}
-                                                        className="text-slate-600 hover:text-slate-700 hover:bg-slate-50"
-                                                        title="Status ändern"
-                                                    >
-                                                        <XCircle className="w-4 h-4" />
-                                                    </Button>
-                                                </>
-                                            )}
+                                                            {company.transfer_status !== "transferred" && (
+                                                                <>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        onClick={() => setTransferDialog(company)}
+                                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                        title="Zu Kunden/Lieferanten übertragen"
+                                                                    >
+                                                                        <ArrowRight className="w-4 h-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        onClick={() => {
+                                                                            let newStatus;
+                                                                            if (company.transfer_status === "not_transferred") {
+                                                                                newStatus = "no_interest";
+                                                                            } else if (company.transfer_status === "no_interest") {
+                                                                                newStatus = "maybe_later";
+                                                                            } else {
+                                                                                newStatus = "not_transferred";
+                                                                            }
+                                                                            updateStatusMutation.mutate({ id: company.id, status: newStatus });
+                                                                        }}
+                                                                        className="text-slate-600 hover:text-slate-700 hover:bg-slate-50"
+                                                                        title="Status ändern"
+                                                                    >
+                                                                        <XCircle className="w-4 h-4" />
+                                                                    </Button>
+                                                                </>
+                                                            )}
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
