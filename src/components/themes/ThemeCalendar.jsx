@@ -72,7 +72,7 @@ export default function ThemeCalendar({ activities, themes }) {
     };
 
     const gaugeActivityCount = getActivityCountForDate(gaugeDate);
-    const activityAngle = Math.min(gaugeActivityCount * 45, 270); // Max 270 degrees for 3/4 arc
+    const activityAngle = 270 - Math.min(gaugeActivityCount * 45, 270); // Start at 270° (red), move towards 0° (green)
     const activityPercentage = Math.min(Math.round((gaugeActivityCount / 6) * 100), 100); // 6 activities = 100%
 
     const getActivitiesForDay = (day) => {
@@ -195,11 +195,11 @@ export default function ThemeCalendar({ activities, themes }) {
                 <p className="text-xs text-slate-500 mb-4">{format(gaugeDate, "dd. MMM yyyy", { locale: de })}</p>
                 <div className="relative w-36 h-36 flex items-center justify-center">
                     {/* Background Circle */}
-                    <svg className="absolute inset-0 w-full h-full" style={{ transform: 'rotate(-90deg)' }}>
+                    <svg className="absolute inset-0 w-full h-full -rotate-90">
                         <defs>
-                            <linearGradient id="arcGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <linearGradient id="gradient" gradientUnits="userSpaceOnUse" x1="72" y1="12" x2="72" y2="132">
                                 <stop offset="0%" stopColor="#22c55e" />
-                                <stop offset="33%" stopColor="#eab308" />
+                                <stop offset="66%" stopColor="#eab308" />
                                 <stop offset="100%" stopColor="#ef4444" />
                             </linearGradient>
                         </defs>
@@ -212,41 +212,16 @@ export default function ThemeCalendar({ activities, themes }) {
                             strokeWidth="12"
                             strokeLinecap="round"
                         />
-                        {/* Green segment (12:00 to ~15:00) */}
+                        {/* Static Progress Arc - 3/4 of circle */}
                         <circle
                             cx="72"
                             cy="72"
                             r="60"
                             fill="none"
-                            stroke="#22c55e"
+                            stroke="url(#gradient)"
                             strokeWidth="12"
                             strokeLinecap="round"
-                            strokeDasharray="94 377"
-                            strokeDashoffset="0"
-                        />
-                        {/* Yellow segment (~15:00 to ~18:00) */}
-                        <circle
-                            cx="72"
-                            cy="72"
-                            r="60"
-                            fill="none"
-                            stroke="#eab308"
-                            strokeWidth="12"
-                            strokeLinecap="round"
-                            strokeDasharray="94 377"
-                            strokeDashoffset="-94"
-                        />
-                        {/* Red segment (~18:00 to 21:00) */}
-                        <circle
-                            cx="72"
-                            cy="72"
-                            r="60"
-                            fill="none"
-                            stroke="#ef4444"
-                            strokeWidth="12"
-                            strokeLinecap="round"
-                            strokeDasharray="95 377"
-                            strokeDashoffset="-188"
+                            strokeDasharray="283 377"
                         />
                     </svg>
                     
