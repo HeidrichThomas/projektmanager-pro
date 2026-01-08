@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
     LayoutDashboard, Building2, FolderKanban, Database,
-    Menu, ChevronRight, CheckCircle2
+    Menu, ChevronRight, CheckCircle2, Lightbulb
 } from "lucide-react";
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
     { name: "Projekte", icon: FolderKanban, page: "Projects" },
+    { name: "Themen", icon: Lightbulb, page: "Themes" },
     { name: "Kunden & Lieferanten", icon: Building2, page: "Customers" },
     { name: "Abgeschlossene Projekte", icon: CheckCircle2, page: "CompletedProjects" },
     { name: "Datensicherung", icon: Database, page: "DataBackup" }
