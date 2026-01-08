@@ -14,6 +14,9 @@ const navigation = [
     { name: "Kunden & Lieferanten", icon: Building2, page: "Customers" },
     { name: "Abgeschlossene Projekte", icon: CheckCircle2, page: "CompletedProjects" },
     { name: "Business Themen", icon: Lightbulb, page: "Themes" },
+];
+
+const bottomNavigation = [
     { name: "Datensicherung", icon: Database, page: "DataBackup" }
 ];
 
