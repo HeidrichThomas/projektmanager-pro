@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Upload, Trash2, Download, Plus, X, Save, Filter } from "lucide-react";
+import { FileText, Upload, Trash2, Download, Plus, X, Save, Filter, Pencil } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
     const [showForm, setShowForm] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState("all");
+    const [editingDocument, setEditingDocument] = useState(null);
     const [formData, setFormData] = useState({
         theme_id: themeId || "",
         title: "",
@@ -63,6 +64,17 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
         }
     });
 
+    const updateDocumentMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.ThemeDocument.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeDocuments'] });
+            setShowForm(false);
+            setEditingDocument(null);
+            resetForm();
+            toast.success("Dokument aktualisiert");
+        }
+    });
+
     const deleteDocumentMutation = useMutation({
         mutationFn: (id) => base44.entities.ThemeDocument.delete(id),
         onSuccess: () => {
@@ -81,6 +93,7 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
             file_name: "",
             file_size: 0
         });
+        setEditingDocument(null);
     };
 
     const handleFileUpload = async (e) => {
@@ -106,7 +119,25 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        createDocumentMutation.mutate(formData);
+        if (editingDocument) {
+            updateDocumentMutation.mutate({ id: editingDocument.id, data: formData });
+        } else {
+            createDocumentMutation.mutate(formData);
+        }
+    };
+
+    const handleEdit = (doc) => {
+        setEditingDocument(doc);
+        setFormData({
+            theme_id: doc.theme_id || "",
+            title: doc.title,
+            description: doc.description || "",
+            category: doc.category,
+            file_url: doc.file_url,
+            file_name: doc.file_name,
+            file_size: doc.file_size
+        });
+        setShowForm(true);
     };
 
     const formatFileSize = (bytes) => {
@@ -125,7 +156,7 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <FileText className="w-5 h-5 text-slate-600" />
-                        {themeId ? "Themen-Dokumente" : "Dokumentenverwaltung"}
+                        {showForm && editingDocument ? "Dokument bearbeiten" : (themeId ? "Themen-Dokumente" : "Dokumentenverwaltung")}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -192,6 +223,13 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
+                                                    onClick={() => handleEdit(doc)}
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
                                                     onClick={() => window.open(doc.file_url, '_blank')}
                                                 >
                                                     <Download className="w-4 h-4" />
@@ -223,25 +261,34 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                        <div>
-                            <Label>Datei hochladen *</Label>
-                            <div className="mt-1.5">
-                                <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
-                                    <div className="text-center">
-                                        <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                                        <p className="text-sm text-slate-600">
-                                            {uploading ? "Wird hochgeladen..." : formData.file_name || "Datei auswählen"}
-                                        </p>
-                                    </div>
-                                    <input
-                                        type="file"
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                        disabled={uploading}
-                                    />
-                                </label>
+                        {!editingDocument && (
+                            <div>
+                                <Label>Datei hochladen *</Label>
+                                <div className="mt-1.5">
+                                    <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
+                                        <div className="text-center">
+                                            <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
+                                            <p className="text-sm text-slate-600">
+                                                {uploading ? "Wird hochgeladen..." : formData.file_name || "Datei auswählen"}
+                                            </p>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                            disabled={uploading}
+                                        />
+                                    </label>
+                                </div>
                             </div>
-                        </div>
+                        )}
+                        
+                        {editingDocument && (
+                            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <p className="text-sm text-slate-600 mb-1">Aktuelle Datei:</p>
+                                <p className="text-sm font-medium text-slate-900">{formData.file_name}</p>
+                            </div>
+                        )}
 
                         {!themeId && (
                             <div>
@@ -303,7 +350,7 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4 border-t">
-                            <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                            <Button type="button" variant="outline" onClick={() => { setShowForm(false); resetForm(); }}>
                                 <X className="w-4 h-4 mr-2" />
                                 Zurück
                             </Button>
@@ -313,7 +360,7 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
                                 disabled={!formData.file_url || !formData.title}
                             >
                                 <Save className="w-4 h-4 mr-2" />
-                                Speichern
+                                {editingDocument ? "Aktualisieren" : "Speichern"}
                             </Button>
                         </div>
                     </form>
