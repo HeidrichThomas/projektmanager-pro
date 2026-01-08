@@ -72,7 +72,7 @@ export default function ThemeCalendar({ activities, themes }) {
     };
 
     const gaugeActivityCount = getActivityCountForDate(gaugeDate);
-    const activityAngle = Math.min(gaugeActivityCount * 30, 162); // Max 162 degrees for 90% arc
+    const activityAngle = Math.min(gaugeActivityCount * 45, 270); // Max 270 degrees for 3/4 arc
     const activityPercentage = Math.min(Math.round((gaugeActivityCount / 6) * 100), 100); // 6 activities = 100%
 
     const getActivitiesForDay = (day) => {
@@ -205,7 +205,7 @@ export default function ThemeCalendar({ activities, themes }) {
                             strokeWidth="12"
                             strokeLinecap="round"
                         />
-                        {/* Static Progress Arc - 90% of circle */}
+                        {/* Static Progress Arc - 3/4 of circle */}
                         <circle
                             cx="72"
                             cy="72"
@@ -214,14 +214,13 @@ export default function ThemeCalendar({ activities, themes }) {
                             stroke="url(#gradient)"
                             strokeWidth="12"
                             strokeLinecap="round"
-                            strokeDasharray="339 377"
+                            strokeDasharray="283 377"
                         />
                         <defs>
                             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#ef4444" />
-                                <stop offset="33%" stopColor="#f97316" />
-                                <stop offset="66%" stopColor="#eab308" />
-                                <stop offset="100%" stopColor="#22c55e" />
+                                <stop offset="0%" stopColor="#22c55e" />
+                                <stop offset="50%" stopColor="#eab308" />
+                                <stop offset="100%" stopColor="#ef4444" />
                             </linearGradient>
                         </defs>
                     </svg>
