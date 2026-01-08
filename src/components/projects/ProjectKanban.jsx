@@ -19,8 +19,8 @@ const statusConfig = {
 const statuses = [
     { id: "geplant", label: "Geplant" },
     { id: "in_arbeit", label: "In Arbeit" },
-    { id: "abgeschlossen", label: "Abgeschlossen" },
-    { id: "pausiert", label: "Pausiert" }
+    { id: "pausiert", label: "Pausiert" },
+    { id: "abgeschlossen", label: "Abgeschlossen" }
 ];
 
 export default function ProjectKanban({ projects, customers, onStatusChange }) {
