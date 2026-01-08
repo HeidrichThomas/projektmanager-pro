@@ -74,7 +74,6 @@ export default function DateTimeWeather() {
                     setWeather({
                         temperature: current.temperature_2m,
                         condition: weatherConditions[current.weather_code] || "Unbekannt",
-                        city: city,
                         wind_speed: current.wind_speed_10m,
                         humidity: current.relative_humidity_2m
                     });
