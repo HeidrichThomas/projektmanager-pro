@@ -11,10 +11,7 @@ export default function DateTimeWeather() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [weather, setWeather] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [postalCode, setPostalCode] = useState(() => localStorage.getItem('weatherPostalCode') || '89257');
-    const [cityName, setCityName] = useState(() => localStorage.getItem('weatherCity') || 'Illertissen');
-    const [editMode, setEditMode] = useState(false);
-    const [tempPostalCode, setTempPostalCode] = useState(postalCode);
+    const [cityName, setCityName] = useState('');
 
     useEffect(() => {
         const timer = setInterval(() => {
