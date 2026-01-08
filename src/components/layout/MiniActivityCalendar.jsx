@@ -56,31 +56,57 @@ export default function MiniActivityCalendar() {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
     };
 
+    const handleToday = () => {
+        setCurrentDate(new Date());
+    };
+
+    const handleDayClick = (day) => {
+        setSelectedDay(day);
+        setShowDialog(true);
+    };
+
+    const getThemeName = (themeId) => {
+        return themes.find(t => t.id === themeId)?.name || "Unbekannt";
+    };
+
+    const selectedDateKey = selectedDay ? format(selectedDay, 'yyyy-MM-dd') : null;
+    const selectedDayActivities = selectedDateKey ? (activitiesByDate[selectedDateKey] || []) : [];
+
     return (
-        <div className="bg-white rounded-lg border border-slate-200 p-3 mt-4">
-            <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-slate-700">
-                    {format(currentDate, "MMMM yyyy", { locale: de })}
-                </h3>
-                <div className="flex gap-1">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={handlePrevMonth}
-                    >
-                        <ChevronLeft className="w-3 h-3" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={handleNextMonth}
-                    >
-                        <ChevronRight className="w-3 h-3" />
-                    </Button>
+        <>
+            <div className="bg-white rounded-lg border border-slate-200 p-3 mt-4">
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xs font-semibold text-slate-700">
+                        {format(currentDate, "MMMM yyyy", { locale: de })}
+                    </h3>
+                    <div className="flex gap-1">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={handlePrevMonth}
+                        >
+                            <ChevronLeft className="w-3 h-3" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={handleNextMonth}
+                        >
+                            <ChevronRight className="w-3 h-3" />
+                        </Button>
+                    </div>
                 </div>
-            </div>
+
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleToday}
+                    className="w-full mb-3 h-7 text-xs"
+                >
+                    Heute
+                </Button>
 
             <div className="grid grid-cols-7 gap-1 mb-2">
                 {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
