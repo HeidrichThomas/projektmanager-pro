@@ -293,12 +293,34 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                             </label>
                         </div>
 
+                        <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                    <span className="text-slate-700">Erfolgreich übertragen</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Circle className="w-4 h-4 text-red-500" />
+                                    <span className="text-slate-700">Noch nicht übertragen</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <XCircle className="w-4 h-4 text-yellow-500" />
+                                    <span className="text-slate-700">Kein Interesse</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Circle className="w-4 h-4 text-blue-500" />
+                                    <span className="text-slate-700">Vielleicht später</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="space-y-3">
                             {companies.map((company) => {
                                 const statusConfig = {
                                     not_transferred: { icon: Circle, color: "text-red-500", label: "Nicht übertragen" },
                                     transferred: { icon: CheckCircle2, color: "text-green-500", label: "Übertragen" },
-                                    no_interest: { icon: XCircle, color: "text-yellow-500", label: "Kein Interesse" }
+                                    no_interest: { icon: XCircle, color: "text-yellow-500", label: "Kein Interesse" },
+                                    maybe_later: { icon: Circle, color: "text-blue-500", label: "Vielleicht später" }
                                 };
                                 const status = statusConfig[company.transfer_status || "not_transferred"];
                                 const StatusIcon = status.icon;
@@ -355,14 +377,19 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
-                                                        onClick={() => updateStatusMutation.mutate({ 
-                                                            id: company.id, 
-                                                            status: company.transfer_status === "no_interest" ? "not_transferred" : "no_interest" 
-                                                        })}
-                                                        className={company.transfer_status === "no_interest" 
-                                                            ? "text-slate-600 hover:text-slate-700 hover:bg-slate-50" 
-                                                            : "text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"}
-                                                        title={company.transfer_status === "no_interest" ? "Als interessant markieren" : "Kein Interesse"}
+                                                        onClick={() => {
+                                                            let newStatus;
+                                                            if (company.transfer_status === "not_transferred") {
+                                                                newStatus = "no_interest";
+                                                            } else if (company.transfer_status === "no_interest") {
+                                                                newStatus = "maybe_later";
+                                                            } else {
+                                                                newStatus = "not_transferred";
+                                                            }
+                                                            updateStatusMutation.mutate({ id: company.id, status: newStatus });
+                                                        }}
+                                                        className="text-slate-600 hover:text-slate-700 hover:bg-slate-50"
+                                                        title="Status ändern"
                                                     >
                                                         <XCircle className="w-4 h-4" />
                                                     </Button>
