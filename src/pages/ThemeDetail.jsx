@@ -11,13 +11,15 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     ArrowLeft, Building2, Calendar, Lightbulb, 
-    Pencil, Trash2, User, Briefcase
+    Pencil, Trash2, User, Briefcase, Plus, Clock
 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { toast } from "sonner";
 
 import ThemeForm from "@/components/themes/ThemeForm";
+import ThemeActivityForm from "@/components/themes/ThemeActivityForm";
+import ThemeActivityTimeline from "@/components/themes/ThemeActivityTimeline";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -31,6 +33,8 @@ export default function ThemeDetail() {
     const themeId = urlParams.get('id');
 
     const [showThemeForm, setShowThemeForm] = useState(false);
+    const [showActivityForm, setShowActivityForm] = useState(false);
+    const [editingActivity, setEditingActivity] = useState(null);
 
     const queryClient = useQueryClient();
 
@@ -47,6 +51,12 @@ export default function ThemeDetail() {
     const { data: sectors = [] } = useQuery({
         queryKey: ['sectors'],
         queryFn: () => base44.entities.Sector.list()
+    });
+
+    const { data: activities = [], isLoading: loadingActivities } = useQuery({
+        queryKey: ['themeActivities', themeId],
+        queryFn: () => base44.entities.ThemeActivity.filter({ theme_id: themeId }, '-activity_date'),
+        enabled: !!themeId
     });
 
     const theme = themes.find(t => t.id === themeId);
@@ -70,8 +80,43 @@ export default function ThemeDetail() {
         }
     });
 
+    const createActivityMutation = useMutation({
+        mutationFn: (data) => base44.entities.ThemeActivity.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeActivities', themeId] });
+            setShowActivityForm(false);
+            toast.success("Aktivität erfolgreich angelegt");
+        }
+    });
+
+    const updateActivityMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.ThemeActivity.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeActivities', themeId] });
+            setShowActivityForm(false);
+            setEditingActivity(null);
+            toast.success("Aktivität aktualisiert");
+        }
+    });
+
+    const deleteActivityMutation = useMutation({
+        mutationFn: (id) => base44.entities.ThemeActivity.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeActivities', themeId] });
+            toast.success("Aktivität gelöscht");
+        }
+    });
+
     const handleProgressChange = (value) => {
         updateThemeMutation.mutate({ id: themeId, data: { progress: value[0] } });
+    };
+
+    const handleActivitySave = (data) => {
+        if (editingActivity) {
+            updateActivityMutation.mutate({ id: editingActivity.id, data });
+        } else {
+            createActivityMutation.mutate(data);
+        }
     };
 
     if (!theme) {
@@ -281,6 +326,41 @@ export default function ThemeDetail() {
                         </CardContent>
                     </Card>
                 )}
+
+                {/* Activities Timeline */}
+                <Card className="mb-8 shadow-sm">
+                    <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-slate-600" />
+                                Chronologischer Verlauf
+                            </CardTitle>
+                            <Button onClick={() => { setEditingActivity(null); setShowActivityForm(true); }} className="bg-slate-800 hover:bg-slate-900">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Neue Aktivität
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        {loadingActivities ? (
+                            <div className="space-y-4">
+                                {Array(3).fill(0).map((_, i) => (
+                                    <Skeleton key={i} className="h-24 w-full" />
+                                ))}
+                            </div>
+                        ) : (
+                            <ThemeActivityTimeline
+                                activities={activities}
+                                onEdit={(activity) => { setEditingActivity(activity); setShowActivityForm(true); }}
+                                onDelete={(activity) => {
+                                    if (confirm("Aktivität wirklich löschen?")) {
+                                        deleteActivityMutation.mutate(activity.id);
+                                    }
+                                }}
+                            />
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Forms */}
@@ -291,6 +371,14 @@ export default function ThemeDetail() {
                 theme={theme}
                 customers={customers}
                 suppliers={customers.filter(c => c.type === 'supplier' || c.type === 'both')}
+            />
+
+            <ThemeActivityForm
+                open={showActivityForm}
+                onClose={() => { setShowActivityForm(false); setEditingActivity(null); }}
+                onSave={handleActivitySave}
+                activity={editingActivity}
+                themeId={themeId}
             />
         </div>
     );

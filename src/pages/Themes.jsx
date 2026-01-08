@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeCard from "@/components/themes/ThemeCard";
 import SectorManagement from "@/components/themes/SectorManagement";
+import ThemeCalendar from "@/components/themes/ThemeCalendar";
 
 export default function Themes() {
     const [showForm, setShowForm] = useState(false);
@@ -29,6 +30,11 @@ export default function Themes() {
     const { data: customers = [] } = useQuery({
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
+    });
+
+    const { data: activities = [] } = useQuery({
+        queryKey: ['themeActivities'],
+        queryFn: () => base44.entities.ThemeActivity.list()
     });
 
     const createMutation = useMutation({
@@ -165,6 +171,11 @@ export default function Themes() {
                         )}
                     </div>
                 )}
+
+                {/* Calendar */}
+                <div className="mt-8">
+                    <ThemeCalendar activities={activities} themes={themes} />
+                </div>
             </div>
 
             <ThemeForm
