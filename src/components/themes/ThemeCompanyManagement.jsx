@@ -21,6 +21,9 @@ export default function ThemeCompanyManagement({ open, onClose }) {
         postal_code: "",
         city: "",
         country: "Deutschland",
+        phone: "",
+        mobile_phone: "",
+        email: "",
         website: "",
         contact_persons: [],
         notes: ""
@@ -78,6 +81,9 @@ export default function ThemeCompanyManagement({ open, onClose }) {
             postal_code: "",
             city: "",
             country: "Deutschland",
+            phone: "",
+            mobile_phone: "",
+            email: "",
             website: "",
             contact_persons: [],
             notes: ""
@@ -140,6 +146,9 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                         postal_code: { type: "string" },
                         city: { type: "string" },
                         country: { type: "string" },
+                        phone: { type: "string" },
+                        mobile_phone: { type: "string" },
+                        email: { type: "string" },
                         website: { type: "string" },
                         contact_name: { type: "string" },
                         contact_position: { type: "string" },
@@ -164,6 +173,9 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                         postal_code: row.postal_code || "",
                         city: row.city || "",
                         country: row.country || "Deutschland",
+                        phone: row.phone || "",
+                        mobile_phone: row.mobile_phone || "",
+                        email: row.email || "",
                         website: row.website || "",
                         notes: row.notes || "",
                         contact_persons: []
@@ -245,6 +257,13 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                                                     {company.postal_code} {company.city}
                                                 </p>
                                             )}
+                                            {(company.phone || company.email) && (
+                                                <p className="text-sm text-slate-500 mt-1">
+                                                    {company.phone && `☎ ${company.phone}`}
+                                                    {company.phone && company.email && ' • '}
+                                                    {company.email && `✉ ${company.email}`}
+                                                </p>
+                                            )}
                                             {company.contact_persons && company.contact_persons.length > 0 && (
                                                 <div className="mt-2 flex flex-wrap gap-2">
                                                     {company.contact_persons.map((contact, idx) => (
@@ -298,25 +317,14 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label>Straße & Hausnummer</Label>
-                                <Input
-                                    value={formData.street}
-                                    onChange={(e) => setFormData({...formData, street: e.target.value})}
-                                    placeholder="Musterstraße 123"
-                                    className="mt-1.5"
-                                />
-                            </div>
-                            <div>
-                                <Label>Website</Label>
-                                <Input
-                                    value={formData.website}
-                                    onChange={(e) => setFormData({...formData, website: e.target.value})}
-                                    placeholder="www.beispiel.de"
-                                    className="mt-1.5"
-                                />
-                            </div>
+                        <div>
+                            <Label>Straße & Hausnummer</Label>
+                            <Input
+                                value={formData.street}
+                                onChange={(e) => setFormData({...formData, street: e.target.value})}
+                                placeholder="Musterstraße 123"
+                                className="mt-1.5"
+                            />
                         </div>
 
                         <div className="grid grid-cols-3 gap-4">
@@ -343,6 +351,49 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                                 <Input
                                     value={formData.country}
                                     onChange={(e) => setFormData({...formData, country: e.target.value})}
+                                    className="mt-1.5"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>Telefon</Label>
+                                <Input
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                    placeholder="+49 123 456789"
+                                    className="mt-1.5"
+                                />
+                            </div>
+                            <div>
+                                <Label>Handy</Label>
+                                <Input
+                                    value={formData.mobile_phone}
+                                    onChange={(e) => setFormData({...formData, mobile_phone: e.target.value})}
+                                    placeholder="+49 170 123456"
+                                    className="mt-1.5"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>E-Mail</Label>
+                                <Input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    placeholder="info@firma.de"
+                                    className="mt-1.5"
+                                />
+                            </div>
+                            <div>
+                                <Label>Website</Label>
+                                <Input
+                                    value={formData.website}
+                                    onChange={(e) => setFormData({...formData, website: e.target.value})}
+                                    placeholder="www.beispiel.de"
                                     className="mt-1.5"
                                 />
                             </div>
