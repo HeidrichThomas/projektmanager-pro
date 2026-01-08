@@ -20,6 +20,7 @@ export default function ThemeCalendar({ activities, themes }) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
     const [showDialog, setShowDialog] = useState(false);
+    const [gaugeDate, setGaugeDate] = useState(new Date());
 
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
@@ -47,17 +48,18 @@ export default function ThemeCalendar({ activities, themes }) {
 
     const goToToday = () => {
         setCurrentMonth(new Date());
+        setGaugeDate(new Date());
     };
 
-    const getTodayActivityCount = () => {
+    const getActivityCountForDate = (date) => {
         return activities.filter(activity => 
-            isToday(new Date(activity.activity_date))
+            isSameDay(new Date(activity.activity_date), date)
         ).length;
     };
 
-    const todayActivityCount = getTodayActivityCount();
-    const activityAngle = Math.min(todayActivityCount * 30, 180); // Max 180 degrees for 6+ activities
-    const activityPercentage = Math.min(Math.round((todayActivityCount / 6) * 100), 100); // 6 activities = 100%
+    const gaugeActivityCount = getActivityCountForDate(gaugeDate);
+    const activityAngle = Math.min(gaugeActivityCount * 30, 180); // Max 180 degrees for 6+ activities
+    const activityPercentage = Math.min(Math.round((gaugeActivityCount / 6) * 100), 100); // 6 activities = 100%
 
     const getActivitiesForDay = (day) => {
         return activities.filter(activity => 
@@ -66,6 +68,7 @@ export default function ThemeCalendar({ activities, themes }) {
     };
 
     const handleDayClick = (day) => {
+        setGaugeDate(day);
         const dayActivities = getActivitiesForDay(day);
         if (dayActivities.length > 0) {
             setSelectedDate(day);
@@ -161,7 +164,8 @@ export default function ThemeCalendar({ activities, themes }) {
 
             {/* Activity Gauge */}
             <Card className="w-48 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-white to-slate-50">
-                <h3 className="text-sm font-semibold text-slate-700 mb-6">Heutige Aktivität</h3>
+                <h3 className="text-sm font-semibold text-slate-700 mb-2">Aktivität</h3>
+                <p className="text-xs text-slate-500 mb-4">{format(gaugeDate, "dd. MMM yyyy", { locale: de })}</p>
                 <div className="relative w-36 h-36 flex items-center justify-center">
                     {/* Background Circle */}
                     <svg className="absolute inset-0 w-full h-full -rotate-90">
@@ -196,25 +200,27 @@ export default function ThemeCalendar({ activities, themes }) {
                         </defs>
                     </svg>
                     
-                    {/* Pointer Triangle */}
-                    <div 
-                        className="absolute inset-0 transition-transform duration-500"
-                        style={{ 
-                            transform: `rotate(${(activityAngle / 180) * 180 - 90}deg)`,
-                            transformOrigin: 'center'
-                        }}
-                    >
-                        <div className="absolute top-[6px] left-1/2 -translate-x-1/2">
-                            <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[20px] border-t-slate-900 drop-shadow-lg" />
-                        </div>
-                    </div>
+                    {/* Pointer Line */}
+                    <svg className="absolute inset-0 w-full h-full transition-transform duration-500" style={{ transform: `rotate(${(activityAngle / 180) * 180 - 90}deg)` }}>
+                        <line
+                            x1="72"
+                            y1="72"
+                            x2="72"
+                            y2="12"
+                            stroke="#1e293b"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            className="drop-shadow-lg"
+                        />
+                        <circle cx="72" cy="72" r="6" fill="#1e293b" />
+                    </svg>
                 </div>
                 
                 {/* Activity Percentage and Status Labels */}
                 <div className="text-center mt-4">
                     <div className="text-3xl font-bold text-slate-900 mb-1">{activityPercentage}%</div>
                     <div className="text-xs text-slate-500 mb-3">
-                        {todayActivityCount} {todayActivityCount === 1 ? "Aktivität" : "Aktivitäten"} heute
+                        {gaugeActivityCount} {gaugeActivityCount === 1 ? "Aktivität" : "Aktivitäten"}
                     </div>
                 </div>
                 
