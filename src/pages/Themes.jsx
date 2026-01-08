@@ -5,17 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Lightbulb } from "lucide-react";
+import { Plus, Search, Lightbulb, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 
 import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeCard from "@/components/themes/ThemeCard";
+import SectorManagement from "@/components/themes/SectorManagement";
 
 export default function Themes() {
     const [showForm, setShowForm] = useState(false);
     const [editingTheme, setEditingTheme] = useState(null);
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [showSectorManagement, setShowSectorManagement] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -78,14 +80,23 @@ export default function Themes() {
                         <h1 className="text-3xl font-bold text-slate-900">Themen</h1>
                         <p className="text-slate-500 mt-1">Verwalten Sie Ihre Themen und deren Fortschritt</p>
                     </div>
-                    <Button 
-                        onClick={() => { setEditingTheme(null); setShowForm(true); }} 
-                        className="bg-slate-800 hover:bg-slate-900"
-                        disabled={customers.length === 0}
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Neues Thema
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button 
+                            onClick={() => setShowSectorManagement(true)} 
+                            variant="outline"
+                        >
+                            <Briefcase className="w-4 h-4 mr-2" />
+                            Sparten
+                        </Button>
+                        <Button 
+                            onClick={() => { setEditingTheme(null); setShowForm(true); }} 
+                            className="bg-slate-800 hover:bg-slate-900"
+                            disabled={customers.length === 0}
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Neues Thema
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -163,6 +174,11 @@ export default function Themes() {
                 theme={editingTheme}
                 customers={customers}
                 suppliers={customers.filter(c => c.type === 'supplier' || c.type === 'both')}
+            />
+
+            <SectorManagement
+                open={showSectorManagement}
+                onClose={() => setShowSectorManagement(false)}
             />
         </div>
     );

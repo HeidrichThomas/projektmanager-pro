@@ -8,13 +8,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Slider } from "@/components/ui/slider";
 import { Lightbulb, Save, X, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ThemeForm({ open, onClose, onSave, theme, customers, suppliers }) {
     const availableSuppliers = suppliers || customers.filter(c => c.type === 'supplier' || c.type === 'both');
     const [selectedSupplierId, setSelectedSupplierId] = useState("");
+
+    const { data: sectors = [] } = useQuery({
+        queryKey: ['sectors'],
+        queryFn: () => base44.entities.Sector.list()
+    });
     
     const [formData, setFormData] = useState({
         name: "",
+        sector_id: "",
         customer_id: "",
         contact_person: "",
         supplier_ids: [],
@@ -31,6 +39,7 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
         } else {
             setFormData({
                 name: "",
+                sector_id: "",
                 customer_id: "",
                 contact_person: "",
                 supplier_ids: [],
@@ -86,16 +95,34 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
                     </div>
                     
                     <div>
-                        <Label className="text-slate-700 font-medium">Kunde *</Label>
+                        <Label className="text-slate-700 font-medium">Sparte</Label>
+                        <Select
+                            value={formData.sector_id}
+                            onValueChange={(value) => setFormData({...formData, sector_id: value})}
+                        >
+                            <SelectTrigger className="mt-1.5">
+                                <SelectValue placeholder="Sparte auswählen (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {sectors.map((sector) => (
+                                    <SelectItem key={sector.id} value={sector.id}>
+                                        {sector.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <Label className="text-slate-700 font-medium">Kunde</Label>
                         <Select
                             value={formData.customer_id}
                             onValueChange={(value) => {
                                 setFormData({...formData, customer_id: value, contact_person: ""});
                             }}
-                            required
                         >
                             <SelectTrigger className="mt-1.5">
-                                <SelectValue placeholder="Kunde auswählen" />
+                                <SelectValue placeholder="Kunde auswählen (optional)" />
                             </SelectTrigger>
                             <SelectContent>
                                 {customers.filter(c => c.type === 'customer' || c.type === 'both').map((c) => (
