@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Lightbulb, Briefcase, Building2, TrendingUp, Calendar, Users, FileText } from "lucide-react";
+import { Plus, Search, Lightbulb, Briefcase, Building2, TrendingUp, Calendar, Users, FileText, Grid2x2, Columns4 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
