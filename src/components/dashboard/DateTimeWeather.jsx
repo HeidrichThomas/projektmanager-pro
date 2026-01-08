@@ -75,12 +75,38 @@ export default function DateTimeWeather() {
                 }
             };
 
-            if (postalCode) {
-                fetchWeather();
-                const weatherInterval = setInterval(fetchWeather, 30 * 60 * 1000);
-                return () => clearInterval(weatherInterval);
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        try {
+                            const cityResponse = await base44.integrations.Core.InvokeLLM({
+                                prompt: `Gib mir die Stadt für diese Koordinaten: Latitude ${latitude}, Longitude ${longitude}. Nur die Stadtnamen als String, nichts anderes.`,
+                                response_json_schema: {
+                                    type: "object",
+                                    properties: {
+                                        city: { type: "string" }
+                                    }
+                                }
+                            });
+                            fetchWeather(latitude, longitude, cityResponse.city);
+                            localStorage.setItem('weatherPostalCode', '');
+                        } catch {
+                            setLoading(false);
+                        }
+                    },
+                    () => {
+                        if (postalCode) {
+                            setLoading(true);
+                        } else {
+                            setLoading(false);
+                        }
+                    }
+                );
+            } else if (postalCode) {
+                setLoading(true);
             }
-        }, [postalCode]);
+            }, []);
 
     const handleSavePostalCode = () => {
         if (tempPostalCode && tempPostalCode.length === 5) {
