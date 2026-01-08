@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Cloud, CloudRain, Sun, CloudSnow, Calendar, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Cloud, CloudRain, Sun, CloudSnow, Calendar, Clock, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { base44 } from "@/api/base44Client";
@@ -9,6 +11,10 @@ export default function DateTimeWeather() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [weather, setWeather] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [postalCode, setPostalCode] = useState(() => localStorage.getItem('weatherPostalCode') || '89257');
+    const [cityName, setCityName] = useState(() => localStorage.getItem('weatherCity') || 'Illertissen');
+    const [editMode, setEditMode] = useState(false);
+    const [tempPostalCode, setTempPostalCode] = useState(postalCode);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -22,17 +28,22 @@ export default function DateTimeWeather() {
         const fetchWeather = async () => {
             try {
                 const response = await base44.integrations.Core.InvokeLLM({
-                    prompt: "Gib mir das aktuelle Wetter für Illertissen, Deutschland (PLZ 89257). Ich brauche nur die Temperatur in Celsius und eine kurze Wetterbeschreibung (z.B. sonnig, bewölkt, regnerisch, etc.).",
+                    prompt: `Gib mir das aktuelle Wetter für die Postleitzahl ${postalCode} in Deutschland. Ich brauche die Temperatur in Celsius, eine kurze Wetterbeschreibung (z.B. sonnig, bewölkt, regnerisch, etc.) und den Ortsnamen.`,
                     add_context_from_internet: true,
                     response_json_schema: {
                         type: "object",
                         properties: {
                             temperature: { type: "number" },
-                            condition: { type: "string" }
+                            condition: { type: "string" },
+                            city: { type: "string" }
                         }
                     }
                 });
                 setWeather(response);
+                if (response.city) {
+                    setCityName(response.city);
+                    localStorage.setItem('weatherCity', response.city);
+                }
                 setLoading(false);
             } catch (error) {
                 console.error("Fehler beim Abrufen des Wetters:", error);
@@ -44,7 +55,16 @@ export default function DateTimeWeather() {
         const weatherInterval = setInterval(fetchWeather, 30 * 60 * 1000); // Alle 30 Minuten
 
         return () => clearInterval(weatherInterval);
-    }, []);
+    }, [postalCode]);
+
+    const handleSavePostalCode = () => {
+        if (tempPostalCode && tempPostalCode.length === 5) {
+            setPostalCode(tempPostalCode);
+            localStorage.setItem('weatherPostalCode', tempPostalCode);
+            setEditMode(false);
+            setLoading(true);
+        }
+    };
 
     const getWeatherIcon = (condition) => {
         if (!condition) return Cloud;
@@ -90,7 +110,33 @@ export default function DateTimeWeather() {
                                 <div className="text-2xl font-bold">{Math.round(weather.temperature)}°C</div>
                                 <div className="text-xs text-slate-300">{weather.condition}</div>
                             </div>
-                            <div className="text-xs text-slate-400">Illertissen</div>
+                            {editMode ? (
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        type="text"
+                                        value={tempPostalCode}
+                                        onChange={(e) => setTempPostalCode(e.target.value)}
+                                        placeholder="PLZ"
+                                        maxLength={5}
+                                        className="w-20 h-7 text-xs bg-slate-700 border-slate-600 text-white"
+                                    />
+                                    <Button 
+                                        size="sm" 
+                                        onClick={handleSavePostalCode}
+                                        className="h-7 px-2 text-xs bg-slate-600 hover:bg-slate-700"
+                                    >
+                                        OK
+                                    </Button>
+                                </div>
+                            ) : (
+                                <button 
+                                    onClick={() => setEditMode(true)}
+                                    className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                                >
+                                    <MapPin className="w-3 h-3" />
+                                    {cityName}
+                                </button>
+                            )}
                         </div>
                     ) : (
                         <div className="text-sm text-slate-400">Wetter nicht verfügbar</div>
