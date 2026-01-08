@@ -195,6 +195,19 @@ export default function ThemeCalendar({ activities, themes }) {
                         </defs>
                     </svg>
                     
+                    {/* Pointer Triangle */}
+                    <div 
+                        className="absolute inset-0 transition-transform duration-500"
+                        style={{ 
+                            transform: `rotate(${(activityAngle / 180) * 180 - 90}deg)`,
+                            transformOrigin: 'center'
+                        }}
+                    >
+                        <div className="absolute top-[6px] left-1/2 -translate-x-1/2">
+                            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[12px] border-b-slate-900" />
+                        </div>
+                    </div>
+                    
                     {/* Center Content */}
                     <div className="relative z-10 text-center">
                         <div className="text-4xl font-bold bg-gradient-to-br from-slate-700 to-slate-900 bg-clip-text text-transparent">
