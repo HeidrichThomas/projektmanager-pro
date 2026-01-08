@@ -13,6 +13,7 @@ import CustomerForm from "@/components/customers/CustomerForm";
 import CustomerCard from "@/components/customers/CustomerCard";
 import CustomerListItem from "@/components/customers/CustomerListItem";
 import CustomerProjectsDialog from "@/components/customers/CustomerProjectsDialog";
+import InactiveCustomersSidebar from "@/components/customers/InactiveCustomersSidebar";
 
 export default function Customers() {
     const [showForm, setShowForm] = useState(false);
@@ -23,6 +24,7 @@ export default function Customers() {
     const [showProjectsDialog, setShowProjectsDialog] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [orderedCustomers, setOrderedCustomers] = useState([]);
+    const [inactiveCustomers, setInactiveCustomers] = useState([]);
 
     const queryClient = useQueryClient();
 
@@ -122,17 +124,44 @@ export default function Customers() {
 
     const handleDragEnd = (result) => {
         if (!result.destination) return;
-        
-        const items = Array.from(filteredCustomers);
-        const [reorderedItem] = items.splice(result.source.index, 1);
-        items.splice(result.destination.index, 0, reorderedItem);
-        
-        setOrderedCustomers(items);
+
+        const sourceId = result.source.droppableId;
+        const destId = result.destination.droppableId;
+
+        // Drag from active to inactive
+        if (sourceId === "customers-grid" && destId === "inactive-customers") {
+            const customerId = result.draggableId;
+            const customer = orderedCustomers.find(c => c.id === customerId);
+            if (customer) {
+                setOrderedCustomers(orderedCustomers.filter(c => c.id !== customerId));
+                setInactiveCustomers([...inactiveCustomers, customer]);
+            }
+        }
+        // Drag from inactive to active
+        else if (sourceId === "inactive-customers" && destId === "customers-grid") {
+            const customerId = result.draggableId.replace('inactive-', '');
+            const customer = inactiveCustomers.find(c => c.id === customerId);
+            if (customer) {
+                setInactiveCustomers(inactiveCustomers.filter(c => c.id !== customerId));
+                const newCustomers = Array.from(orderedCustomers);
+                newCustomers.splice(result.destination.index, 0, customer);
+                setOrderedCustomers(newCustomers);
+            }
+        }
+        // Reorder within active
+        else if (sourceId === "customers-grid" && destId === "customers-grid") {
+            const items = Array.from(filteredCustomers);
+            const [reorderedItem] = items.splice(result.source.index, 1);
+            items.splice(result.destination.index, 0, reorderedItem);
+            setOrderedCustomers(items);
+        }
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="flex gap-6">
+                    <div className="flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-slate-900">Kunden & Lieferanten</h1>
@@ -277,6 +306,10 @@ export default function Customers() {
                         )}
                     </div>
                 )}
+                    </div>
+                    
+                    <InactiveCustomersSidebar inactiveCustomers={inactiveCustomers} />
+                </div>
             </div>
 
             <CustomerForm
