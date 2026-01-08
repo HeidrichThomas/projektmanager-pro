@@ -230,7 +230,7 @@ export default function Themes() {
                     </Card>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row gap-4 mb-6 items-end">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                         <Input
@@ -249,6 +249,25 @@ export default function Themes() {
                             <TabsTrigger value="abgeschlossen">Abgeschlossen</TabsTrigger>
                         </TabsList>
                     </Tabs>
+
+                    <div className="flex gap-2">
+                        <Button
+                            variant={viewMode === "grid" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setViewMode("grid")}
+                            className={viewMode === "grid" ? "bg-slate-800 hover:bg-slate-900" : ""}
+                        >
+                            <Grid2x2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant={viewMode === "kanban" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setViewMode("kanban")}
+                            className={viewMode === "kanban" ? "bg-slate-800 hover:bg-slate-900" : ""}
+                        >
+                            <Columns4 className="w-4 h-4" />
+                        </Button>
+                    </div>
                 </div>
 
 
