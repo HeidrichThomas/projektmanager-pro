@@ -11,7 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     ArrowLeft, Building2, Calendar, Lightbulb, 
-    Pencil, Trash2, User, Briefcase, Plus, Clock
+    Pencil, Trash2, User, Briefcase, Plus, Clock, FileText
 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
