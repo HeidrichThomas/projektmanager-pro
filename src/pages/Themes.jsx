@@ -16,6 +16,7 @@ import ThemeCalendar from "@/components/themes/ThemeCalendar";
 import ThemeCompanyManagement from "@/components/themes/ThemeCompanyManagement";
 import DocumentManagement from "@/components/themes/DocumentManagement";
 import CompaniesAndSectorsOverview from "@/components/themes/CompaniesAndSectorsOverview";
+import CompanyStatusColumns from "@/components/themes/CompanyStatusColumns";
 
 export default function Themes() {
     const [showForm, setShowForm] = useState(false);
@@ -208,13 +209,13 @@ export default function Themes() {
                         onClick={() => setShowCompaniesAndSectorsOverview(true)}
                     >
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-slate-600">Firmen & Sparten</CardTitle>
+                            <CardTitle className="text-sm font-medium text-slate-600">Nur Firmen</CardTitle>
                             <Users className="w-4 h-4 text-purple-600" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-slate-900">{stats.totalCompanies}</div>
                             <p className="text-xs text-slate-500 mt-1">
-                                {stats.totalSectors} Sparten
+                                Nach Status sortiert
                             </p>
                         </CardContent>
                     </Card>
@@ -310,11 +311,10 @@ export default function Themes() {
                 onClose={() => setShowDocuments(false)}
             />
 
-            <CompaniesAndSectorsOverview
+            <CompanyStatusColumns
                 open={showCompaniesAndSectorsOverview}
                 onClose={() => setShowCompaniesAndSectorsOverview(false)}
                 companies={companies}
-                sectors={sectors}
             />
         </div>
     );
