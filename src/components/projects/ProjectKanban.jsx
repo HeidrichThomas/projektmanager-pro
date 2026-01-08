@@ -32,14 +32,14 @@ export default function ProjectKanban({ projects, customers, onStatusChange }) {
 
         return (
             <Link to={createPageUrl("ProjectDetail") + `?id=${project.id}`}>
-                <Card className="p-4 hover:shadow-lg transition-all duration-300 border-slate-200 group cursor-pointer h-80 flex flex-col justify-between">
-                    <div className="flex justify-between items-start mb-3">
-                        <div className="flex items-center gap-2 flex-1">
+                <Card className="p-4 hover:shadow-lg transition-all duration-300 border-slate-200 group cursor-pointer h-96 flex flex-col overflow-hidden">
+                    <div className="flex justify-between items-start mb-3 gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
                             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shrink-0">
                                 <FolderKanban className="w-5 h-5 text-indigo-600" />
                             </div>
                             <div className="min-w-0 flex-1">
-                                <h3 className="font-semibold text-base text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
+                                <h3 className="font-semibold text-sm text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
                                     {project.name}
                                 </h3>
                             </div>
@@ -54,12 +54,12 @@ export default function ProjectKanban({ projects, customers, onStatusChange }) {
                     )}
                     
                     {project.description && (
-                        <p className="text-sm text-slate-600 mb-3 line-clamp-2 flex-1">
+                        <p className="text-xs text-slate-600 mb-3 line-clamp-2">
                             {project.description}
                         </p>
                     )}
                     
-                    <div className="space-y-2">
+                    <div className="space-y-2 mt-auto">
                         <div>
                             <div className="flex justify-between text-xs mb-1">
                                 <span className="text-slate-500">Fortschritt</span>
