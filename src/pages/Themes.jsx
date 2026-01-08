@@ -183,8 +183,11 @@ export default function Themes() {
                 onClose={() => { setShowForm(false); setEditingTheme(null); }}
                 onSave={handleSave}
                 theme={editingTheme}
-                customers={customers}
-                suppliers={customers.filter(c => c.type === 'supplier' || c.type === 'both')}
+            />
+
+            <ThemeCompanyManagement
+                open={showCompanyManagement}
+                onClose={() => setShowCompanyManagement(false)}
             />
 
             <SectorManagement

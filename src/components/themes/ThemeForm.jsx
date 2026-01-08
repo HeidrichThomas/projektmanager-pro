@@ -12,23 +12,23 @@ import { Card } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
-export default function ThemeForm({ open, onClose, onSave, theme, customers, suppliers }) {
-    const availableSuppliers = suppliers || customers.filter(c => c.type === 'supplier' || c.type === 'both');
-    const [selectedSupplierId, setSelectedSupplierId] = useState("");
-    const [newContact, setNewContact] = useState({ name: "", position: "", phone: "", email: "" });
+export default function ThemeForm({ open, onClose, onSave, theme }) {
+    const [selectedCompanyId, setSelectedCompanyId] = useState("");
 
     const { data: sectors = [] } = useQuery({
         queryKey: ['sectors'],
         queryFn: () => base44.entities.Sector.list()
     });
+
+    const { data: companies = [] } = useQuery({
+        queryKey: ['themeCompanies'],
+        queryFn: () => base44.entities.ThemeCompany.list()
+    });
     
     const [formData, setFormData] = useState({
         name: "",
         sector_id: "",
-        customer_id: "",
-        contact_person: "",
-        contact_persons: [],
-        supplier_ids: [],
+        company_ids: [],
         description: "",
         status: "geplant",
         progress: 0,
@@ -40,16 +40,13 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
         if (theme) {
             setFormData({
                 ...theme,
-                contact_persons: theme.contact_persons || []
+                company_ids: theme.company_ids || []
             });
         } else {
             setFormData({
                 name: "",
                 sector_id: "",
-                customer_id: "",
-                contact_person: "",
-                contact_persons: [],
-                supplier_ids: [],
+                company_ids: [],
                 description: "",
                 status: "geplant",
                 progress: 0,
@@ -57,40 +54,21 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
                 end_date: ""
             });
         }
-        setSelectedSupplierId("");
-        setNewContact({ name: "", position: "", phone: "", email: "" });
+        setSelectedCompanyId("");
     }, [theme, open]);
 
-    const addSupplier = () => {
-        if (!selectedSupplierId) return;
-        const currentIds = formData.supplier_ids || [];
-        if (!currentIds.includes(selectedSupplierId)) {
-            setFormData({...formData, supplier_ids: [...currentIds, selectedSupplierId]});
+    const addCompany = () => {
+        if (!selectedCompanyId) return;
+        const currentIds = formData.company_ids || [];
+        if (!currentIds.includes(selectedCompanyId)) {
+            setFormData({...formData, company_ids: [...currentIds, selectedCompanyId]});
         }
-        setSelectedSupplierId("");
+        setSelectedCompanyId("");
     };
 
-    const removeSupplier = (supplierId) => {
-        const currentIds = formData.supplier_ids || [];
-        setFormData({...formData, supplier_ids: currentIds.filter(id => id !== supplierId)});
-    };
-
-    const addContact = () => {
-        if (!newContact.name.trim()) return;
-        const currentContacts = formData.contact_persons || [];
-        setFormData({
-            ...formData,
-            contact_persons: [...currentContacts, { ...newContact }]
-        });
-        setNewContact({ name: "", position: "", phone: "", email: "" });
-    };
-
-    const removeContact = (index) => {
-        const currentContacts = formData.contact_persons || [];
-        setFormData({
-            ...formData,
-            contact_persons: currentContacts.filter((_, i) => i !== index)
-        });
+    const removeCompany = (companyId) => {
+        const currentIds = formData.company_ids || [];
+        setFormData({...formData, company_ids: currentIds.filter(id => id !== companyId)});
     };
 
     const handleSubmit = (e) => {
@@ -138,171 +116,48 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
                             </SelectContent>
                         </Select>
                     </div>
-
-                    <div>
-                        <Label className="text-slate-700 font-medium">Kunde</Label>
-                        <Select
-                            value={formData.customer_id}
-                            onValueChange={(value) => {
-                                setFormData({...formData, customer_id: value, contact_person: ""});
-                            }}
-                        >
-                            <SelectTrigger className="mt-1.5">
-                                <SelectValue placeholder="Kunde auswählen (optional)" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {customers.filter(c => c.type === 'customer' || c.type === 'both').map((c) => (
-                                    <SelectItem key={c.id} value={c.id}>
-                                        {c.company}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    
-                    {formData.customer_id && (() => {
-                        const selectedCustomer = customers.find(c => c.id === formData.customer_id);
-                        const contactPersons = selectedCustomer?.contact_persons || [];
-                        return contactPersons.length > 0 ? (
-                            <div>
-                                <Label className="text-slate-700 font-medium">Ansprechpartner</Label>
-                                <Select
-                                    value={formData.contact_person}
-                                    onValueChange={(value) => setFormData({...formData, contact_person: value})}
-                                >
-                                    <SelectTrigger className="mt-1.5">
-                                        <SelectValue placeholder="Ansprechpartner auswählen" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {contactPersons.map((contact, index) => (
-                                            <SelectItem key={index} value={contact.name}>
-                                                {contact.name}
-                                                {contact.position && ` - ${contact.position}`}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        ) : null;
-                    })()}
-
-                    <div>
-                        <Label className="text-slate-700 font-medium">Weitere Kontaktpersonen</Label>
-                        <Card className="p-4 mt-1.5 bg-slate-50">
-                            <div className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Input
-                                        placeholder="Name *"
-                                        value={newContact.name}
-                                        onChange={(e) => setNewContact({...newContact, name: e.target.value})}
-                                    />
-                                    <Input
-                                        placeholder="Position"
-                                        value={newContact.position}
-                                        onChange={(e) => setNewContact({...newContact, position: e.target.value})}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Input
-                                        placeholder="Telefon"
-                                        value={newContact.phone}
-                                        onChange={(e) => setNewContact({...newContact, phone: e.target.value})}
-                                    />
-                                    <Input
-                                        placeholder="E-Mail"
-                                        type="email"
-                                        value={newContact.email}
-                                        onChange={(e) => setNewContact({...newContact, email: e.target.value})}
-                                    />
-                                </div>
-                                <Button 
-                                    type="button" 
-                                    onClick={addContact}
-                                    disabled={!newContact.name.trim()}
-                                    variant="outline"
-                                    className="w-full"
-                                >
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Kontakt hinzufügen
-                                </Button>
-                            </div>
-                        </Card>
-                        
-                        {formData.contact_persons && formData.contact_persons.length > 0 && (
-                            <div className="mt-3 space-y-2">
-                                {formData.contact_persons.map((contact, index) => (
-                                    <Card key={index} className="p-3 bg-white">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <User className="w-4 h-4 text-slate-500" />
-                                                    <span className="font-medium text-slate-900">{contact.name}</span>
-                                                </div>
-                                                {contact.position && (
-                                                    <p className="text-sm text-slate-600">{contact.position}</p>
-                                                )}
-                                                <div className="flex gap-3 mt-1 text-sm text-slate-500">
-                                                    {contact.phone && <span>{contact.phone}</span>}
-                                                    {contact.email && <span>{contact.email}</span>}
-                                                </div>
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => removeContact(index)}
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </Card>
-                                ))}
-                            </div>
-                        )}
-                    </div>
                     
                     <div>
-                        <Label className="text-slate-700 font-medium">Beteiligte Lieferanten</Label>
+                        <Label className="text-slate-700 font-medium">Beteiligte Firmen</Label>
                         <div className="flex gap-2 mt-1.5">
                             <Select
-                                value={selectedSupplierId}
-                                onValueChange={setSelectedSupplierId}
+                                value={selectedCompanyId}
+                                onValueChange={setSelectedCompanyId}
                             >
                                 <SelectTrigger className="flex-1">
-                                    <SelectValue placeholder="Lieferant auswählen" />
+                                    <SelectValue placeholder="Firma auswählen" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {availableSuppliers.filter(s => !(formData.supplier_ids || []).includes(s.id)).map((supplier) => (
-                                        <SelectItem key={supplier.id} value={supplier.id}>
-                                            {supplier.company}
+                                    {companies.filter(c => !(formData.company_ids || []).includes(c.id)).map((company) => (
+                                        <SelectItem key={company.id} value={company.id}>
+                                            {company.company_name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             <Button 
                                 type="button" 
-                                onClick={addSupplier}
-                                disabled={!selectedSupplierId}
+                                onClick={addCompany}
+                                disabled={!selectedCompanyId}
                                 size="icon"
                             >
                                 <Plus className="w-4 h-4" />
                             </Button>
                         </div>
                         
-                        {formData.supplier_ids && formData.supplier_ids.length > 0 && (
+                        {formData.company_ids && formData.company_ids.length > 0 && (
                             <div className="mt-3 space-y-2">
-                                {formData.supplier_ids.map(supplierId => {
-                                    const supplier = availableSuppliers.find(s => s.id === supplierId);
-                                    if (!supplier) return null;
+                                {formData.company_ids.map(companyId => {
+                                    const company = companies.find(c => c.id === companyId);
+                                    if (!company) return null;
                                     return (
-                                        <div key={supplierId} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200">
-                                            <span className="text-sm font-medium text-slate-700">{supplier.company}</span>
+                                        <div key={companyId} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200">
+                                            <span className="text-sm font-medium text-slate-700">{company.company_name}</span>
                                             <Button
                                                 type="button"
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => removeSupplier(supplierId)}
+                                                onClick={() => removeCompany(companyId)}
                                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                             >
                                                 <Trash2 className="w-3 h-3" />

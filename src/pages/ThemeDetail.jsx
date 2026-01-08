@@ -43,14 +43,14 @@ export default function ThemeDetail() {
         queryFn: () => base44.entities.Theme.list()
     });
 
-    const { data: customers = [] } = useQuery({
-        queryKey: ['customers'],
-        queryFn: () => base44.entities.Customer.list()
-    });
-
     const { data: sectors = [] } = useQuery({
         queryKey: ['sectors'],
         queryFn: () => base44.entities.Sector.list()
+    });
+
+    const { data: companies = [] } = useQuery({
+        queryKey: ['themeCompanies'],
+        queryFn: () => base44.entities.ThemeCompany.list()
     });
 
     const { data: activities = [], isLoading: loadingActivities } = useQuery({
@@ -60,9 +60,9 @@ export default function ThemeDetail() {
     });
 
     const theme = themes.find(t => t.id === themeId);
-    const customer = theme?.customer_id ? customers.find(c => c.id === theme.customer_id) : null;
     const sector = theme?.sector_id ? sectors.find(s => s.id === theme.sector_id) : null;
     const status = theme ? (statusConfig[theme.status] || statusConfig.geplant) : null;
+    const themeCompanies = theme?.company_ids ? companies.filter(c => theme.company_ids.includes(c.id)) : [];
 
     const updateThemeMutation = useMutation({
         mutationFn: ({ id, data }) => base44.entities.Theme.update(id, data),
@@ -155,18 +155,6 @@ export default function ThemeDetail() {
                                             {sector.name}
                                         </p>
                                     )}
-                                    {customer && (
-                                        <p className="text-slate-500 flex items-center gap-2">
-                                            <Building2 className="w-4 h-4" />
-                                            {customer.company}
-                                        </p>
-                                    )}
-                                    {theme.contact_person && (
-                                        <p className="text-slate-500 flex items-center gap-2 text-sm">
-                                            <User className="w-3 h-3" />
-                                            {theme.contact_person}
-                                        </p>
-                                    )}
                                 </div>
                                 
                                 <div className="flex flex-wrap gap-2 mt-3">
@@ -231,128 +219,71 @@ export default function ThemeDetail() {
                     </CardContent>
                 </Card>
 
-                {/* Customer & Contact Info */}
-                {(customer || (theme.contact_persons && theme.contact_persons.length > 0)) && (
+                {/* Companies */}
+                {themeCompanies.length > 0 && (
                     <Card className="mb-8 shadow-sm">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <Building2 className="w-5 h-5 text-slate-600" />
-                                {customer ? 'Kunden- und Kontaktinformationen' : 'Kontaktinformationen'}
+                                Beteiligte Firmen
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {customer && (
-                                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-6 pb-6 border-b">
-                                    {customer.contact_name && (
-                                        <div>
-                                            <p className="text-slate-500">Ansprechpartner</p>
-                                            <p className="font-medium">{customer.contact_name}</p>
-                                        </div>
-                                    )}
-                                    {customer.phone && (
-                                        <div>
-                                            <p className="text-slate-500">Telefon</p>
-                                            <a href={`tel:${customer.phone}`} className="font-medium text-amber-600 hover:text-amber-700">
-                                                {customer.phone}
-                                            </a>
-                                        </div>
-                                    )}
-                                    {customer.email && (
-                                        <div>
-                                            <p className="text-slate-500">E-Mail</p>
-                                            <a href={`mailto:${customer.email}`} className="font-medium text-amber-600 hover:text-amber-700">
-                                                {customer.email}
-                                            </a>
-                                        </div>
-                                    )}
-                                    {(customer.street || customer.city) && (
-                                        <div>
-                                            <p className="text-slate-500">Adresse</p>
-                                            <p className="font-medium">
-                                                {customer.street && `${customer.street}, `}
-                                                {customer.postal_code} {customer.city}
+                            <div className="grid gap-4">
+                                {themeCompanies.map(company => (
+                                    <div key={company.id} className="group p-4 border rounded-lg hover:border-amber-300 transition-colors relative">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            onClick={() => {
+                                                if (confirm(`${company.company_name} wirklich entfernen?`)) {
+                                                    const newCompanyIds = theme.company_ids.filter(id => id !== company.id);
+                                                    updateThemeMutation.mutate({ 
+                                                        id: themeId, 
+                                                        data: { ...theme, company_ids: newCompanyIds } 
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                        <h4 className="font-semibold text-slate-900 mb-2 pr-8">{company.company_name}</h4>
+                                        {(company.street || company.city) && (
+                                            <p className="text-sm text-slate-600 mb-3">
+                                                {company.street && `${company.street}, `}
+                                                {company.postal_code} {company.city}
                                             </p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            
-                            {theme.contact_persons && theme.contact_persons.length > 0 && (
-                                <div>
-                                    <h4 className="font-semibold text-slate-900 mb-3">Weitere Kontaktpersonen</h4>
-                                    <div className="grid sm:grid-cols-2 gap-3">
-                                        {theme.contact_persons.map((contact, index) => (
-                                            <div key={index} className="p-3 bg-slate-50 rounded-lg border">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <User className="w-4 h-4 text-slate-500" />
-                                                    <span className="font-medium text-slate-900">{contact.name}</span>
+                                        )}
+                                        {company.contact_persons && company.contact_persons.length > 0 && (
+                                            <div className="space-y-2 mt-3 pt-3 border-t">
+                                                <p className="text-xs font-medium text-slate-500 uppercase">Ansprechpartner</p>
+                                                <div className="grid sm:grid-cols-2 gap-2">
+                                                    {company.contact_persons.map((contact, idx) => (
+                                                        <div key={idx} className="p-2 bg-slate-50 rounded">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <User className="w-3 h-3 text-slate-500" />
+                                                                <span className="text-sm font-medium text-slate-900">{contact.name}</span>
+                                                            </div>
+                                                            {contact.position && (
+                                                                <p className="text-xs text-slate-600 ml-5">{contact.position}</p>
+                                                            )}
+                                                            <div className="text-xs text-slate-500 ml-5 space-y-0.5 mt-1">
+                                                                {contact.phone && <div>☎ {contact.phone}</div>}
+                                                                {contact.mobile_phone && <div>📱 {contact.mobile_phone}</div>}
+                                                                {contact.email && (
+                                                                    <a href={`mailto:${contact.email}`} className="text-amber-600 hover:text-amber-700 block">
+                                                                        ✉ {contact.email}
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                                {contact.position && (
-                                                    <p className="text-sm text-slate-600 ml-6">{contact.position}</p>
-                                                )}
-                                                {contact.phone && (
-                                                    <a href={`tel:${contact.phone}`} className="text-sm text-amber-600 hover:text-amber-700 ml-6 block">
-                                                        {contact.phone}
-                                                    </a>
-                                                )}
-                                                {contact.email && (
-                                                    <a href={`mailto:${contact.email}`} className="text-sm text-amber-600 hover:text-amber-700 ml-6 block">
-                                                        {contact.email}
-                                                    </a>
-                                                )}
                                             </div>
-                                        ))}
+                                        )}
                                     </div>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
-                
-                {/* Suppliers */}
-                {theme.supplier_ids && theme.supplier_ids.length > 0 && (
-                    <Card className="mb-8 shadow-sm">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Building2 className="w-5 h-5 text-purple-600" />
-                                Beteiligte Lieferanten
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {theme.supplier_ids.map(supplierId => {
-                                    const supplier = customers.find(c => c.id === supplierId);
-                                    if (!supplier) return null;
-                                    return (
-                                        <div key={supplierId} className="group p-3 border rounded-lg hover:border-purple-300 transition-colors relative">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                onClick={() => {
-                                                    if (confirm(`${supplier.company} wirklich entfernen?`)) {
-                                                        const newSupplierIds = theme.supplier_ids.filter(id => id !== supplierId);
-                                                        updateThemeMutation.mutate({ 
-                                                            id: themeId, 
-                                                            data: { ...theme, supplier_ids: newSupplierIds } 
-                                                        });
-                                                    }
-                                                }}
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                            </Button>
-                                            <p className="font-medium text-slate-900 pr-6">{supplier.company}</p>
-                                            {supplier.contact_name && (
-                                                <p className="text-sm text-slate-500">{supplier.contact_name}</p>
-                                            )}
-                                            {supplier.phone && (
-                                                <a href={`tel:${supplier.phone}`} className="text-sm text-purple-600 hover:text-purple-700">
-                                                    {supplier.phone}
-                                                </a>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                ))}
                             </div>
                         </CardContent>
                     </Card>
@@ -400,8 +331,6 @@ export default function ThemeDetail() {
                 onClose={() => setShowThemeForm(false)}
                 onSave={(data) => updateThemeMutation.mutate({ id: themeId, data })}
                 theme={theme}
-                customers={customers}
-                suppliers={customers.filter(c => c.type === 'supplier' || c.type === 'both')}
             />
 
             <ThemeActivityForm
