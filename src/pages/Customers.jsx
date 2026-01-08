@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search, Building2, Filter, LayoutGrid, List } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import CustomerForm from "@/components/customers/CustomerForm";
 import CustomerCard from "@/components/customers/CustomerCard";
@@ -21,6 +22,7 @@ export default function Customers() {
     const [viewMode, setViewMode] = useState("grid");
     const [showProjectsDialog, setShowProjectsDialog] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [orderedCustomers, setOrderedCustomers] = useState([]);
 
     const queryClient = useQueryClient();
 
@@ -28,6 +30,11 @@ export default function Customers() {
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
     });
+
+    // Reihenfolge aktualisieren, wenn Kunden sich ändern
+    React.useEffect(() => {
+        setOrderedCustomers(customers);
+    }, [customers]);
 
     const { data: projects = [] } = useQuery({
         queryKey: ['projects'],
@@ -105,13 +112,23 @@ export default function Customers() {
         setShowProjectsDialog(true);
     };
 
-    const filteredCustomers = customers.filter(c => {
+    const filteredCustomers = orderedCustomers.filter(c => {
         const matchesSearch = c.company?.toLowerCase().includes(search.toLowerCase()) ||
             c.contact_name?.toLowerCase().includes(search.toLowerCase()) ||
             c.city?.toLowerCase().includes(search.toLowerCase());
         const matchesType = typeFilter === "all" || c.type === typeFilter || (typeFilter === "customer" && c.type === "both") || (typeFilter === "supplier" && c.type === "both");
         return matchesSearch && matchesType;
     });
+
+    const handleDragEnd = (result) => {
+        if (!result.destination) return;
+        
+        const items = Array.from(filteredCustomers);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+        
+        setOrderedCustomers(items);
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
@@ -190,19 +207,44 @@ export default function Customers() {
                     )
                 ) : filteredCustomers.length > 0 ? (
                     viewMode === "grid" ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredCustomers.map((customer) => (
-                                <CustomerCard
-                                    key={customer.id}
-                                    customer={customer}
-                                    onEdit={handleEdit}
-                                    onCopy={handleCopy}
-                                    onDelete={handleDelete}
-                                    projectCount={getProjectCount(customer.id)}
-                                    onShowProjects={handleShowProjects}
-                                />
-                            ))}
-                        </div>
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <Droppable droppableId="customers-grid">
+                                {(provided, snapshot) => (
+                                    <div 
+                                        ref={provided.innerRef}
+                                        {...provided.droppableProps}
+                                        className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-colors ${
+                                            snapshot.isDraggingOver ? 'bg-slate-100 p-4 rounded-lg' : ''
+                                        }`}
+                                    >
+                                        {filteredCustomers.map((customer, index) => (
+                                            <Draggable key={customer.id} draggableId={customer.id} index={index}>
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className={`${
+                                                            snapshot.isDragging ? 'shadow-2xl rotate-2' : ''
+                                                        } transition-all`}
+                                                    >
+                                                        <CustomerCard
+                                                            customer={customer}
+                                                            onEdit={handleEdit}
+                                                            onCopy={handleCopy}
+                                                            onDelete={handleDelete}
+                                                            projectCount={getProjectCount(customer.id)}
+                                                            onShowProjects={handleShowProjects}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </Droppable>
+                        </DragDropContext>
                     ) : (
                         <div className="space-y-3">
                             {filteredCustomers.map((customer) => (
