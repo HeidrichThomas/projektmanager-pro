@@ -2,9 +2,11 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Phone, Users, Mail, Milestone, Pencil, Trash2, Download } from "lucide-react";
+import { FileText, Phone, Users, Mail, Milestone, Pencil, Trash2, Download, Building2, User } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 const activityTypes = {
     notiz: { label: "Notiz", icon: FileText, color: "bg-slate-100 text-slate-700 border-slate-300" },
@@ -16,6 +18,11 @@ const activityTypes = {
 };
 
 export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) {
+    const { data: companies = [] } = useQuery({
+        queryKey: ['themeCompanies'],
+        queryFn: () => base44.entities.ThemeCompany.list()
+    });
+
     if (!activities || activities.length === 0) {
         return (
             <div className="text-center py-12 text-slate-500">
@@ -30,6 +37,7 @@ export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) 
             {activities.map((activity) => {
                 const config = activityTypes[activity.type] || activityTypes.notiz;
                 const Icon = config.icon;
+                const company = companies.find(c => c.id === activity.company_id);
                 
                 return (
                     <Card key={activity.id} className="p-5 hover:shadow-md transition-all group">
@@ -71,10 +79,22 @@ export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) 
                                     </div>
                                 </div>
                                 
-                                {activity.contact_person && (
-                                    <p className="text-sm text-slate-600 mb-2">
-                                        <strong>Kontakt:</strong> {activity.contact_person}
-                                    </p>
+                                {company && (
+                                    <div className="text-sm text-slate-600 mb-2 flex items-center gap-1">
+                                        <Building2 className="w-3 h-3" />
+                                        <strong>{company.company_name}</strong>
+                                    </div>
+                                )}
+                                
+                                {activity.contact_person_ids && activity.contact_person_ids.length > 0 && (
+                                    <div className="text-sm text-slate-600 mb-2">
+                                        <div className="flex items-start gap-1">
+                                            <User className="w-3 h-3 mt-0.5" />
+                                            <div>
+                                                <strong>Ansprechpartner:</strong> {activity.contact_person_ids.join(', ')}
+                                            </div>
+                                        </div>
+                                    </div>
                                 )}
                                 
                                 {activity.content && (

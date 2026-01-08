@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Save, X, Upload, Trash2, FileText, Phone, Users, Mail, Milestone } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const activityTypes = {
     notiz: { label: "Notiz", icon: FileText, color: "text-slate-600" },
@@ -22,17 +24,25 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
         type: "notiz",
         title: "",
         content: "",
-        contact_person: "",
+        company_id: "",
+        contact_person_ids: [],
         activity_date: new Date().toISOString().slice(0, 16),
         file_urls: [],
         file_names: []
     });
     const [uploading, setUploading] = useState(false);
 
+    const { data: companies = [] } = useQuery({
+        queryKey: ['themeCompanies'],
+        queryFn: () => base44.entities.ThemeCompany.list(),
+        enabled: open
+    });
+
     useEffect(() => {
         if (activity) {
             setFormData({
                 ...activity,
+                contact_person_ids: activity.contact_person_ids || [],
                 activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16)
             });
         } else if (open) {
@@ -40,13 +50,26 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                 type: "notiz",
                 title: "",
                 content: "",
-                contact_person: "",
+                company_id: "",
+                contact_person_ids: [],
                 activity_date: new Date().toISOString().slice(0, 16),
                 file_urls: [],
                 file_names: []
             });
         }
     }, [activity, open]);
+
+    const selectedCompany = companies.find(c => c.id === formData.company_id);
+    const availableContacts = selectedCompany?.contact_persons || [];
+
+    const toggleContact = (contactName) => {
+        const currentIds = formData.contact_person_ids || [];
+        if (currentIds.includes(contactName)) {
+            setFormData({...formData, contact_person_ids: currentIds.filter(id => id !== contactName)});
+        } else {
+            setFormData({...formData, contact_person_ids: [...currentIds, contactName]});
+        }
+    };
 
     const handleFileUpload = async (e) => {
         const files = Array.from(e.target.files);
@@ -144,14 +167,44 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                     </div>
 
                     <div>
-                        <Label>Kontaktperson</Label>
-                        <Input
-                            value={formData.contact_person}
-                            onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
-                            placeholder="Name des Gesprächspartners"
-                            className="mt-1.5"
-                        />
+                        <Label>Firma</Label>
+                        <Select
+                            value={formData.company_id}
+                            onValueChange={(value) => setFormData({...formData, company_id: value, contact_person_ids: []})}
+                        >
+                            <SelectTrigger className="mt-1.5">
+                                <SelectValue placeholder="Firma auswählen (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {companies.map((company) => (
+                                    <SelectItem key={company.id} value={company.id}>
+                                        {company.company_name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
+
+                    {selectedCompany && availableContacts.length > 0 && (
+                        <div>
+                            <Label>Ansprechpartner</Label>
+                            <div className="mt-1.5 space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3 bg-slate-50">
+                                {availableContacts.map((contact, index) => (
+                                    <div key={index} className="flex items-start gap-2">
+                                        <Checkbox
+                                            id={`contact-${index}`}
+                                            checked={formData.contact_person_ids?.includes(contact.name)}
+                                            onCheckedChange={() => toggleContact(contact.name)}
+                                        />
+                                        <label htmlFor={`contact-${index}`} className="text-sm cursor-pointer flex-1">
+                                            <div className="font-medium text-slate-900">{contact.name}</div>
+                                            {contact.position && <div className="text-xs text-slate-500">{contact.position}</div>}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div>
                         <Label>Beschreibung/Notizen</Label>
