@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, Trash2, User, Save, X, Pencil, Upload } from "lucide-react";
+import { Building2, Plus, Trash2, User, Save, X, Pencil, Upload, ArrowRight, CheckCircle2, Circle, XCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ export default function ThemeCompanyManagement({ open, onClose }) {
     const [editingCompany, setEditingCompany] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [importing, setImporting] = useState(false);
+    const [transferDialog, setTransferDialog] = useState(null);
     const [formData, setFormData] = useState({
         company_name: "",
         street: "",
@@ -26,7 +27,8 @@ export default function ThemeCompanyManagement({ open, onClose }) {
         email: "",
         website: "",
         contact_persons: [],
-        notes: ""
+        notes: "",
+        transfer_status: "not_transferred"
     });
     const [newContact, setNewContact] = useState({ 
         name: "", 
@@ -74,6 +76,51 @@ export default function ThemeCompanyManagement({ open, onClose }) {
         }
     });
 
+    const transferToCustomerMutation = useMutation({
+        mutationFn: async ({ themeCompany, customerType }) => {
+            // Erstelle den Customer-Datensatz
+            const customerData = {
+                company: themeCompany.company_name,
+                contact_name: themeCompany.contact_persons?.[0]?.name || "",
+                contact_persons: themeCompany.contact_persons || [],
+                type: customerType,
+                street: themeCompany.street,
+                postal_code: themeCompany.postal_code,
+                city: themeCompany.city,
+                country: themeCompany.country,
+                phone: themeCompany.phone,
+                mobile_phone: themeCompany.mobile_phone,
+                email: themeCompany.email,
+                website: themeCompany.website,
+                notes: themeCompany.notes
+            };
+            
+            const customer = await base44.entities.Customer.create(customerData);
+            
+            // Update ThemeCompany mit customer_id und transfer_status
+            await base44.entities.ThemeCompany.update(themeCompany.id, {
+                transfer_status: "transferred",
+                customer_id: customer.id
+            });
+            
+            return customer;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeCompanies'] });
+            queryClient.invalidateQueries({ queryKey: ['customers'] });
+            setTransferDialog(null);
+            toast.success("Firma erfolgreich übertragen");
+        }
+    });
+
+    const updateStatusMutation = useMutation({
+        mutationFn: ({ id, status }) => base44.entities.ThemeCompany.update(id, { transfer_status: status }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeCompanies'] });
+            toast.success("Status aktualisiert");
+        }
+    });
+
     const resetForm = () => {
         setFormData({
             company_name: "",
@@ -86,7 +133,8 @@ export default function ThemeCompanyManagement({ open, onClose }) {
             email: "",
             website: "",
             contact_persons: [],
-            notes: ""
+            notes: "",
+            transfer_status: "not_transferred"
         });
         setNewContact({ name: "", position: "", phone: "", mobile_phone: "", email: "" });
     };
@@ -246,10 +294,21 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                         </div>
 
                         <div className="space-y-3">
-                            {companies.map((company) => (
-                                <Card key={company.id} className="p-4 hover:shadow-md transition-all group">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="flex-1">
+                            {companies.map((company) => {
+                                const statusConfig = {
+                                    not_transferred: { icon: Circle, color: "text-red-500", label: "Nicht übertragen" },
+                                    transferred: { icon: CheckCircle2, color: "text-green-500", label: "Übertragen" },
+                                    no_interest: { icon: XCircle, color: "text-yellow-500", label: "Kein Interesse" }
+                                };
+                                const status = statusConfig[company.transfer_status || "not_transferred"];
+                                const StatusIcon = status.icon;
+                                
+                                return (
+                                    <Card key={company.id} className="p-4 hover:shadow-md transition-all group">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex items-start gap-3 flex-1">
+                                                <StatusIcon className={`w-5 h-5 mt-0.5 ${status.color}`} />
+                                                <div className="flex-1">
                                             <h3 className="font-semibold text-slate-900 mb-1">{company.company_name}</h3>
                                             {(company.street || company.city) && (
                                                 <p className="text-sm text-slate-600">
@@ -271,11 +330,44 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                                                             <User className="w-3 h-3 mr-1" />
                                                             {contact.name}
                                                         </Badge>
-                                                    ))}
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                <div className="mt-2">
+                                                    <Badge variant="outline" className={status.color}>
+                                                        {status.label}
+                                                    </Badge>
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            {company.transfer_status !== "transferred" && (
+                                                <>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => setTransferDialog(company)}
+                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        title="Zu Kunden/Lieferanten übertragen"
+                                                    >
+                                                        <ArrowRight className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => updateStatusMutation.mutate({ 
+                                                            id: company.id, 
+                                                            status: company.transfer_status === "no_interest" ? "not_transferred" : "no_interest" 
+                                                        })}
+                                                        className={company.transfer_status === "no_interest" 
+                                                            ? "text-slate-600 hover:text-slate-700 hover:bg-slate-50" 
+                                                            : "text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"}
+                                                        title={company.transfer_status === "no_interest" ? "Als interessant markieren" : "Kein Interesse"}
+                                                    >
+                                                        <XCircle className="w-4 h-4" />
+                                                    </Button>
+                                                </>
+                                            )}
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
@@ -298,7 +390,8 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                                         </div>
                                     </div>
                                 </Card>
-                            ))}
+                                );
+                            })}
                             {companies.length === 0 && (
                                 <p className="text-center py-8 text-slate-500">Noch keine Firmen angelegt</p>
                             )}
@@ -504,6 +597,59 @@ export default function ThemeCompanyManagement({ open, onClose }) {
                     </form>
                 )}
             </DialogContent>
+
+            {/* Transfer Dialog */}
+            <Dialog open={!!transferDialog} onOpenChange={() => setTransferDialog(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Firma übertragen</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 mt-4">
+                        <p className="text-sm text-slate-600">
+                            Soll <strong>{transferDialog?.company_name}</strong> als Kunde oder Lieferant übertragen werden?
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <Button 
+                                onClick={() => transferToCustomerMutation.mutate({ 
+                                    themeCompany: transferDialog, 
+                                    customerType: "customer" 
+                                })}
+                                className="w-full bg-blue-600 hover:bg-blue-700"
+                                disabled={transferToCustomerMutation.isPending}
+                            >
+                                Als Kunde übertragen
+                            </Button>
+                            <Button 
+                                onClick={() => transferToCustomerMutation.mutate({ 
+                                    themeCompany: transferDialog, 
+                                    customerType: "supplier" 
+                                })}
+                                className="w-full bg-purple-600 hover:bg-purple-700"
+                                disabled={transferToCustomerMutation.isPending}
+                            >
+                                Als Lieferant übertragen
+                            </Button>
+                            <Button 
+                                onClick={() => transferToCustomerMutation.mutate({ 
+                                    themeCompany: transferDialog, 
+                                    customerType: "both" 
+                                })}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                                disabled={transferToCustomerMutation.isPending}
+                            >
+                                Als Kunde & Lieferant übertragen
+                            </Button>
+                            <Button 
+                                variant="outline"
+                                onClick={() => setTransferDialog(null)}
+                                disabled={transferToCustomerMutation.isPending}
+                            >
+                                Abbrechen
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </Dialog>
     );
 }
