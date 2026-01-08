@@ -159,66 +159,65 @@ export default function ThemeCalendar({ activities, themes }) {
             </Card>
 
             {/* Activity Gauge */}
-            <Card className="w-48 flex flex-col items-center justify-center p-6">
-                <h3 className="text-sm font-semibold text-slate-700 mb-4">Heutige Aktivität</h3>
-                <div className="relative w-32 h-20">
-                    {/* Gauge Background */}
-                    <svg viewBox="0 0 200 120" className="w-full h-full">
-                        {/* Red Zone */}
-                        <path
-                            d="M 20 100 A 80 80 0 0 1 60 30"
+            <Card className="w-48 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-white to-slate-50">
+                <h3 className="text-sm font-semibold text-slate-700 mb-6">Heutige Aktivität</h3>
+                <div className="relative w-36 h-36 flex items-center justify-center">
+                    {/* Background Circle */}
+                    <svg className="absolute inset-0 w-full h-full -rotate-90">
+                        <circle
+                            cx="72"
+                            cy="72"
+                            r="60"
                             fill="none"
-                            stroke="#ef4444"
-                            strokeWidth="20"
+                            stroke="#e2e8f0"
+                            strokeWidth="12"
                             strokeLinecap="round"
                         />
-                        {/* Orange Zone */}
-                        <path
-                            d="M 60 30 A 80 80 0 0 1 100 10"
+                        {/* Progress Arc */}
+                        <circle
+                            cx="72"
+                            cy="72"
+                            r="60"
                             fill="none"
-                            stroke="#f97316"
-                            strokeWidth="20"
+                            stroke="url(#gradient)"
+                            strokeWidth="12"
                             strokeLinecap="round"
+                            strokeDasharray={`${(activityAngle / 180) * 377} 377`}
+                            className="transition-all duration-500"
                         />
-                        {/* Yellow Zone */}
-                        <path
-                            d="M 100 10 A 80 80 0 0 1 140 30"
-                            fill="none"
-                            stroke="#eab308"
-                            strokeWidth="20"
-                            strokeLinecap="round"
-                        />
-                        {/* Green Zone */}
-                        <path
-                            d="M 140 30 A 80 80 0 0 1 180 100"
-                            fill="none"
-                            stroke="#22c55e"
-                            strokeWidth="20"
-                            strokeLinecap="round"
-                        />
-                        
-                        {/* Needle */}
-                        <line
-                            x1="100"
-                            y1="100"
-                            x2={100 + 60 * Math.cos((180 - activityAngle) * Math.PI / 180)}
-                            y2={100 - 60 * Math.sin((180 - activityAngle) * Math.PI / 180)}
-                            stroke="#1e293b"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                        />
-                        
-                        {/* Center Dot */}
-                        <circle cx="100" cy="100" r="5" fill="#1e293b" />
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor="#ef4444" />
+                                <stop offset="40%" stopColor="#f59e0b" />
+                                <stop offset="70%" stopColor="#eab308" />
+                                <stop offset="100%" stopColor="#22c55e" />
+                            </linearGradient>
+                        </defs>
                     </svg>
+                    
+                    {/* Center Content */}
+                    <div className="relative z-10 text-center">
+                        <div className="text-4xl font-bold bg-gradient-to-br from-slate-700 to-slate-900 bg-clip-text text-transparent">
+                            {todayActivityCount}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                            {todayActivityCount === 0 && "Aktivitäten"}
+                            {todayActivityCount === 1 && "Aktivität"}
+                            {todayActivityCount > 1 && "Aktivitäten"}
+                        </div>
+                    </div>
                 </div>
-                <div className="text-center mt-2">
-                    <p className="text-2xl font-bold text-slate-900">{todayActivityCount}</p>
-                    <p className="text-xs text-slate-500">
-                        {todayActivityCount === 0 && "Keine Aktivitäten"}
-                        {todayActivityCount === 1 && "Aktivität"}
-                        {todayActivityCount > 1 && "Aktivitäten"}
-                    </p>
+                
+                {/* Status Labels */}
+                <div className="flex items-center justify-between w-full mt-4 text-xs">
+                    <span className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-red-500" />
+                        <span className="text-slate-500">Wenig</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        <span className="text-slate-500">Viel</span>
+                    </span>
                 </div>
             </Card>
         </div>
