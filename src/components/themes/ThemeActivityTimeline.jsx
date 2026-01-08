@@ -33,33 +33,67 @@ export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) 
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             {activities.map((activity) => {
                 const config = activityTypes[activity.type] || activityTypes.notiz;
                 const Icon = config.icon;
                 const company = companies.find(c => c.id === activity.company_id);
                 
                 return (
-                    <Card key={activity.id} className="p-5 hover:shadow-md transition-all group">
-                        <div className="flex gap-4">
-                            <div className={`w-12 h-12 rounded-xl ${config.color.split(' ')[0]} flex items-center justify-center shrink-0`}>
-                                <Icon className={`w-6 h-6 ${config.color.split(' ')[1]}`} />
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-3 mb-2">
-                                    <div className="flex-1">
-                                        <h3 className="font-semibold text-slate-900">{activity.title}</h3>
-                                        <div className="flex flex-wrap gap-2 mt-1">
-                                            <Badge variant="outline" className={config.color}>
-                                                {config.label}
-                                            </Badge>
-                                            <span className="text-sm text-slate-500">
-                                                {format(new Date(activity.activity_date), "dd. MMMM yyyy, HH:mm", { locale: de })} Uhr
-                                            </span>
-                                        </div>
-                                    </div>
+                    <div key={activity.id} className="group flex gap-3 p-4 hover:bg-slate-50 rounded-lg transition-all">
+                        <div className={`w-10 h-10 rounded-full ${config.color.split(' ')[0]} flex items-center justify-center shrink-0`}>
+                            <Icon className={`w-5 h-5 ${config.color.split(' ')[1]}`} />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-slate-900 mb-1">{activity.title}</h3>
                                     
+                                    {activity.content && (
+                                        <p className="text-sm text-slate-600 mb-2">{activity.content}</p>
+                                    )}
+                                    
+                                    <p className="text-sm text-slate-400">
+                                        {format(new Date(activity.activity_date), "dd. MMM. yyyy", { locale: de })}
+                                    </p>
+                                    
+                                    {company && (
+                                        <div className="text-sm text-slate-600 mt-2 flex items-center gap-1">
+                                            <Building2 className="w-3 h-3" />
+                                            {company.company_name}
+                                        </div>
+                                    )}
+                                    
+                                    {activity.contact_person_ids && activity.contact_person_ids.length > 0 && (
+                                        <div className="text-sm text-slate-600 mt-1 flex items-start gap-1">
+                                            <User className="w-3 h-3 mt-0.5" />
+                                            <span>{activity.contact_person_ids.join(', ')}</span>
+                                        </div>
+                                    )}
+                                    
+                                    {activity.file_urls && activity.file_urls.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-3">
+                                            {activity.file_urls.map((url, index) => (
+                                                <a
+                                                    key={index}
+                                                    href={url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
+                                                >
+                                                    <Download className="w-3 h-3" />
+                                                    {activity.file_names?.[index] || `Datei ${index + 1}`}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="flex flex-col items-end gap-2">
+                                    <Badge variant="outline" className={`${config.color} text-xs`}>
+                                        {config.label}
+                                    </Badge>
                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <Button
                                             size="sm"
@@ -78,48 +112,9 @@ export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) 
                                         </Button>
                                     </div>
                                 </div>
-                                
-                                {company && (
-                                    <div className="text-sm text-slate-600 mb-2 flex items-center gap-1">
-                                        <Building2 className="w-3 h-3" />
-                                        <strong>{company.company_name}</strong>
-                                    </div>
-                                )}
-                                
-                                {activity.contact_person_ids && activity.contact_person_ids.length > 0 && (
-                                    <div className="text-sm text-slate-600 mb-2">
-                                        <div className="flex items-start gap-1">
-                                            <User className="w-3 h-3 mt-0.5" />
-                                            <div>
-                                                <strong>Ansprechpartner:</strong> {activity.contact_person_ids.join(', ')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                
-                                {activity.content && (
-                                    <p className="text-slate-700 whitespace-pre-wrap mb-3">{activity.content}</p>
-                                )}
-                                
-                                {activity.file_urls && activity.file_urls.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mt-3">
-                                        {activity.file_urls.map((url, index) => (
-                                            <a
-                                                key={index}
-                                                href={url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
-                                            >
-                                                <Download className="w-3 h-3" />
-                                                {activity.file_names?.[index] || `Datei ${index + 1}`}
-                                            </a>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                         </div>
-                    </Card>
+                    </div>
                 );
             })}
         </div>
