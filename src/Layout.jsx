@@ -7,6 +7,7 @@ import {
     LayoutDashboard, Building2, FolderKanban, Database,
     Menu, ChevronRight, CheckCircle2, Lightbulb
 } from "lucide-react";
+import MiniActivityCalendar from "@/components/layout/MiniActivityCalendar";
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
