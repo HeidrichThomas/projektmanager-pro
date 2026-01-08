@@ -27,24 +27,60 @@ export default function DateTimeWeather() {
     useEffect(() => {
         const fetchWeather = async () => {
             try {
-                const response = await base44.integrations.Core.InvokeLLM({
-                    prompt: `Gib mir das AKTUELLE und ORTSGENAU Wetter für die PLZ ${postalCode} in Deutschland. Nutze Wetterdaten von OpenWeatherMap, WeatherAPI oder ähnliche APIs. Ich brauche: aktuelle Temperatur in Celsius, detaillierte Wetterbeschreibung (z.B. sonnig, bewölkt, regnerisch, Schneefall, etc.), Windgeschwindigkeit in km/h, Luftfeuchtigkeit in % und den exakten Ortsnamen für diese Postleitzahl.`,
-                    add_context_from_internet: true,
-                    response_json_schema: {
-                        type: "object",
-                        properties: {
-                            temperature: { type: "number" },
-                            condition: { type: "string" },
-                            city: { type: "string" },
-                            wind_speed: { type: "number" },
-                            humidity: { type: "number" }
-                        }
-                    }
-                });
-                setWeather(response);
-                if (response.city) {
-                    setCityName(response.city);
-                    localStorage.setItem('weatherCity', response.city);
+                // Konvertiere Postleitzahl zu Koordinaten via Nominatim
+                const geoResponse = await fetch(
+                    `https://nominatim.openstreetmap.org/search?postalcode=${postalCode}&country=de&format=json&limit=1`
+                );
+                const geoData = await geoResponse.json();
+                
+                if (!geoData.length) {
+                    setLoading(false);
+                    return;
+                }
+
+                const { lat, lon, address } = geoData[0];
+                const city = address?.city || address?.town || address?.village || "Unbekannt";
+
+                // Hole Wetterdaten von Open-Meteo (kostenlos, schnell, keine API-Key nötig)
+                const weatherResponse = await fetch(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=Europe/Berlin`
+                );
+                const weatherData = await weatherResponse.json();
+
+                if (weatherData.current) {
+                    const current = weatherData.current;
+                    const weatherConditions = {
+                        0: "Klar",
+                        1: "Überwiegend klar",
+                        2: "Teilweise bewölkt",
+                        3: "Bewölkt",
+                        45: "Nebel",
+                        48: "Nebel",
+                        51: "Leichter Nieselregen",
+                        53: "Nieselregen",
+                        55: "Dichter Nieselregen",
+                        61: "Leichter Regen",
+                        63: "Regen",
+                        65: "Starkregen",
+                        71: "Leichter Schnee",
+                        73: "Schnee",
+                        75: "Starker Schnee",
+                        80: "Leichte Regenschauer",
+                        81: "Regenschauer",
+                        82: "Starke Regenschauer",
+                        95: "Gewitter"
+                    };
+
+                    setWeather({
+                        temperature: current.temperature_2m,
+                        condition: weatherConditions[current.weather_code] || "Unbekannt",
+                        city: city,
+                        wind_speed: current.wind_speed_10m,
+                        humidity: current.relative_humidity_2m
+                    });
+                    
+                    setCityName(city);
+                    localStorage.setItem('weatherCity', city);
                 }
                 setLoading(false);
             } catch (error) {
@@ -53,10 +89,11 @@ export default function DateTimeWeather() {
             }
         };
 
-        fetchWeather();
-        const weatherInterval = setInterval(fetchWeather, 30 * 60 * 1000); // Alle 30 Minuten
-
-        return () => clearInterval(weatherInterval);
+        if (postalCode) {
+            fetchWeather();
+            const weatherInterval = setInterval(fetchWeather, 30 * 60 * 1000); // Alle 30 Minuten
+            return () => clearInterval(weatherInterval);
+        }
     }, [postalCode]);
 
     const handleSavePostalCode = () => {
