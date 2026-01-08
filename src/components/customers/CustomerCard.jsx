@@ -14,7 +14,7 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
     const type = typeConfig[customer.type] || typeConfig.customer;
     
     return (
-        <Card className="p-5 hover:shadow-lg transition-all duration-300 border-slate-200 group">
+        <Card className="p-5 hover:shadow-lg transition-all duration-300 border-slate-200 group h-80 flex flex-col">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
@@ -49,7 +49,7 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
                 </div>
             </div>
             
-            <div className="space-y-2 text-sm text-slate-600 mb-4">
+            <div className="space-y-2 text-sm text-slate-600 mb-4 flex-1 overflow-y-auto">
                 {(customer.street || customer.city) && (
                     <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
@@ -108,7 +108,7 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
                 )}
             </div>
             
-            <div className="flex gap-2 pt-3 border-t border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex gap-2 pt-3 border-t border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity mt-auto">
                 <Button size="sm" variant="outline" onClick={() => onEdit(customer)} className="flex-1">
                     <Pencil className="w-3 h-3 mr-1" />
                     Bearbeiten
