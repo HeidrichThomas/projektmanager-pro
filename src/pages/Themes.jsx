@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Lightbulb, Briefcase } from "lucide-react";
+import { Plus, Search, Lightbulb, Briefcase, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
 import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeCard from "@/components/themes/ThemeCard";
 import SectorManagement from "@/components/themes/SectorManagement";
 import ThemeCalendar from "@/components/themes/ThemeCalendar";
+import ThemeCompanyManagement from "@/components/themes/ThemeCompanyManagement";
 
 export default function Themes() {
     const [showForm, setShowForm] = useState(false);
@@ -19,6 +20,7 @@ export default function Themes() {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [showSectorManagement, setShowSectorManagement] = useState(false);
+    const [showCompanyManagement, setShowCompanyManagement] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -72,8 +74,7 @@ export default function Themes() {
     const getCustomer = (id) => customers.find(c => c.id === id);
 
     const filteredThemes = themes.filter(t => {
-        const matchesSearch = t.name?.toLowerCase().includes(search.toLowerCase()) ||
-            getCustomer(t.customer_id)?.company?.toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = t.name?.toLowerCase().includes(search.toLowerCase());
         const matchesStatus = statusFilter === "all" || t.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
@@ -88,6 +89,13 @@ export default function Themes() {
                     </div>
                     <div className="flex gap-2">
                         <Button 
+                            onClick={() => setShowCompanyManagement(true)} 
+                            variant="outline"
+                        >
+                            <Building2 className="w-4 h-4 mr-2" />
+                            Firmen
+                        </Button>
+                        <Button 
                             onClick={() => setShowSectorManagement(true)} 
                             variant="outline"
                         >
@@ -97,7 +105,6 @@ export default function Themes() {
                         <Button 
                             onClick={() => { setEditingTheme(null); setShowForm(true); }} 
                             className="bg-slate-800 hover:bg-slate-900"
-                            disabled={customers.length === 0}
                         >
                             <Plus className="w-4 h-4 mr-2" />
                             Neues Thema
@@ -109,7 +116,7 @@ export default function Themes() {
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                         <Input
-                            placeholder="Suche nach Thema oder Kunde..."
+                            placeholder="Suche nach Thema..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="pl-10"
@@ -126,11 +133,7 @@ export default function Themes() {
                     </Tabs>
                 </div>
 
-                {customers.length === 0 && !isLoading && (
-                    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
-                        Bitte legen Sie zuerst einen Kunden an, bevor Sie Themen erstellen können.
-                    </div>
-                )}
+
 
                 {isLoading ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -150,7 +153,6 @@ export default function Themes() {
                             <ThemeCard
                                 key={theme.id}
                                 theme={theme}
-                                customer={getCustomer(theme.customer_id)}
                             />
                         ))}
                     </div>
@@ -163,7 +165,7 @@ export default function Themes() {
                         <p className="text-slate-500 mb-6">
                             {search || statusFilter !== "all" ? "Versuchen Sie andere Filteroptionen" : "Starten Sie Ihr erstes Thema"}
                         </p>
-                        {!search && statusFilter === "all" && customers.length > 0 && (
+                        {!search && statusFilter === "all" && (
                             <Button onClick={() => setShowForm(true)} className="bg-slate-800 hover:bg-slate-900">
                                 <Plus className="w-4 h-4 mr-2" />
                                 Erstes Thema anlegen
