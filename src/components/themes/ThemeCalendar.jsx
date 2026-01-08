@@ -78,7 +78,8 @@ export default function ThemeCalendar({ activities, themes }) {
 
     return (
         <>
-            <Card className="max-w-md mx-auto">
+            <div className="flex gap-4 items-start">
+                <Card className="flex-1 max-w-md">
                     <CardHeader className="pb-2 px-4 pt-4">
                         <div className="flex items-center justify-between">
                             <CardTitle className="flex items-center gap-2 text-base">
@@ -158,6 +159,7 @@ export default function ThemeCalendar({ activities, themes }) {
                     </div>
                 </CardContent>
                 </Card>
+                </div>
 
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
