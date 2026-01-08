@@ -213,7 +213,7 @@ export default function Customers() {
                                     <div 
                                         ref={provided.innerRef}
                                         {...provided.droppableProps}
-                                        className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-colors ${
+                                        className={`grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 transition-colors ${
                                             snapshot.isDraggingOver ? 'bg-slate-100 p-4 rounded-lg' : ''
                                         }`}
                                     >
