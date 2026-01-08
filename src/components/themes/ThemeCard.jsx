@@ -20,7 +20,7 @@ export default function ThemeCard({ theme }) {
 
     return (
         <Link to={createPageUrl("ThemeDetail") + `?id=${theme.id}`}>
-            <Card className="p-5 hover:shadow-xl transition-all duration-300 border-slate-200 group cursor-pointer h-full">
+            <Card className="p-5 hover:shadow-xl transition-all duration-300 border-slate-200 group cursor-pointer min-h-96 flex flex-col">
                 <div className="flex items-start gap-4 mb-4">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                         <Lightbulb className="w-6 h-6 text-amber-600" />
@@ -32,17 +32,17 @@ export default function ThemeCard({ theme }) {
                     </div>
                 </div>
 
-                <Badge variant="secondary" className={`${status.color} border mb-3`}>
+                <Badge variant="secondary" className={`${status.color} border mb-3 w-fit`}>
                     {status.label}
                 </Badge>
 
                 {theme.description && (
-                    <p className="text-sm text-slate-600 line-clamp-2 mb-4">
+                    <p className="text-sm text-slate-600 line-clamp-3 mb-4 flex-1">
                         {theme.description}
                     </p>
                 )}
 
-                <div className="space-y-3">
+                <div className="space-y-3 mt-auto pt-4 border-t">
                     <div>
                         <div className="flex justify-between items-center mb-1 text-xs">
                             <span className="text-slate-500">Fortschritt</span>
