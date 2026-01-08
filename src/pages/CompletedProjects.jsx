@@ -143,7 +143,7 @@ export default function CompletedProjects() {
                                          </div>
                                      </CardHeader>
 
-                                    <CardContent className="p-6">
+                                    <CardContent className="p-6 flex-1 flex flex-col">
                                         {project.description && (
                                             <p className="text-slate-600 mb-6 pb-6 border-b">
                                                 {project.description}
