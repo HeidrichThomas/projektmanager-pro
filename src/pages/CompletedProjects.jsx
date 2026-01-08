@@ -116,32 +116,32 @@ export default function CompletedProjects() {
                             return (
                                 <Card key={project.id} className="shadow-md hover:shadow-lg transition-shadow">
                                     <CardHeader className="bg-gradient-to-r from-emerald-50 to-white border-b">
-                                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                                            <div className="flex items-start gap-4">
-                                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center shrink-0">
-                                                    <FolderKanban className="w-7 h-7 text-emerald-600" />
-                                                </div>
-                                                <div>
-                                                    <Link 
-                                                        to={createPageUrl("ProjectDetail") + `?id=${project.id}`}
-                                                        className="text-xl font-bold text-slate-900 hover:text-emerald-600 transition-colors"
-                                                    >
-                                                        {project.name}
-                                                    </Link>
-                                                    {customer && (
-                                                        <p className="text-slate-600 flex items-center gap-2 mt-1">
-                                                            <Building2 className="w-4 h-4" />
-                                                            {customer.company}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0">
-                                                <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                Abgeschlossen
-                                            </Badge>
-                                        </div>
-                                    </CardHeader>
+                                         <div className="flex flex-col lg:flex-row lg:items-start justify-start gap-4">
+                                             <div className="flex items-start gap-4 flex-1">
+                                                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center shrink-0">
+                                                     <FolderKanban className="w-7 h-7 text-emerald-600" />
+                                                 </div>
+                                                 <div>
+                                                     <Link 
+                                                         to={createPageUrl("ProjectDetail") + `?id=${project.id}`}
+                                                         className="text-xl font-bold text-slate-900 hover:text-emerald-600 transition-colors"
+                                                     >
+                                                         {project.name}
+                                                     </Link>
+                                                     {customer && (
+                                                         <p className="text-slate-600 flex items-center gap-2 mt-1">
+                                                             <Building2 className="w-4 h-4" />
+                                                             {customer.company}
+                                                         </p>
+                                                     )}
+                                                 </div>
+                                             </div>
+                                             <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0 ml-auto">
+                                                 <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                 Abgeschlossen
+                                             </Badge>
+                                         </div>
+                                     </CardHeader>
 
                                     <CardContent className="p-6">
                                         {project.description && (
