@@ -28,6 +28,7 @@ export default function Themes() {
     const [showCompanyManagement, setShowCompanyManagement] = useState(false);
     const [showDocuments, setShowDocuments] = useState(false);
     const [showCompaniesAndSectorsOverview, setShowCompaniesAndSectorsOverview] = useState(false);
+    const [viewMode, setViewMode] = useState("grid");
 
     const queryClient = useQueryClient();
 
