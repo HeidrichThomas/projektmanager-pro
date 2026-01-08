@@ -246,6 +246,43 @@ export default function CompanyStatusColumns({ open, onClose, companies }) {
                 </div>
                 </DragDropContext>
             </DialogContent>
+
+            {/* Bestätigungsdialog */}
+            <Dialog open={!!confirmDialog} onOpenChange={() => setConfirmDialog(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <div className="flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-amber-600" />
+                            <DialogTitle>Verschiebung bestätigen</DialogTitle>
+                        </div>
+                    </DialogHeader>
+                    {confirmDialog && (
+                        <div className="space-y-4 mt-4">
+                            <p className="text-sm text-slate-600">
+                                <strong>{confirmDialog.company.company_name}</strong> war bereits als Kunde registriert. Diese Verschiebung wird den Kundendatensatz löschen.
+                            </p>
+                            <p className="text-sm text-slate-500">
+                                Möchten Sie fortfahren?
+                            </p>
+                            <div className="flex gap-3 pt-4 border-t">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setConfirmDialog(null)}
+                                    className="flex-1"
+                                >
+                                    Abbrechen
+                                </Button>
+                                <Button
+                                    onClick={handleConfirmMove}
+                                    className="flex-1 bg-amber-600 hover:bg-amber-700"
+                                >
+                                    Verschieben
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </Dialog>
     );
 }
