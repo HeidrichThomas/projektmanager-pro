@@ -28,14 +28,16 @@ export default function DateTimeWeather() {
         const fetchWeather = async () => {
             try {
                 const response = await base44.integrations.Core.InvokeLLM({
-                    prompt: `Gib mir das aktuelle Wetter für die Postleitzahl ${postalCode} in Deutschland. Ich brauche die Temperatur in Celsius, eine kurze Wetterbeschreibung (z.B. sonnig, bewölkt, regnerisch, etc.) und den Ortsnamen.`,
+                    prompt: `Gib mir das AKTUELLE und ORTSGENAU Wetter für die PLZ ${postalCode} in Deutschland. Nutze Wetterdaten von OpenWeatherMap, WeatherAPI oder ähnliche APIs. Ich brauche: aktuelle Temperatur in Celsius, detaillierte Wetterbeschreibung (z.B. sonnig, bewölkt, regnerisch, Schneefall, etc.), Windgeschwindigkeit in km/h, Luftfeuchtigkeit in % und den exakten Ortsnamen für diese Postleitzahl.`,
                     add_context_from_internet: true,
                     response_json_schema: {
                         type: "object",
                         properties: {
                             temperature: { type: "number" },
                             condition: { type: "string" },
-                            city: { type: "string" }
+                            city: { type: "string" },
+                            wind_speed: { type: "number" },
+                            humidity: { type: "number" }
                         }
                     }
                 });
