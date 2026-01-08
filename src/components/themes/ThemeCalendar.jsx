@@ -45,6 +45,19 @@ export default function ThemeCalendar({ activities, themes }) {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
     };
 
+    const goToToday = () => {
+        setCurrentMonth(new Date());
+    };
+
+    const getTodayActivityCount = () => {
+        return activities.filter(activity => 
+            isToday(new Date(activity.activity_date))
+        ).length;
+    };
+
+    const todayActivityCount = getTodayActivityCount();
+    const activityAngle = Math.min(todayActivityCount * 30, 180); // Max 180 degrees for 6+ activities
+
     const getActivitiesForDay = (day) => {
         return activities.filter(activity => 
             isSameDay(new Date(activity.activity_date), day)
@@ -63,34 +76,38 @@ export default function ThemeCalendar({ activities, themes }) {
 
     return (
         <>
-            <Card className="max-w-sm">
-                <CardHeader className="pb-2 px-3 pt-3">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-1 text-sm">
-                            <CalendarIcon className="w-3.5 h-3.5 text-slate-600" />
-                            Aktivitäten-Kalender
-                        </CardTitle>
-                        <div className="flex items-center gap-1">
-                            <Button variant="outline" size="sm" onClick={previousMonth} className="h-6 w-6 p-0">
-                                <ChevronLeft className="w-3 h-3" />
-                            </Button>
-                            <span className="text-xs font-medium min-w-[90px] text-center">
-                                {format(currentMonth, "MMM yyyy", { locale: de })}
-                            </span>
-                            <Button variant="outline" size="sm" onClick={nextMonth} className="h-6 w-6 p-0">
-                                <ChevronRight className="w-3 h-3" />
-                            </Button>
+            <div className="flex gap-4 items-start">
+                <Card className="flex-1 max-w-md">
+                    <CardHeader className="pb-2 px-4 pt-4">
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="flex items-center gap-2 text-base">
+                                <CalendarIcon className="w-4 h-4 text-slate-600" />
+                                Aktivitäten-Kalender
+                            </CardTitle>
+                            <div className="flex items-center gap-1">
+                                <Button variant="outline" size="sm" onClick={goToToday} className="h-7 px-2 text-xs">
+                                    Heute
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={previousMonth} className="h-7 w-7 p-0">
+                                    <ChevronLeft className="w-3.5 h-3.5" />
+                                </Button>
+                                <span className="text-xs font-medium min-w-[100px] text-center">
+                                    {format(currentMonth, "MMM yyyy", { locale: de })}
+                                </span>
+                                <Button variant="outline" size="sm" onClick={nextMonth} className="h-7 w-7 p-0">
+                                    <ChevronRight className="w-3.5 h-3.5" />
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="px-3 pb-3">
-                    <div className="grid grid-cols-[auto_1fr] gap-1">
-                        <div className="text-center text-[10px] font-semibold text-slate-600 py-1">
+                    </CardHeader>
+                <CardContent className="px-4 pb-4">
+                    <div className="grid grid-cols-[auto_1fr] gap-1.5">
+                        <div className="text-center text-[11px] font-semibold text-slate-600 py-1.5">
                             KW
                         </div>
-                        <div className="grid grid-cols-7 gap-1">
+                        <div className="grid grid-cols-7 gap-1.5">
                             {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
-                                <div key={day} className="text-center text-[10px] font-semibold text-slate-600 py-1">
+                                <div key={day} className="text-center text-[11px] font-semibold text-slate-600 py-1.5">
                                     {day}
                                 </div>
                             ))}
@@ -98,10 +115,10 @@ export default function ThemeCalendar({ activities, themes }) {
                         
                         {weeks.map((week, weekIndex) => (
                             <React.Fragment key={weekIndex}>
-                                <div className="flex items-center justify-center text-[10px] font-medium text-slate-500">
+                                <div className="flex items-center justify-center text-[11px] font-medium text-slate-500">
                                     {getWeek(week[0], { weekStartsOn: 1, firstWeekContainsDate: 4 })}
                                 </div>
-                                <div className="grid grid-cols-7 gap-1">
+                                <div className="grid grid-cols-7 gap-1.5">
                                     {week.map(day => {
                                         const dayActivities = getActivitiesForDay(day);
                                         const hasActivities = dayActivities.length > 0;
@@ -112,7 +129,7 @@ export default function ThemeCalendar({ activities, themes }) {
                                                 key={day.toString()}
                                                 onClick={() => handleDayClick(day)}
                                                 className={`
-                                                    aspect-square p-0.5 rounded text-[10px] transition-all
+                                                    aspect-square p-1 rounded text-xs transition-all
                                                     ${today ? 'ring-1 ring-red-500 bg-red-50' : 'hover:bg-slate-100'}
                                                     ${hasActivities ? 'cursor-pointer font-semibold' : 'cursor-default'}
                                                     ${!isSameMonth(day, currentMonth) ? 'text-slate-300' : 'text-slate-700'}
@@ -140,6 +157,71 @@ export default function ThemeCalendar({ activities, themes }) {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Activity Gauge */}
+            <Card className="w-48 flex flex-col items-center justify-center p-6">
+                <h3 className="text-sm font-semibold text-slate-700 mb-4">Heutige Aktivität</h3>
+                <div className="relative w-32 h-20">
+                    {/* Gauge Background */}
+                    <svg viewBox="0 0 200 120" className="w-full h-full">
+                        {/* Red Zone */}
+                        <path
+                            d="M 20 100 A 80 80 0 0 1 60 30"
+                            fill="none"
+                            stroke="#ef4444"
+                            strokeWidth="20"
+                            strokeLinecap="round"
+                        />
+                        {/* Orange Zone */}
+                        <path
+                            d="M 60 30 A 80 80 0 0 1 100 10"
+                            fill="none"
+                            stroke="#f97316"
+                            strokeWidth="20"
+                            strokeLinecap="round"
+                        />
+                        {/* Yellow Zone */}
+                        <path
+                            d="M 100 10 A 80 80 0 0 1 140 30"
+                            fill="none"
+                            stroke="#eab308"
+                            strokeWidth="20"
+                            strokeLinecap="round"
+                        />
+                        {/* Green Zone */}
+                        <path
+                            d="M 140 30 A 80 80 0 0 1 180 100"
+                            fill="none"
+                            stroke="#22c55e"
+                            strokeWidth="20"
+                            strokeLinecap="round"
+                        />
+                        
+                        {/* Needle */}
+                        <line
+                            x1="100"
+                            y1="100"
+                            x2={100 + 60 * Math.cos((180 - activityAngle) * Math.PI / 180)}
+                            y2={100 - 60 * Math.sin((180 - activityAngle) * Math.PI / 180)}
+                            stroke="#1e293b"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                        />
+                        
+                        {/* Center Dot */}
+                        <circle cx="100" cy="100" r="5" fill="#1e293b" />
+                    </svg>
+                </div>
+                <div className="text-center mt-2">
+                    <p className="text-2xl font-bold text-slate-900">{todayActivityCount}</p>
+                    <p className="text-xs text-slate-500">
+                        {todayActivityCount === 0 && "Keine Aktivitäten"}
+                        {todayActivityCount === 1 && "Aktivität"}
+                        {todayActivityCount > 1 && "Aktivitäten"}
+                    </p>
+                </div>
+            </Card>
+        </div>
 
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
