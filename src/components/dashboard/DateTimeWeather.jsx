@@ -25,27 +25,8 @@ export default function DateTimeWeather() {
     }, []);
 
     useEffect(() => {
-            const fetchWeather = async () => {
+            const fetchWeather = async (lat, lon, city) => {
                 try {
-                    // Verwende Google Geocoding API via InvokeLLM für Postleitzahl -> Koordinaten
-                    const geoResponse = await base44.integrations.Core.InvokeLLM({
-                        prompt: `Ich habe die deutsche Postleitzahl: ${postalCode}. Gib mir nur die Latitude und Longitude im Format: {"lat": number, "lon": number, "city": string}. Die Stadt sollte der Ort sein, für den diese Postleitzahl steht.`,
-                        response_json_schema: {
-                            type: "object",
-                            properties: {
-                                lat: { type: "number" },
-                                lon: { type: "number" },
-                                city: { type: "string" }
-                            }
-                        }
-                    });
-
-                    if (!geoResponse.lat || !geoResponse.lon) {
-                        setLoading(false);
-                        return;
-                    }
-
-                    const { lat, lon, city } = geoResponse;
 
                     // Hole Wetterdaten von Open-Meteo
                     const weatherResponse = await fetch(
