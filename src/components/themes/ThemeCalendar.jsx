@@ -57,6 +57,7 @@ export default function ThemeCalendar({ activities, themes }) {
 
     const todayActivityCount = getTodayActivityCount();
     const activityAngle = Math.min(todayActivityCount * 30, 180); // Max 180 degrees for 6+ activities
+    const activityPercentage = Math.min(Math.round((todayActivityCount / 6) * 100), 100); // 6 activities = 100%
 
     const getActivitiesForDay = (day) => {
         return activities.filter(activity => 
@@ -203,19 +204,17 @@ export default function ThemeCalendar({ activities, themes }) {
                             transformOrigin: 'center'
                         }}
                     >
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2">
-                            <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[20px] border-b-slate-900 drop-shadow-lg" />
+                        <div className="absolute top-[6px] left-1/2 -translate-x-1/2">
+                            <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[20px] border-t-slate-900 drop-shadow-lg" />
                         </div>
                     </div>
                 </div>
                 
-                {/* Activity Count and Status Labels */}
+                {/* Activity Percentage and Status Labels */}
                 <div className="text-center mt-4">
-                    <div className="text-3xl font-bold text-slate-900 mb-1">{todayActivityCount}</div>
+                    <div className="text-3xl font-bold text-slate-900 mb-1">{activityPercentage}%</div>
                     <div className="text-xs text-slate-500 mb-3">
-                        {todayActivityCount === 0 && "Keine Aktivitäten"}
-                        {todayActivityCount === 1 && "Aktivität heute"}
-                        {todayActivityCount > 1 && "Aktivitäten heute"}
+                        {todayActivityCount} {todayActivityCount === 1 ? "Aktivität" : "Aktivitäten"} heute
                     </div>
                 </div>
                 
