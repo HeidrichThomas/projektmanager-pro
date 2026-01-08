@@ -33,15 +33,17 @@ export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) 
     }
 
     return (
-        <div className="space-y-3">
-            {activities.map((activity) => {
+        <div className="relative">
+            <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200" />
+            
+            {activities.map((activity, index) => {
                 const config = activityTypes[activity.type] || activityTypes.notiz;
                 const Icon = config.icon;
                 const company = companies.find(c => c.id === activity.company_id);
                 
                 return (
-                    <div key={activity.id} className="group flex gap-3 p-4 hover:bg-slate-50 rounded-lg transition-all">
-                        <div className={`w-10 h-10 rounded-full ${config.color.split(' ')[0]} flex items-center justify-center shrink-0`}>
+                    <div key={activity.id} className="relative group flex gap-3 p-4 hover:bg-slate-50 rounded-lg transition-all">
+                        <div className={`relative z-10 w-10 h-10 rounded-full ${config.color.split(' ')[0]} flex items-center justify-center shrink-0 border-2 border-white`}>
                             <Icon className={`w-5 h-5 ${config.color.split(' ')[1]}`} />
                         </div>
                         
