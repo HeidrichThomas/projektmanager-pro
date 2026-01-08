@@ -64,7 +64,10 @@ export default function Layout({ children, currentPageName }) {
                     
                     <nav className="flex-1 px-4 space-y-1">
                         {navigation.map((item) => (
-                            <NavLink key={item.name} item={item} />
+                            <div key={item.name}>
+                                <NavLink item={item} />
+                                {item.page === "Themes" && <MiniActivityCalendar />}
+                            </div>
                         ))}
                     </nav>
 
