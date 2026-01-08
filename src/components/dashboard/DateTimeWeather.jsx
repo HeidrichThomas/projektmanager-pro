@@ -151,36 +151,13 @@ export default function DateTimeWeather() {
                                 <div className="text-2xl font-bold">{Math.round(weather.temperature)}°C</div>
                                 <div className="text-xs text-slate-300">{weather.condition}</div>
                             </div>
-                            {editMode ? (
-                                <div className="flex items-center gap-2">
-                                    <Input
-                                        type="text"
-                                        value={tempPostalCode}
-                                        onChange={(e) => setTempPostalCode(e.target.value)}
-                                        placeholder="PLZ"
-                                        maxLength={5}
-                                        className="w-20 h-7 text-xs bg-slate-700 border-slate-600 text-white"
-                                    />
-                                    <Button 
-                                        size="sm" 
-                                        onClick={handleSavePostalCode}
-                                        className="h-7 px-2 text-xs bg-slate-600 hover:bg-slate-700"
-                                    >
-                                        OK
-                                    </Button>
-                                </div>
-                            ) : (
-                                <button 
-                                    onClick={() => setEditMode(true)}
-                                    className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
-                                >
-                                    <MapPin className="w-3 h-3" />
-                                    {cityName}
-                                </button>
-                            )}
+                            <div className="flex items-center gap-1 text-xs text-slate-400">
+                                <MapPin className="w-3 h-3" />
+                                {cityName}
+                            </div>
                         </div>
                     ) : (
-                        <div className="text-sm text-slate-400">Wetter nicht verfügbar</div>
+                        <div className="text-sm text-slate-400">Wetter wird geladen...</div>
                     )}
                 </div>
             </div>
