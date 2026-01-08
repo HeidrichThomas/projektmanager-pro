@@ -15,7 +15,7 @@ const statusConfig = {
     abgeschlossen: { label: "Abgeschlossen", color: "bg-emerald-100 text-emerald-700 border-emerald-200" }
 };
 
-export default function ThemeCard({ theme, customer }) {
+export default function ThemeCard({ theme }) {
     const status = statusConfig[theme.status] || statusConfig.geplant;
 
     return (
@@ -29,12 +29,6 @@ export default function ThemeCard({ theme, customer }) {
                         <h3 className="font-semibold text-lg text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-2 mb-1">
                             {theme.name}
                         </h3>
-                        {customer && (
-                            <p className="text-sm text-slate-500 flex items-center gap-1">
-                                <Building2 className="w-3 h-3" />
-                                {customer.company}
-                            </p>
-                        )}
                     </div>
                 </div>
 
