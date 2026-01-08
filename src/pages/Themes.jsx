@@ -285,14 +285,18 @@ export default function Themes() {
                         ))}
                     </div>
                 ) : filteredThemes.length > 0 ? (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredThemes.map((theme) => (
-                            <ThemeCard
-                                key={theme.id}
-                                theme={theme}
-                            />
-                        ))}
-                    </div>
+                    viewMode === "kanban" ? (
+                        <ThemeKanban themes={filteredThemes} onStatusChange={handleStatusChange} />
+                    ) : (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredThemes.map((theme) => (
+                                <ThemeCard
+                                    key={theme.id}
+                                    theme={theme}
+                                />
+                            ))}
+                        </div>
+                    )
                 ) : (
                     <div className="text-center py-16">
                         <Lightbulb className="w-16 h-16 mx-auto mb-4 text-slate-300" />
