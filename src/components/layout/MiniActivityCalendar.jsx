@@ -108,40 +108,40 @@ export default function MiniActivityCalendar() {
                     Heute
                 </Button>
 
-            <div className="grid grid-cols-7 gap-1 mb-2">
-                {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
-                    <div key={day} className="text-center text-xs font-medium text-slate-500">
-                        {day}
-                    </div>
-                ))}
-            </div>
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                    {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
+                        <div key={day} className="text-center text-xs font-medium text-slate-500">
+                            {day}
+                        </div>
+                    ))}
+                </div>
 
-            <div className="grid grid-cols-7 gap-1">
-                {days.map((day, idx) => {
-                    const dateKey = format(day, 'yyyy-MM-dd');
-                    const dayActivities = activitiesByDate[dateKey] || [];
-                    const isCurrentMonth = isSameMonth(day, currentDate);
-                    const isToday = isSameDay(day, new Date());
+                <div className="grid grid-cols-7 gap-1">
+                    {days.map((day, idx) => {
+                        const dateKey = format(day, 'yyyy-MM-dd');
+                        const dayActivities = activitiesByDate[dateKey] || [];
+                        const isCurrentMonth = isSameMonth(day, currentDate);
+                        const isToday = isSameDay(day, new Date());
 
-                    return (
-                        <button
-                            key={idx}
-                            onClick={() => handleDayClick(day)}
-                            className={`
-                                aspect-square flex items-center justify-center rounded text-xs font-medium relative
-                                ${isCurrentMonth ? 'text-slate-700' : 'text-slate-300'}
-                                ${isToday ? 'bg-slate-800 text-white border-2 border-slate-800' : 'border-2 border-transparent hover:border-slate-300'}
-                                transition-all cursor-pointer
-                            `}
-                        >
-                            {day.getDate()}
-                            {dayActivities.length > 0 && (
-                                <div className="absolute bottom-0.5 w-1 h-1 bg-amber-500 rounded-full" />
-                            )}
-                        </button>
-                    );
-                })}
-            </div>
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => handleDayClick(day)}
+                                className={`
+                                    aspect-square flex items-center justify-center rounded text-xs font-medium relative
+                                    ${isCurrentMonth ? 'text-slate-700' : 'text-slate-300'}
+                                    ${isToday ? 'bg-slate-800 text-white border-2 border-slate-800' : 'border-2 border-transparent hover:border-slate-300'}
+                                    transition-all cursor-pointer
+                                `}
+                            >
+                                {day.getDate()}
+                                {dayActivities.length > 0 && (
+                                    <div className="absolute bottom-0.5 w-1 h-1 bg-amber-500 rounded-full" />
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
