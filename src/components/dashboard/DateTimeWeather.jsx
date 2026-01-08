@@ -11,7 +11,7 @@ export default function DateTimeWeather() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [weather, setWeather] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [cityName, setCityName] = useState('');
+    const [cityName, setCityName] = useState('Illertissen');
 
     useEffect(() => {
         const timer = setInterval(() => {
