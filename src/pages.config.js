@@ -4,8 +4,8 @@ import Dashboard from './pages/Dashboard';
 import DataBackup from './pages/DataBackup';
 import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
-import Themes from './pages/Themes';
 import ThemeDetail from './pages/ThemeDetail';
+import Themes from './pages/Themes';
 import __Layout from './Layout.jsx';
 
 
@@ -16,8 +16,8 @@ export const PAGES = {
     "DataBackup": DataBackup,
     "ProjectDetail": ProjectDetail,
     "Projects": Projects,
-    "Themes": Themes,
     "ThemeDetail": ThemeDetail,
+    "Themes": Themes,
 }
 
 export const pagesConfig = {

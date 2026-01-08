@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Lightbulb, Briefcase, Building2 } from "lucide-react";
+import { Plus, Search, Lightbulb, Briefcase, Building2, TrendingUp, Calendar, Users } from "lucide-react";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeCard from "@/components/themes/ThemeCard";
@@ -37,6 +38,16 @@ export default function Themes() {
     const { data: activities = [] } = useQuery({
         queryKey: ['themeActivities'],
         queryFn: () => base44.entities.ThemeActivity.list()
+    });
+
+    const { data: sectors = [] } = useQuery({
+        queryKey: ['sectors'],
+        queryFn: () => base44.entities.Sector.list()
+    });
+
+    const { data: companies = [] } = useQuery({
+        queryKey: ['themeCompanies'],
+        queryFn: () => base44.entities.ThemeCompany.list()
     });
 
     const createMutation = useMutation({
@@ -79,13 +90,26 @@ export default function Themes() {
         return matchesSearch && matchesStatus;
     });
 
+    // Dashboard Statistiken
+    const stats = {
+        total: themes.length,
+        inProgress: themes.filter(t => t.status === 'in_arbeit').length,
+        planned: themes.filter(t => t.status === 'geplant').length,
+        completed: themes.filter(t => t.status === 'abgeschlossen').length,
+        avgProgress: themes.length > 0 ? Math.round(themes.reduce((sum, t) => sum + (t.progress || 0), 0) / themes.length) : 0,
+        recentActivities: activities.slice(0, 5),
+        totalActivities: activities.length,
+        totalCompanies: companies.length,
+        totalSectors: sectors.length
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">Themen</h1>
-                        <p className="text-slate-500 mt-1">Verwalten Sie Ihre Themen und deren Fortschritt</p>
+                        <h1 className="text-3xl font-bold text-slate-900">Business Themen</h1>
+                        <p className="text-slate-500 mt-1">Dashboard zur Verwaltung Ihrer Business Themen und Aktivitäten</p>
                     </div>
                     <div className="flex gap-2">
                         <Button 
@@ -110,6 +134,61 @@ export default function Themes() {
                             Neues Thema
                         </Button>
                     </div>
+                </div>
+
+                {/* Dashboard Statistiken */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-slate-600">Gesamt Themen</CardTitle>
+                            <Lightbulb className="w-4 h-4 text-amber-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-slate-900">{stats.total}</div>
+                            <p className="text-xs text-slate-500 mt-1">
+                                {stats.inProgress} in Arbeit • {stats.planned} geplant
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-slate-600">Durchschnittlicher Fortschritt</CardTitle>
+                            <TrendingUp className="w-4 h-4 text-emerald-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-slate-900">{stats.avgProgress}%</div>
+                            <p className="text-xs text-slate-500 mt-1">
+                                {stats.completed} abgeschlossen
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-slate-600">Aktivitäten</CardTitle>
+                            <Calendar className="w-4 h-4 text-blue-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-slate-900">{stats.totalActivities}</div>
+                            <p className="text-xs text-slate-500 mt-1">
+                                Gesamt erfasst
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-slate-600">Firmen & Sparten</CardTitle>
+                            <Users className="w-4 h-4 text-purple-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-slate-900">{stats.totalCompanies}</div>
+                            <p className="text-xs text-slate-500 mt-1">
+                                {stats.totalSectors} Sparten
+                            </p>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -160,15 +239,15 @@ export default function Themes() {
                     <div className="text-center py-16">
                         <Lightbulb className="w-16 h-16 mx-auto mb-4 text-slate-300" />
                         <h3 className="text-lg font-medium text-slate-700 mb-2">
-                            {search || statusFilter !== "all" ? "Keine Themen gefunden" : "Noch keine Themen angelegt"}
+                            {search || statusFilter !== "all" ? "Keine Business Themen gefunden" : "Noch keine Business Themen angelegt"}
                         </h3>
                         <p className="text-slate-500 mb-6">
-                            {search || statusFilter !== "all" ? "Versuchen Sie andere Filteroptionen" : "Starten Sie Ihr erstes Thema"}
+                            {search || statusFilter !== "all" ? "Versuchen Sie andere Filteroptionen" : "Starten Sie Ihr erstes Business Thema"}
                         </p>
                         {!search && statusFilter === "all" && (
                             <Button onClick={() => setShowForm(true)} className="bg-slate-800 hover:bg-slate-900">
                                 <Plus className="w-4 h-4 mr-2" />
-                                Erstes Thema anlegen
+                                Erstes Business Thema anlegen
                             </Button>
                         )}
                     </div>
