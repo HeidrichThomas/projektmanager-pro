@@ -12,9 +12,21 @@ export default function CompanyStatusColumns({ open, onClose, companies }) {
     const queryClient = useQueryClient();
 
     const updateStatusMutation = useMutation({
-        mutationFn: ({ id, status }) => base44.entities.ThemeCompany.update(id, { transfer_status: status }),
+        mutationFn: async ({ id, status, oldStatus, customerId }) => {
+            // Wenn von "transferred" wegbewegt wird, Customer löschen
+            if (oldStatus === "transferred" && status !== "transferred" && customerId) {
+                await base44.entities.Customer.delete(customerId);
+                await base44.entities.ThemeCompany.update(id, { 
+                    transfer_status: status,
+                    customer_id: null
+                });
+            } else {
+                await base44.entities.ThemeCompany.update(id, { transfer_status: status });
+            }
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['themeCompanies'] });
+            queryClient.invalidateQueries({ queryKey: ['customers'] });
             toast.success("Status aktualisiert");
         }
     });
@@ -24,8 +36,16 @@ export default function CompanyStatusColumns({ open, onClose, companies }) {
         
         const companyId = result.draggableId;
         const newStatus = result.destination.droppableId;
+        const oldStatus = result.source.droppableId;
         
-        updateStatusMutation.mutate({ id: companyId, status: newStatus });
+        const company = companies.find(c => c.id === companyId);
+        
+        updateStatusMutation.mutate({ 
+            id: companyId, 
+            status: newStatus,
+            oldStatus: oldStatus,
+            customerId: company?.customer_id
+        });
     };
     const statusGroups = {
         transferred: {
