@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Lightbulb, Briefcase, Building2, TrendingUp, Calendar, Users } from "lucide-react";
+import { Plus, Search, Lightbulb, Briefcase, Building2, TrendingUp, Calendar, Users, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -14,6 +14,7 @@ import ThemeCard from "@/components/themes/ThemeCard";
 import SectorManagement from "@/components/themes/SectorManagement";
 import ThemeCalendar from "@/components/themes/ThemeCalendar";
 import ThemeCompanyManagement from "@/components/themes/ThemeCompanyManagement";
+import DocumentManagement from "@/components/themes/DocumentManagement";
 
 export default function Themes() {
     const [showForm, setShowForm] = useState(false);
@@ -22,6 +23,7 @@ export default function Themes() {
     const [statusFilter, setStatusFilter] = useState("all");
     const [showSectorManagement, setShowSectorManagement] = useState(false);
     const [showCompanyManagement, setShowCompanyManagement] = useState(false);
+    const [showDocuments, setShowDocuments] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -48,6 +50,11 @@ export default function Themes() {
     const { data: companies = [] } = useQuery({
         queryKey: ['themeCompanies'],
         queryFn: () => base44.entities.ThemeCompany.list()
+    });
+
+    const { data: documents = [] } = useQuery({
+        queryKey: ['themeDocuments'],
+        queryFn: () => base44.entities.ThemeDocument.list()
     });
 
     const createMutation = useMutation({
@@ -100,7 +107,8 @@ export default function Themes() {
         recentActivities: activities.slice(0, 5),
         totalActivities: activities.length,
         totalCompanies: companies.length,
-        totalSectors: sectors.length
+        totalSectors: sectors.length,
+        totalDocuments: documents.length
     };
 
     return (
@@ -137,7 +145,7 @@ export default function Themes() {
                 </div>
 
                 {/* Dashboard Statistiken */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-slate-600">Gesamt Themen</CardTitle>
@@ -173,6 +181,22 @@ export default function Themes() {
                             <div className="text-2xl font-bold text-slate-900">{stats.totalActivities}</div>
                             <p className="text-xs text-slate-500 mt-1">
                                 Gesamt erfasst
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
+                        className="cursor-pointer hover:shadow-lg transition-all"
+                        onClick={() => setShowDocuments(true)}
+                    >
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-slate-600">Dokumente</CardTitle>
+                            <FileText className="w-4 h-4 text-indigo-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-slate-900">{stats.totalDocuments}</div>
+                            <p className="text-xs text-slate-500 mt-1">
+                                Zentral verwaltet
                             </p>
                         </CardContent>
                     </Card>
@@ -274,6 +298,11 @@ export default function Themes() {
             <SectorManagement
                 open={showSectorManagement}
                 onClose={() => setShowSectorManagement(false)}
+            />
+
+            <DocumentManagement
+                open={showDocuments}
+                onClose={() => setShowDocuments(false)}
             />
         </div>
     );

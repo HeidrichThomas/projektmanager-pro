@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeActivityForm from "@/components/themes/ThemeActivityForm";
 import ThemeActivityTimeline from "@/components/themes/ThemeActivityTimeline";
+import DocumentManagement from "@/components/themes/DocumentManagement";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -35,6 +36,7 @@ export default function ThemeDetail() {
     const [showThemeForm, setShowThemeForm] = useState(false);
     const [showActivityForm, setShowActivityForm] = useState(false);
     const [editingActivity, setEditingActivity] = useState(null);
+    const [showDocuments, setShowDocuments] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -297,10 +299,16 @@ export default function ThemeDetail() {
                                 <Clock className="w-5 h-5 text-slate-600" />
                                 Chronologischer Verlauf
                             </CardTitle>
-                            <Button onClick={() => { setEditingActivity(null); setShowActivityForm(true); }} className="bg-slate-800 hover:bg-slate-900">
-                                <Plus className="w-4 h-4 mr-2" />
-                                Neue Aktivität
-                            </Button>
+                            <div className="flex gap-2">
+                                <Button onClick={() => setShowDocuments(true)} variant="outline">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    Dokumente ({documents.length})
+                                </Button>
+                                <Button onClick={() => { setEditingActivity(null); setShowActivityForm(true); }} className="bg-slate-800 hover:bg-slate-900">
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Neue Aktivität
+                                </Button>
+                            </div>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -338,6 +346,12 @@ export default function ThemeDetail() {
                 onClose={() => { setShowActivityForm(false); setEditingActivity(null); }}
                 onSave={handleActivitySave}
                 activity={editingActivity}
+                themeId={themeId}
+            />
+
+            <DocumentManagement
+                open={showDocuments}
+                onClose={() => setShowDocuments(false)}
                 themeId={themeId}
             />
         </div>
