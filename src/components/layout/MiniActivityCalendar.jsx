@@ -124,22 +124,65 @@ export default function MiniActivityCalendar() {
                     const isToday = isSameDay(day, new Date());
 
                     return (
-                        <div
+                        <button
                             key={idx}
+                            onClick={() => handleDayClick(day)}
                             className={`
                                 aspect-square flex items-center justify-center rounded text-xs font-medium relative
                                 ${isCurrentMonth ? 'text-slate-700' : 'text-slate-300'}
-                                ${isToday ? 'bg-slate-800 text-white' : ''}
+                                ${isToday ? 'bg-slate-800 text-white border-2 border-slate-800' : 'border-2 border-transparent hover:border-slate-300'}
+                                transition-all cursor-pointer
                             `}
                         >
                             {day.getDate()}
                             {dayActivities.length > 0 && (
                                 <div className="absolute bottom-0.5 w-1 h-1 bg-amber-500 rounded-full" />
                             )}
-                        </div>
+                        </button>
                     );
                 })}
             </div>
-        </div>
+            </div>
+
+            <Dialog open={showDialog} onOpenChange={setShowDialog}>
+                <DialogContent className="max-w-2xl max-h-96 overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {selectedDay && format(selectedDay, "dd. MMMM yyyy", { locale: de })}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        {selectedDayActivities.length > 0 ? (
+                            selectedDayActivities.map((activity) => {
+                                const config = activityTypeConfig[activity.type] || { label: activity.type, icon: "📌" };
+                                return (
+                                    <div key={activity.id} className="border-l-4 border-amber-500 pl-4 py-2 bg-slate-50 rounded">
+                                        <div className="flex items-start gap-2 mb-1">
+                                            <span className="text-lg">{config.icon}</span>
+                                            <div>
+                                                <p className="font-semibold text-sm text-slate-900">{activity.title}</p>
+                                                <p className="text-xs text-slate-500">{config.label}</p>
+                                            </div>
+                                        </div>
+                                        {activity.content && (
+                                            <p className="text-sm text-slate-700 ml-6 mb-1">{activity.content}</p>
+                                        )}
+                                        {activity.theme_id && (
+                                            <p className="text-xs text-slate-500 ml-6">
+                                                Thema: {getThemeName(activity.theme_id)}
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <p className="text-center text-slate-500 py-6">
+                                Keine Aktivitäten an diesem Tag
+                            </p>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
