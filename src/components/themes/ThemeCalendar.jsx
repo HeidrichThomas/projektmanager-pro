@@ -72,7 +72,7 @@ export default function ThemeCalendar({ activities, themes }) {
     };
 
     const gaugeActivityCount = getActivityCountForDate(gaugeDate);
-    const activityAngle = 270 - Math.min(gaugeActivityCount * 45, 270); // Start at 270° (red), move towards 0° (green)
+    const activityAngle = Math.min(gaugeActivityCount * 45, 270); // 0° = oben/grün, 270° = links/rot
     const activityPercentage = Math.min(Math.round((gaugeActivityCount / 6) * 100), 100); // 6 activities = 100%
 
     const getActivitiesForDay = (day) => {
