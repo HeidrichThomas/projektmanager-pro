@@ -106,6 +106,12 @@ export default function Layout({ children, currentPageName }) {
                                     <NavLink key={item.name} item={item} mobile />
                                 ))}
                             </nav>
+
+                            <nav className="px-4 space-y-1 border-t border-slate-200 pt-4">
+                                {bottomNavigation.map((item) => (
+                                    <NavLink key={item.name} item={item} mobile />
+                                ))}
+                            </nav>
                         </div>
                     </SheetContent>
                 </Sheet>
