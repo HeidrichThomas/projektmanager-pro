@@ -231,49 +231,80 @@ export default function ThemeDetail() {
                     </CardContent>
                 </Card>
 
-                {/* Customer Info */}
-                {customer && (
+                {/* Customer & Contact Info */}
+                {(customer || (theme.contact_persons && theme.contact_persons.length > 0)) && (
                     <Card className="mb-8 shadow-sm">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <Building2 className="w-5 h-5 text-slate-600" />
-                                Kundeninformationen
+                                {customer ? 'Kunden- und Kontaktinformationen' : 'Kontaktinformationen'}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                                {customer.contact_name && (
-                                    <div>
-                                        <p className="text-slate-500">Ansprechpartner</p>
-                                        <p className="font-medium">{customer.contact_name}</p>
+                            {customer && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-6 pb-6 border-b">
+                                    {customer.contact_name && (
+                                        <div>
+                                            <p className="text-slate-500">Ansprechpartner</p>
+                                            <p className="font-medium">{customer.contact_name}</p>
+                                        </div>
+                                    )}
+                                    {customer.phone && (
+                                        <div>
+                                            <p className="text-slate-500">Telefon</p>
+                                            <a href={`tel:${customer.phone}`} className="font-medium text-amber-600 hover:text-amber-700">
+                                                {customer.phone}
+                                            </a>
+                                        </div>
+                                    )}
+                                    {customer.email && (
+                                        <div>
+                                            <p className="text-slate-500">E-Mail</p>
+                                            <a href={`mailto:${customer.email}`} className="font-medium text-amber-600 hover:text-amber-700">
+                                                {customer.email}
+                                            </a>
+                                        </div>
+                                    )}
+                                    {(customer.street || customer.city) && (
+                                        <div>
+                                            <p className="text-slate-500">Adresse</p>
+                                            <p className="font-medium">
+                                                {customer.street && `${customer.street}, `}
+                                                {customer.postal_code} {customer.city}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
+                            {theme.contact_persons && theme.contact_persons.length > 0 && (
+                                <div>
+                                    <h4 className="font-semibold text-slate-900 mb-3">Weitere Kontaktpersonen</h4>
+                                    <div className="grid sm:grid-cols-2 gap-3">
+                                        {theme.contact_persons.map((contact, index) => (
+                                            <div key={index} className="p-3 bg-slate-50 rounded-lg border">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <User className="w-4 h-4 text-slate-500" />
+                                                    <span className="font-medium text-slate-900">{contact.name}</span>
+                                                </div>
+                                                {contact.position && (
+                                                    <p className="text-sm text-slate-600 ml-6">{contact.position}</p>
+                                                )}
+                                                {contact.phone && (
+                                                    <a href={`tel:${contact.phone}`} className="text-sm text-amber-600 hover:text-amber-700 ml-6 block">
+                                                        {contact.phone}
+                                                    </a>
+                                                )}
+                                                {contact.email && (
+                                                    <a href={`mailto:${contact.email}`} className="text-sm text-amber-600 hover:text-amber-700 ml-6 block">
+                                                        {contact.email}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
-                                )}
-                                {customer.phone && (
-                                    <div>
-                                        <p className="text-slate-500">Telefon</p>
-                                        <a href={`tel:${customer.phone}`} className="font-medium text-amber-600 hover:text-amber-700">
-                                            {customer.phone}
-                                        </a>
-                                    </div>
-                                )}
-                                {customer.email && (
-                                    <div>
-                                        <p className="text-slate-500">E-Mail</p>
-                                        <a href={`mailto:${customer.email}`} className="font-medium text-amber-600 hover:text-amber-700">
-                                            {customer.email}
-                                        </a>
-                                    </div>
-                                )}
-                                {(customer.street || customer.city) && (
-                                    <div>
-                                        <p className="text-slate-500">Adresse</p>
-                                        <p className="font-medium">
-                                            {customer.street && `${customer.street}, `}
-                                            {customer.postal_code} {customer.city}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 )}

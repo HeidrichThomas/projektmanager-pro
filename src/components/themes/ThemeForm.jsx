@@ -6,14 +6,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
-import { Lightbulb, Save, X, Plus, Trash2 } from "lucide-react";
+import { Lightbulb, Save, X, Plus, Trash2, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
 export default function ThemeForm({ open, onClose, onSave, theme, customers, suppliers }) {
     const availableSuppliers = suppliers || customers.filter(c => c.type === 'supplier' || c.type === 'both');
     const [selectedSupplierId, setSelectedSupplierId] = useState("");
+    const [newContact, setNewContact] = useState({ name: "", position: "", phone: "", email: "" });
 
     const { data: sectors = [] } = useQuery({
         queryKey: ['sectors'],
@@ -25,6 +27,7 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
         sector_id: "",
         customer_id: "",
         contact_person: "",
+        contact_persons: [],
         supplier_ids: [],
         description: "",
         status: "geplant",
@@ -35,13 +38,17 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
 
     useEffect(() => {
         if (theme) {
-            setFormData(theme);
+            setFormData({
+                ...theme,
+                contact_persons: theme.contact_persons || []
+            });
         } else {
             setFormData({
                 name: "",
                 sector_id: "",
                 customer_id: "",
                 contact_person: "",
+                contact_persons: [],
                 supplier_ids: [],
                 description: "",
                 status: "geplant",
@@ -51,6 +58,7 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
             });
         }
         setSelectedSupplierId("");
+        setNewContact({ name: "", position: "", phone: "", email: "" });
     }, [theme, open]);
 
     const addSupplier = () => {
@@ -65,6 +73,24 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
     const removeSupplier = (supplierId) => {
         const currentIds = formData.supplier_ids || [];
         setFormData({...formData, supplier_ids: currentIds.filter(id => id !== supplierId)});
+    };
+
+    const addContact = () => {
+        if (!newContact.name.trim()) return;
+        const currentContacts = formData.contact_persons || [];
+        setFormData({
+            ...formData,
+            contact_persons: [...currentContacts, { ...newContact }]
+        });
+        setNewContact({ name: "", position: "", phone: "", email: "" });
+    };
+
+    const removeContact = (index) => {
+        const currentContacts = formData.contact_persons || [];
+        setFormData({
+            ...formData,
+            contact_persons: currentContacts.filter((_, i) => i !== index)
+        });
     };
 
     const handleSubmit = (e) => {
@@ -159,6 +185,82 @@ export default function ThemeForm({ open, onClose, onSave, theme, customers, sup
                             </div>
                         ) : null;
                     })()}
+
+                    <div>
+                        <Label className="text-slate-700 font-medium">Weitere Kontaktpersonen</Label>
+                        <Card className="p-4 mt-1.5 bg-slate-50">
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Input
+                                        placeholder="Name *"
+                                        value={newContact.name}
+                                        onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                                    />
+                                    <Input
+                                        placeholder="Position"
+                                        value={newContact.position}
+                                        onChange={(e) => setNewContact({...newContact, position: e.target.value})}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Input
+                                        placeholder="Telefon"
+                                        value={newContact.phone}
+                                        onChange={(e) => setNewContact({...newContact, phone: e.target.value})}
+                                    />
+                                    <Input
+                                        placeholder="E-Mail"
+                                        type="email"
+                                        value={newContact.email}
+                                        onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                                    />
+                                </div>
+                                <Button 
+                                    type="button" 
+                                    onClick={addContact}
+                                    disabled={!newContact.name.trim()}
+                                    variant="outline"
+                                    className="w-full"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Kontakt hinzufügen
+                                </Button>
+                            </div>
+                        </Card>
+                        
+                        {formData.contact_persons && formData.contact_persons.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                                {formData.contact_persons.map((contact, index) => (
+                                    <Card key={index} className="p-3 bg-white">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <User className="w-4 h-4 text-slate-500" />
+                                                    <span className="font-medium text-slate-900">{contact.name}</span>
+                                                </div>
+                                                {contact.position && (
+                                                    <p className="text-sm text-slate-600">{contact.position}</p>
+                                                )}
+                                                <div className="flex gap-3 mt-1 text-sm text-slate-500">
+                                                    {contact.phone && <span>{contact.phone}</span>}
+                                                    {contact.email && <span>{contact.email}</span>}
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => removeContact(index)}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     
                     <div>
                         <Label className="text-slate-700 font-medium">Beteiligte Lieferanten</Label>
