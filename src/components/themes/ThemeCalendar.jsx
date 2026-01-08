@@ -203,26 +203,23 @@ export default function ThemeCalendar({ activities, themes }) {
                             transformOrigin: 'center'
                         }}
                     >
-                        <div className="absolute top-[6px] left-1/2 -translate-x-1/2">
-                            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[12px] border-b-slate-900" />
-                        </div>
-                    </div>
-                    
-                    {/* Center Content */}
-                    <div className="relative z-10 text-center">
-                        <div className="text-4xl font-bold bg-gradient-to-br from-slate-700 to-slate-900 bg-clip-text text-transparent">
-                            {todayActivityCount}
-                        </div>
-                        <div className="text-xs text-slate-500 mt-1">
-                            {todayActivityCount === 0 && "Aktivitäten"}
-                            {todayActivityCount === 1 && "Aktivität"}
-                            {todayActivityCount > 1 && "Aktivitäten"}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2">
+                            <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[20px] border-b-slate-900 drop-shadow-lg" />
                         </div>
                     </div>
                 </div>
                 
-                {/* Status Labels */}
-                <div className="flex items-center justify-between w-full mt-4 text-xs">
+                {/* Activity Count and Status Labels */}
+                <div className="text-center mt-4">
+                    <div className="text-3xl font-bold text-slate-900 mb-1">{todayActivityCount}</div>
+                    <div className="text-xs text-slate-500 mb-3">
+                        {todayActivityCount === 0 && "Keine Aktivitäten"}
+                        {todayActivityCount === 1 && "Aktivität heute"}
+                        {todayActivityCount > 1 && "Aktivitäten heute"}
+                    </div>
+                </div>
+                
+                <div className="flex items-center justify-between w-full text-xs">
                     <span className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-red-500" />
                         <span className="text-slate-500">Wenig</span>
