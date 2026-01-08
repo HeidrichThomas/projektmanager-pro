@@ -209,7 +209,7 @@ export default function Themes() {
                         onClick={() => setShowCompaniesAndSectorsOverview(true)}
                     >
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-slate-600">Nur Firmen</CardTitle>
+                            <CardTitle className="text-sm font-medium text-slate-600">Firmen</CardTitle>
                             <Users className="w-4 h-4 text-purple-600" />
                         </CardHeader>
                         <CardContent>
