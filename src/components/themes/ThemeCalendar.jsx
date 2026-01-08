@@ -63,34 +63,34 @@ export default function ThemeCalendar({ activities, themes }) {
 
     return (
         <>
-            <Card>
-                <CardHeader className="pb-3">
+            <Card className="max-w-sm">
+                <CardHeader className="pb-2 px-3 pt-3">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                            <CalendarIcon className="w-5 h-5 text-slate-600" />
+                        <CardTitle className="flex items-center gap-1 text-sm">
+                            <CalendarIcon className="w-3.5 h-3.5 text-slate-600" />
                             Aktivitäten-Kalender
                         </CardTitle>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={previousMonth}>
-                                <ChevronLeft className="w-4 h-4" />
+                        <div className="flex items-center gap-1">
+                            <Button variant="outline" size="sm" onClick={previousMonth} className="h-6 w-6 p-0">
+                                <ChevronLeft className="w-3 h-3" />
                             </Button>
-                            <span className="text-sm font-medium min-w-[150px] text-center">
-                                {format(currentMonth, "MMMM yyyy", { locale: de })}
+                            <span className="text-xs font-medium min-w-[90px] text-center">
+                                {format(currentMonth, "MMM yyyy", { locale: de })}
                             </span>
-                            <Button variant="outline" size="sm" onClick={nextMonth}>
-                                <ChevronRight className="w-4 h-4" />
+                            <Button variant="outline" size="sm" onClick={nextMonth} className="h-6 w-6 p-0">
+                                <ChevronRight className="w-3 h-3" />
                             </Button>
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-[auto_1fr] gap-2">
-                        <div className="text-center text-xs font-semibold text-slate-600 py-2">
+                <CardContent className="px-3 pb-3">
+                    <div className="grid grid-cols-[auto_1fr] gap-1">
+                        <div className="text-center text-[10px] font-semibold text-slate-600 py-1">
                             KW
                         </div>
-                        <div className="grid grid-cols-7 gap-2">
+                        <div className="grid grid-cols-7 gap-1">
                             {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
-                                <div key={day} className="text-center text-xs font-semibold text-slate-600 py-2">
+                                <div key={day} className="text-center text-[10px] font-semibold text-slate-600 py-1">
                                     {day}
                                 </div>
                             ))}
@@ -98,10 +98,10 @@ export default function ThemeCalendar({ activities, themes }) {
                         
                         {weeks.map((week, weekIndex) => (
                             <React.Fragment key={weekIndex}>
-                                <div className="flex items-center justify-center text-xs font-medium text-slate-500">
+                                <div className="flex items-center justify-center text-[10px] font-medium text-slate-500">
                                     {getWeek(week[0], { weekStartsOn: 1, firstWeekContainsDate: 4 })}
                                 </div>
-                                <div className="grid grid-cols-7 gap-2">
+                                <div className="grid grid-cols-7 gap-1">
                                     {week.map(day => {
                                         const dayActivities = getActivitiesForDay(day);
                                         const hasActivities = dayActivities.length > 0;
@@ -112,8 +112,8 @@ export default function ThemeCalendar({ activities, themes }) {
                                                 key={day.toString()}
                                                 onClick={() => handleDayClick(day)}
                                                 className={`
-                                                    aspect-square p-1 rounded-lg text-sm transition-all
-                                                    ${today ? 'ring-2 ring-red-500 bg-red-50' : 'hover:bg-slate-100'}
+                                                    aspect-square p-0.5 rounded text-[10px] transition-all
+                                                    ${today ? 'ring-1 ring-red-500 bg-red-50' : 'hover:bg-slate-100'}
                                                     ${hasActivities ? 'cursor-pointer font-semibold' : 'cursor-default'}
                                                     ${!isSameMonth(day, currentMonth) ? 'text-slate-300' : 'text-slate-700'}
                                                 `}
@@ -121,11 +121,11 @@ export default function ThemeCalendar({ activities, themes }) {
                                                 <div className="flex flex-col items-center justify-center h-full">
                                                     <span>{format(day, 'd')}</span>
                                                     {hasActivities && (
-                                                        <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
-                                                            {dayActivities.slice(0, 3).map((activity, idx) => (
+                                                        <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center">
+                                                            {dayActivities.slice(0, 2).map((activity, idx) => (
                                                                 <div
                                                                     key={idx}
-                                                                    className="w-1.5 h-1.5 rounded-full bg-indigo-500"
+                                                                    className="w-1 h-1 rounded-full bg-indigo-500"
                                                                 />
                                                             ))}
                                                         </div>
