@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, FileText, Phone, Users, Mail, Milestone, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, FileText, Phone, Users, Mail, Milestone } from "lucide-react";
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, isToday, isSameMonth, getWeek, startOfWeek, endOfWeek } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -20,7 +20,7 @@ export default function ThemeCalendar({ activities, themes }) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
     const [showDialog, setShowDialog] = useState(false);
-    const [gaugeDate, setGaugeDate] = useState(new Date());
+
 
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
@@ -48,22 +48,9 @@ export default function ThemeCalendar({ activities, themes }) {
 
     const goToToday = () => {
         setCurrentMonth(new Date());
-        setGaugeDate(new Date());
     };
 
-    const previousDay = () => {
-        const newDate = new Date(gaugeDate);
-        newDate.setDate(newDate.getDate() - 1);
-        setGaugeDate(newDate);
-        setCurrentMonth(newDate);
-    };
 
-    const nextDay = () => {
-        const newDate = new Date(gaugeDate);
-        newDate.setDate(newDate.getDate() + 1);
-        setGaugeDate(newDate);
-        setCurrentMonth(newDate);
-    };
 
     const getActivityCountForDate = (date) => {
         return activities.filter(activity => 
@@ -71,9 +58,7 @@ export default function ThemeCalendar({ activities, themes }) {
         ).length;
     };
 
-    const gaugeActivityCount = getActivityCountForDate(gaugeDate);
-    const activityAngle = Math.min(gaugeActivityCount * 45, 270); // 0° = oben/grün, 270° = links/rot
-    const activityPercentage = Math.min(Math.round((gaugeActivityCount / 6) * 100), 100); // 6 activities = 100%
+
 
     const getActivitiesForDay = (day) => {
         return activities.filter(activity => 
@@ -82,7 +67,6 @@ export default function ThemeCalendar({ activities, themes }) {
     };
 
     const handleDayClick = (day) => {
-        setGaugeDate(day);
         const dayActivities = getActivitiesForDay(day);
         if (dayActivities.length > 0) {
             setSelectedDate(day);
@@ -94,8 +78,7 @@ export default function ThemeCalendar({ activities, themes }) {
 
     return (
         <>
-            <div className="flex gap-4 items-start">
-                <Card className="flex-1 max-w-md">
+            <Card className="max-w-md mx-auto">
                     <CardHeader className="pb-2 px-4 pt-4">
                         <div className="flex items-center justify-between">
                             <CardTitle className="flex items-center gap-2 text-base">
@@ -141,7 +124,6 @@ export default function ThemeCalendar({ activities, themes }) {
                                         const dayActivities = getActivitiesForDay(day);
                                         const hasActivities = dayActivities.length > 0;
                                         const today = isToday(day);
-                                        const isSelected = isSameDay(day, gaugeDate);
 
                                         return (
                                             <button
@@ -150,7 +132,6 @@ export default function ThemeCalendar({ activities, themes }) {
                                                 className={`
                                                     aspect-square p-1 rounded text-xs transition-all
                                                     ${today ? 'ring-1 ring-red-500 bg-red-50' : 'hover:bg-slate-100'}
-                                                    ${isSelected ? 'ring-2 ring-indigo-500 bg-indigo-50' : ''}
                                                     ${hasActivities ? 'cursor-pointer font-semibold' : 'cursor-default'}
                                                     ${!isSameMonth(day, currentMonth) ? 'text-slate-300' : 'text-slate-700'}
                                                 `}
@@ -176,93 +157,7 @@ export default function ThemeCalendar({ activities, themes }) {
                         ))}
                     </div>
                 </CardContent>
-            </Card>
-
-            {/* Activity Gauge */}
-            <Card className="w-48 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-white to-slate-50">
-                <h3 className="text-sm font-semibold text-slate-700 mb-2">Aktivität</h3>
-                <div className="flex items-center gap-2 mb-4">
-                    <Button variant="outline" size="sm" onClick={previousDay} className="h-6 w-6 p-0">
-                        <ChevronUp className="w-3 h-3" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={goToToday} className="h-6 px-2 text-xs">
-                        Heute
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={nextDay} className="h-6 w-6 p-0">
-                        <ChevronDown className="w-3 h-3" />
-                    </Button>
-                </div>
-                <p className="text-xs text-slate-500 mb-4">{format(gaugeDate, "dd. MMM yyyy", { locale: de })}</p>
-                <div className="relative w-36 h-36 flex items-center justify-center">
-                    {/* Background Circle */}
-                    <svg className="absolute inset-0 w-full h-full -rotate-90">
-                        <defs>
-                            <linearGradient id="gradient" gradientUnits="userSpaceOnUse" x1="72" y1="12" x2="72" y2="132">
-                                <stop offset="0%" stopColor="#22c55e" />
-                                <stop offset="66%" stopColor="#eab308" />
-                                <stop offset="100%" stopColor="#ef4444" />
-                            </linearGradient>
-                        </defs>
-                        <circle
-                            cx="72"
-                            cy="72"
-                            r="60"
-                            fill="none"
-                            stroke="#e2e8f0"
-                            strokeWidth="12"
-                            strokeLinecap="round"
-                        />
-                        {/* Static Progress Arc - 3/4 of circle */}
-                        <circle
-                            cx="72"
-                            cy="72"
-                            r="60"
-                            fill="none"
-                            stroke="url(#gradient)"
-                            strokeWidth="12"
-                            strokeLinecap="round"
-                            strokeDasharray="283 377"
-                        />
-                    </svg>
-                    
-                    {/* Pointer Line */}
-                    <svg className="absolute inset-0 w-full h-full transition-transform duration-500" style={{ transform: `rotate(${(activityAngle / 180) * 180 - 90}deg)` }}>
-                        <defs>
-                            <linearGradient id="pointerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stopColor="#0f172a" />
-                                <stop offset="100%" stopColor="#475569" />
-                            </linearGradient>
-                        </defs>
-                        <polygon
-                            points="72,12 69,72 75,72"
-                            fill="url(#pointerGradient)"
-                            className="drop-shadow-lg"
-                        />
-                        <circle cx="72" cy="72" r="8" fill="#1e293b" className="drop-shadow-md" />
-                        <circle cx="72" cy="72" r="3" fill="#64748b" />
-                    </svg>
-                </div>
-                
-                {/* Activity Percentage and Status Labels */}
-                <div className="text-center mt-4">
-                    <div className="text-3xl font-bold text-slate-900 mb-1">{activityPercentage}%</div>
-                    <div className="text-xs text-slate-500 mb-3">
-                        {gaugeActivityCount} {gaugeActivityCount === 1 ? "Aktivität" : "Aktivitäten"}
-                    </div>
-                </div>
-                
-                <div className="flex items-center justify-between w-full text-xs">
-                    <span className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-red-500" />
-                        <span className="text-slate-500">Wenig</span>
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-green-500" />
-                        <span className="text-slate-500">Viel</span>
-                    </span>
-                </div>
-            </Card>
-        </div>
+                </Card>
 
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
