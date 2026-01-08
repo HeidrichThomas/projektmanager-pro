@@ -136,7 +136,7 @@ export default function CompletedProjects() {
                                                      )}
                                                  </div>
                                              </div>
-                                             <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0 ml-auto">
+                                             <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0 ml-auto mr-4">
                                                  <CheckCircle2 className="w-3 h-3 mr-1" />
                                                  Abgeschlossen
                                              </Badge>
