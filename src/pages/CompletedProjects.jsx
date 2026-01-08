@@ -114,7 +114,7 @@ export default function CompletedProjects() {
                             const completedTasks = projectTasks.filter(t => t.status === 'erledigt').length;
 
                             return (
-                                <Card key={project.id} className="shadow-md hover:shadow-lg transition-shadow">
+                                <Card key={project.id} className="shadow-md hover:shadow-lg transition-shadow min-h-[500px] flex flex-col">
                                     <CardHeader className="bg-gradient-to-r from-emerald-50 to-white border-b">
                                          <div className="flex flex-col lg:flex-row lg:items-start justify-start gap-4">
                                              <div className="flex items-start gap-4 flex-1">
