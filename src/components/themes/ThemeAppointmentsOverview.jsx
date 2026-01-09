@@ -303,11 +303,17 @@ export default function ThemeAppointmentsOverview() {
                         {upcomingAppointments.length > 0 ? (
                             upcomingAppointments.map(app => {
                                 const theme = getTheme(app.theme_id);
+                                const handleClick = () => {
+                                    if (!app.isActivity) {
+                                        setEditingAppointment(app);
+                                        setShowForm(true);
+                                    }
+                                };
                                 return (
                                     <div 
                                         key={`${app.isActivity ? 'activity' : 'appointment'}-${app.id}`} 
-                                        className="p-3 border rounded-lg hover:shadow-sm transition-all cursor-pointer group"
-                                        onClick={() => !app.isActivity && (setEditingAppointment(app), setShowForm(true))}
+                                        className={`p-3 border rounded-lg hover:shadow-sm transition-all group ${!app.isActivity ? 'cursor-pointer' : ''}`}
+                                        onClick={handleClick}
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1">
@@ -350,11 +356,6 @@ export default function ThemeAppointmentsOverview() {
                                                     size="sm"
                                                     variant="ghost"
                                                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setEditingAppointment(app);
-                                                        setShowForm(true);
-                                                    }}
                                                 >
                                                     <Pencil className="w-3 h-3" />
                                                 </Button>
