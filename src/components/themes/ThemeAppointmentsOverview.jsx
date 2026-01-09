@@ -342,46 +342,8 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                 className={`p-3 bg-slate-50 rounded-lg border group transition-all ${!app.isActivity ? 'cursor-pointer hover:bg-slate-100 hover:border-indigo-300' : ''}`}
                                                 onClick={handleClick}
                                             >
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            {!app.isActivity && app.is_important && (
-                                                                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                                                            )}
-                                                            <div className="font-medium text-slate-900">{app.title}</div>
-                                                            {app.isActivity && (
-                                                                <Badge variant="secondary" className="text-xs">
-                                                                    Aktivität
-                                                                </Badge>
-                                                            )}
-                                                            {!app.isActivity && app.exported_to_outlook && (
-                                                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                                                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                                    An Outlook übertragen
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                        {theme && (
-                                                            <Badge variant="outline" className="text-xs mt-1">
-                                                                {theme.name}
-                                                            </Badge>
-                                                        )}
-                                                        <div className="flex items-center gap-3 mt-2 text-xs text-slate-600">
-                                                            {app.start_date && (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3" />
-                                                                    {format(new Date(app.start_date), 'HH:mm')}
-                                                                </span>
-                                                            )}
-                                                            {app.location && (
-                                                                <span className="flex items-center gap-1">
-                                                                    <MapPin className="w-3 h-3" />
-                                                                    {app.location}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex gap-1">
+                                                <div className="flex items-start gap-2">
+                                                    <div className="flex gap-1 shrink-0">
                                                         <Button
                                                             size="sm"
                                                             variant="ghost"
@@ -456,6 +418,44 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             <Trash2 className="w-3 h-3" />
                                                         </Button>
                                                     </div>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            {!app.isActivity && app.is_important && (
+                                                                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                                            )}
+                                                            <div className="font-medium text-slate-900">{app.title}</div>
+                                                            {app.isActivity && (
+                                                                <Badge variant="secondary" className="text-xs">
+                                                                    Aktivität
+                                                                </Badge>
+                                                            )}
+                                                            {!app.isActivity && app.exported_to_outlook && (
+                                                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                                    An Outlook übertragen
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                        {theme && (
+                                                            <Badge variant="outline" className="text-xs mt-1">
+                                                                {theme.name}
+                                                            </Badge>
+                                                        )}
+                                                        <div className="flex items-center gap-3 mt-2 text-xs text-slate-600">
+                                                            {app.start_date && (
+                                                                <span className="flex items-center gap-1">
+                                                                    <Clock className="w-3 h-3" />
+                                                                    {format(new Date(app.start_date), 'HH:mm')}
+                                                                </span>
+                                                            )}
+                                                            {app.location && (
+                                                                <span className="flex items-center gap-1">
+                                                                    <MapPin className="w-3 h-3" />
+                                                                    {app.location}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
@@ -493,52 +493,8 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                         className={`p-3 border rounded-lg hover:shadow-sm transition-all group ${!app.isActivity ? 'cursor-pointer hover:border-indigo-300' : ''}`}
                                         onClick={handleClick}
                                     >
-                                        <div className="flex items-start justify-between gap-2">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    {!app.isActivity && app.is_important && (
-                                                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                                                    )}
-                                                    <div className="font-medium text-sm text-slate-900">{app.title}</div>
-                                                    {app.isActivity && (
-                                                        <Badge variant="secondary" className="text-xs">
-                                                            Aktivität
-                                                        </Badge>
-                                                    )}
-                                                    {!app.isActivity && app.exported_to_outlook && (
-                                                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                            Outlook
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                                {theme && (
-                                                    <Badge variant="outline" className="text-xs mt-1">
-                                                        {theme.name}
-                                                    </Badge>
-                                                )}
-                                                <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600">
-                                                    {app.start_date && (
-                                                        <span className="flex items-center gap-1">
-                                                            <Calendar className="w-3 h-3" />
-                                                            {format(new Date(app.start_date), 'dd.MM.yyyy', { locale: de })}
-                                                        </span>
-                                                    )}
-                                                    {app.start_date && (
-                                                        <span className="flex items-center gap-1">
-                                                            <Clock className="w-3 h-3" />
-                                                            {format(new Date(app.start_date), 'HH:mm')} Uhr
-                                                        </span>
-                                                    )}
-                                                    {app.location && (
-                                                        <span className="flex items-center gap-1">
-                                                            <MapPin className="w-3 h-3" />
-                                                            {app.location}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                </div>
-                                                <div className="flex gap-1">
+                                        <div className="flex items-start gap-2">
+                                            <div className="flex gap-1 shrink-0">
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
@@ -611,9 +567,53 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                         title="Löschen"
                                                     >
                                                         <Trash2 className="w-3 h-3" />
-                                                    </Button>
-                                                </div>
-                                        </div>
+                                                        </Button>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                        {!app.isActivity && app.is_important && (
+                                                            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                                        )}
+                                                        <div className="font-medium text-sm text-slate-900">{app.title}</div>
+                                                        {app.isActivity && (
+                                                            <Badge variant="secondary" className="text-xs">
+                                                                Aktivität
+                                                            </Badge>
+                                                        )}
+                                                        {!app.isActivity && app.exported_to_outlook && (
+                                                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                                Outlook
+                                                            </Badge>
+                                                        )}
+                                                        </div>
+                                                        {theme && (
+                                                        <Badge variant="outline" className="text-xs mt-1">
+                                                            {theme.name}
+                                                        </Badge>
+                                                        )}
+                                                        <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600">
+                                                        {app.start_date && (
+                                                            <span className="flex items-center gap-1">
+                                                                <Calendar className="w-3 h-3" />
+                                                                {format(new Date(app.start_date), 'dd.MM.yyyy', { locale: de })}
+                                                            </span>
+                                                        )}
+                                                        {app.start_date && (
+                                                            <span className="flex items-center gap-1">
+                                                                <Clock className="w-3 h-3" />
+                                                                {format(new Date(app.start_date), 'HH:mm')} Uhr
+                                                            </span>
+                                                        )}
+                                                        {app.location && (
+                                                            <span className="flex items-center gap-1">
+                                                                <MapPin className="w-3 h-3" />
+                                                                {app.location}
+                                                            </span>
+                                                        )}
+                                                        </div>
+                                                        </div>
+                                                        </div>
                                     </div>
                                 );
                             })
