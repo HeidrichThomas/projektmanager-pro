@@ -203,24 +203,11 @@ export default function ThemeDetail() {
                 {/* Progress Card */}
                 <Card className="mb-8 shadow-sm">
                     <CardContent className="p-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-medium text-slate-700">Themenfortschritt</span>
-                                    <span className="text-2xl font-bold text-slate-900">{theme.progress || 0}%</span>
-                                </div>
-                                <Progress value={theme.progress || 0} className="h-3" />
-                            </div>
-                            <div className="sm:w-48">
-                                <p className="text-xs text-slate-500 mb-2">Fortschritt anpassen:</p>
-                                <Slider
-                                    value={[theme.progress || 0]}
-                                    onValueChange={handleProgressChange}
-                                    max={100}
-                                    step={5}
-                                />
-                            </div>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium text-slate-700">Themenfortschritt</span>
+                            <span className="text-2xl font-bold text-slate-900">{theme.progress || 0}%</span>
                         </div>
+                        <Progress value={theme.progress || 0} className="h-3" />
                         {theme.description && (
                             <p className="mt-4 pt-4 border-t text-slate-600">{theme.description}</p>
                         )}
