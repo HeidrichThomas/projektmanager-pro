@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Plus, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday, isBefore, startOfToday } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday, isBefore, startOfToday, getWeek, startOfWeek, endOfWeek } from "date-fns";
 import { de } from "date-fns/locale";
 import { toast } from "sonner";
 import ThemeAppointmentForm from "./ThemeAppointmentForm";
@@ -85,7 +85,7 @@ export default function ThemeAppointmentsOverview() {
     return (
         <div className="grid md:grid-cols-10 gap-6">
             {/* Kalenderansicht */}
-            <Card className="md:col-span-3">
+            <Card className="md:col-span-2">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
@@ -129,7 +129,8 @@ export default function ThemeAppointmentsOverview() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-7 gap-1">
+                    <div className="grid grid-cols-8 gap-1">
+                        <div className="text-center text-xs font-medium text-slate-500 py-2">KW</div>
                         {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(day => (
                             <div key={day} className="text-center text-xs font-medium text-slate-500 py-2">
                                 {day}
@@ -137,37 +138,53 @@ export default function ThemeAppointmentsOverview() {
                         ))}
                         
                         {/* Leere Tage am Anfang */}
+                        <div className="text-center text-xs font-medium text-slate-400 flex items-center justify-center">
+                            {getWeek(monthStart, { locale: de, weekStartsOn: 1 })}
+                        </div>
                         {Array.from({ length: (monthStart.getDay() + 6) % 7 }).map((_, i) => (
                             <div key={`empty-${i}`} className="aspect-square" />
                         ))}
                         
                         {/* Tage des Monats */}
-                        {daysInMonth.map(day => {
+                        {daysInMonth.map((day, index) => {
+                            const isMonday = day.getDay() === 1;
+                            const weekNumber = getWeek(day, { locale: de, weekStartsOn: 1 });
                             const dayAppointments = getAppointmentsForDay(day);
                             const isSelected = selectedDate && isSameDay(day, selectedDate);
                             
                             return (
-                                <button
-                                    key={day.toString()}
-                                    onClick={() => setSelectedDate(day)}
-                                    className={`
-                                        aspect-square p-1 rounded-lg border text-sm relative
-                                        ${isToday(day) ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200'}
-                                        ${isSelected ? 'bg-indigo-100' : 'hover:bg-slate-50'}
-                                        ${dayAppointments.length > 0 ? 'font-semibold' : ''}
-                                    `}
-                                >
-                                    <span className={isToday(day) ? 'text-indigo-600' : ''}>
-                                        {format(day, 'd')}
-                                    </span>
-                                    {dayAppointments.length > 0 && (
-                                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-                                            {dayAppointments.slice(0, 3).map((_, i) => (
-                                                <div key={i} className="w-1 h-1 rounded-full bg-indigo-600" />
-                                            ))}
+                                <React.Fragment key={day.toString()}>
+                                    {isMonday && (
+                                        <div className="text-center text-xs font-medium text-slate-400 flex items-center justify-center">
+                                            {weekNumber}
                                         </div>
                                     )}
-                                </button>
+                                    {!isMonday && index > 0 && daysInMonth[index - 1].getDay() === 0 && (
+                                        <div className="text-center text-xs font-medium text-slate-400 flex items-center justify-center">
+                                            {weekNumber}
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={() => setSelectedDate(day)}
+                                        className={`
+                                            aspect-square p-1 rounded-lg border text-sm relative
+                                            ${isToday(day) ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-300' : 'border-slate-200'}
+                                            ${isSelected ? 'bg-indigo-100' : 'hover:bg-slate-50'}
+                                            ${dayAppointments.length > 0 ? 'font-semibold' : ''}
+                                        `}
+                                    >
+                                        <span className={isToday(day) ? 'text-indigo-600 font-bold' : ''}>
+                                            {format(day, 'd')}
+                                        </span>
+                                        {dayAppointments.length > 0 && (
+                                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                                                {dayAppointments.slice(0, 3).map((_, i) => (
+                                                    <div key={i} className="w-1 h-1 rounded-full bg-indigo-600" />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </button>
+                                </React.Fragment>
                             );
                         })}
                     </div>
@@ -244,7 +261,7 @@ export default function ThemeAppointmentsOverview() {
             </Card>
 
             {/* Anstehende Termine */}
-            <Card className="md:col-span-7">
+            <Card className="md:col-span-8">
                 <CardHeader>
                     <CardTitle className="text-lg">Anstehende Termine</CardTitle>
                 </CardHeader>
