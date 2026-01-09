@@ -10,7 +10,7 @@ import { de } from "date-fns/locale";
 import { toast } from "sonner";
 import ThemeAppointmentForm from "./ThemeAppointmentForm";
 
-export default function ThemeAppointmentsOverview() {
+export default function ThemeAppointmentsOverview({ compact = false }) {
     const [showForm, setShowForm] = useState(false);
     const [editingAppointment, setEditingAppointment] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
@@ -105,6 +105,40 @@ export default function ThemeAppointmentsOverview() {
     ]
         .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
         .slice(0, 10);
+
+    if (compact) {
+        return (
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                {upcomingAppointments.slice(0, 3).length > 0 ? (
+                    upcomingAppointments.slice(0, 3).map(app => {
+                        const theme = getTheme(app.theme_id);
+                        return (
+                            <div key={`${app.isActivity ? 'activity' : 'appointment'}-${app.id}`} className="text-xs">
+                                <div className="font-medium text-slate-900 truncate">{app.title}</div>
+                                <div className="flex items-center gap-2 text-slate-500 mt-0.5">
+                                    {app.start_date && (
+                                        <>
+                                            <span>{format(new Date(app.start_date), 'dd.MM.', { locale: de })}</span>
+                                            <span>{format(new Date(app.start_date), 'HH:mm')}</span>
+                                        </>
+                                    )}
+                                    {app.isActivity && (
+                                        <Badge variant="secondary" className="text-xs py-0">
+                                            Aktivität
+                                        </Badge>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <p className="text-xs text-slate-500 text-center py-4">
+                        Keine anstehenden Termine
+                    </p>
+                )}
+            </div>
+        );
+    }
 
     return (
         <div className="grid md:grid-cols-10 gap-6">
