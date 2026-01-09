@@ -342,119 +342,122 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                 className={`p-3 bg-slate-50 rounded-lg border group transition-all ${!app.isActivity ? 'cursor-pointer hover:bg-slate-100 hover:border-indigo-300' : ''}`}
                                                 onClick={handleClick}
                                             >
-                                                <div className="flex items-start gap-2">
-                                                    <div className="flex gap-0.5 shrink-0">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                if (app.isActivity) {
-                                                                    updateActivityMutation.mutate({
-                                                                        id: app.id,
-                                                                        data: { ...app, is_important: !app.is_important }
-                                                                    });
-                                                                } else {
-                                                                    toggleImportant(app);
-                                                                }
-                                                            }}
-                                                            className={`h-7 w-7 p-0 ${app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}`}
-                                                            title="Als wichtig markieren"
-                                                        >
-                                                            <Star className={`w-3.5 h-3.5 ${app.is_important ? 'fill-amber-500' : ''}`} />
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                if (app.isActivity) {
-                                                                    setEditingActivity(app);
-                                                                    setShowActivityForm(true);
-                                                                } else {
-                                                                    setEditingAppointment(app);
-                                                                    setShowForm(true);
-                                                                }
-                                                            }}
-                                                            className="h-7 w-7 p-0 text-slate-600 hover:text-slate-700 hover:bg-slate-100"
-                                                            title="Bearbeiten"
-                                                        >
-                                                            <Pencil className="w-3.5 h-3.5" />
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={(e) => { 
-                                                                e.stopPropagation();
-                                                                handleExportToOutlook(app); 
-                                                            }}
-                                                            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                            title="An Outlook übertragen"
-                                                        >
-                                                            <Send className="w-3.5 h-3.5" />
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                const confirmMessage = app.isActivity 
-                                                                    ? `Aktivität "${app.title}" wirklich löschen?`
-                                                                    : `Termin "${app.title}" wirklich löschen?`;
-                                                                if (confirm(confirmMessage)) {
+                                                <div className="space-y-2">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="font-medium text-slate-900">{app.title}</div>
+                                                        <div className="flex gap-0.5 shrink-0">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     if (app.isActivity) {
-                                                                        base44.entities.ThemeActivity.delete(app.id).then(() => {
-                                                                            queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
-                                                                            toast.success("Aktivität gelöscht");
+                                                                        updateActivityMutation.mutate({
+                                                                            id: app.id,
+                                                                            data: { ...app, is_important: !app.is_important }
                                                                         });
                                                                     } else {
-                                                                        deleteMutation.mutate(app.id);
+                                                                        toggleImportant(app);
                                                                     }
-                                                                }
-                                                            }}
-                                                            className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                            title="Löschen"
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </Button>
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            {!app.isActivity && app.is_important && (
-                                                                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                                                            )}
-                                                            <div className="font-medium text-slate-900">{app.title}</div>
-                                                            {app.isActivity && (
-                                                                <Badge variant="secondary" className="text-xs">
-                                                                    Aktivität
-                                                                </Badge>
-                                                            )}
-                                                            {!app.isActivity && app.exported_to_outlook && (
-                                                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                                                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                                    An Outlook übertragen
-                                                                </Badge>
-                                                            )}
+                                                                }}
+                                                                className={`h-7 w-7 p-0 ${app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}`}
+                                                                title="Als wichtig markieren"
+                                                            >
+                                                                <Star className={`w-3.5 h-3.5 ${app.is_important ? 'fill-amber-500' : ''}`} />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (app.isActivity) {
+                                                                        setEditingActivity(app);
+                                                                        setShowActivityForm(true);
+                                                                    } else {
+                                                                        setEditingAppointment(app);
+                                                                        setShowForm(true);
+                                                                    }
+                                                                }}
+                                                                className="h-7 w-7 p-0 text-slate-600 hover:text-slate-700 hover:bg-slate-100"
+                                                                title="Bearbeiten"
+                                                            >
+                                                                <Pencil className="w-3.5 h-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation();
+                                                                    handleExportToOutlook(app); 
+                                                                }}
+                                                                className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                title="An Outlook übertragen"
+                                                            >
+                                                                <Send className="w-3.5 h-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const confirmMessage = app.isActivity 
+                                                                        ? `Aktivität "${app.title}" wirklich löschen?`
+                                                                        : `Termin "${app.title}" wirklich löschen?`;
+                                                                    if (confirm(confirmMessage)) {
+                                                                        if (app.isActivity) {
+                                                                            base44.entities.ThemeActivity.delete(app.id).then(() => {
+                                                                                queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
+                                                                                toast.success("Aktivität gelöscht");
+                                                                            });
+                                                                        } else {
+                                                                            deleteMutation.mutate(app.id);
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                title="Löschen"
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                            </Button>
                                                         </div>
+                                                    </div>
+                                                    <div className="flex gap-2 flex-wrap">
                                                         {theme && (
-                                                            <Badge variant="outline" className="text-xs mt-1">
+                                                            <Badge variant="outline" className="text-xs">
                                                                 {theme.name}
                                                             </Badge>
                                                         )}
-                                                        <div className="flex items-center gap-3 mt-2 text-xs text-slate-600">
-                                                            {app.start_date && (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3" />
-                                                                    {format(new Date(app.start_date), 'HH:mm')}
-                                                                </span>
-                                                            )}
-                                                            {app.location && (
-                                                                <span className="flex items-center gap-1">
-                                                                    <MapPin className="w-3 h-3" />
-                                                                    {app.location}
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                                        {app.isActivity && (
+                                                            <Badge variant="secondary" className="text-xs">
+                                                                Aktivität
+                                                            </Badge>
+                                                        )}
+                                                        {!app.isActivity && app.exported_to_outlook && (
+                                                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                                An Outlook übertragen
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-slate-600 space-y-1">
+                                                        {app.start_date && (
+                                                            <div className="flex items-center gap-1">
+                                                                <Calendar className="w-3 h-3" />
+                                                                {format(new Date(app.start_date), 'dd.MM.yyyy', { locale: de })}
+                                                            </div>
+                                                        )}
+                                                        {app.start_date && (
+                                                            <div className="flex items-center gap-1">
+                                                                <Clock className="w-3 h-3" />
+                                                                {format(new Date(app.start_date), 'HH:mm')} Uhr
+                                                            </div>
+                                                        )}
+                                                        {app.location && (
+                                                            <div className="flex items-center gap-1">
+                                                                <MapPin className="w-3 h-3" />
+                                                                {app.location}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -493,127 +496,124 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                         className={`p-3 border rounded-lg hover:shadow-sm transition-all group ${!app.isActivity ? 'cursor-pointer hover:border-indigo-300' : ''}`}
                                         onClick={handleClick}
                                     >
-                                        <div className="flex items-start gap-2">
-                                            <div className="flex gap-0.5 shrink-0">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        if (app.isActivity) {
-                                                            updateActivityMutation.mutate({
-                                                                id: app.id,
-                                                                data: { ...app, is_important: !app.is_important }
-                                                            });
-                                                        } else {
-                                                            toggleImportant(app);
-                                                        }
-                                                    }}
-                                                    className={`h-7 w-7 p-0 ${app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}`}
-                                                    title="Als wichtig markieren"
-                                                >
-                                                    <Star className={`w-3.5 h-3.5 ${app.is_important ? 'fill-amber-500' : ''}`} />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        if (app.isActivity) {
-                                                            setEditingActivity(app);
-                                                            setShowActivityForm(true);
-                                                        } else {
-                                                            setEditingAppointment(app);
-                                                            setShowForm(true);
-                                                        }
-                                                    }}
-                                                    className="h-7 w-7 p-0 text-slate-600 hover:text-slate-700 hover:bg-slate-100"
-                                                    title="Bearbeiten"
-                                                >
-                                                    <Pencil className="w-3.5 h-3.5" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={(e) => { 
-                                                        e.stopPropagation();
-                                                        handleExportToOutlook(app); 
-                                                    }}
-                                                    className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                    title="An Outlook übertragen"
-                                                >
-                                                    <Send className="w-3.5 h-3.5" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        const confirmMessage = app.isActivity 
-                                                            ? `Aktivität "${app.title}" wirklich löschen?`
-                                                            : `Termin "${app.title}" wirklich löschen?`;
-                                                        if (confirm(confirmMessage)) {
+                                        <div className="space-y-2">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="font-medium text-sm text-slate-900">{app.title}</div>
+                                                <div className="flex gap-0.5 shrink-0">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             if (app.isActivity) {
-                                                                base44.entities.ThemeActivity.delete(app.id).then(() => {
-                                                                    queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
-                                                                    toast.success("Aktivität gelöscht");
+                                                                updateActivityMutation.mutate({
+                                                                    id: app.id,
+                                                                    data: { ...app, is_important: !app.is_important }
                                                                 });
                                                             } else {
-                                                                deleteMutation.mutate(app.id);
+                                                                toggleImportant(app);
                                                             }
-                                                        }
-                                                    }}
-                                                    className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    title="Löschen"
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </Button>
+                                                        }}
+                                                        className={`h-7 w-7 p-0 ${app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}`}
+                                                        title="Als wichtig markieren"
+                                                    >
+                                                        <Star className={`w-3.5 h-3.5 ${app.is_important ? 'fill-amber-500' : ''}`} />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (app.isActivity) {
+                                                                setEditingActivity(app);
+                                                                setShowActivityForm(true);
+                                                            } else {
+                                                                setEditingAppointment(app);
+                                                                setShowForm(true);
+                                                            }
+                                                        }}
+                                                        className="h-7 w-7 p-0 text-slate-600 hover:text-slate-700 hover:bg-slate-100"
+                                                        title="Bearbeiten"
+                                                    >
+                                                        <Pencil className="w-3.5 h-3.5" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation();
+                                                            handleExportToOutlook(app); 
+                                                        }}
+                                                        className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        title="An Outlook übertragen"
+                                                    >
+                                                        <Send className="w-3.5 h-3.5" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const confirmMessage = app.isActivity 
+                                                                ? `Aktivität "${app.title}" wirklich löschen?`
+                                                                : `Termin "${app.title}" wirklich löschen?`;
+                                                            if (confirm(confirmMessage)) {
+                                                                if (app.isActivity) {
+                                                                    base44.entities.ThemeActivity.delete(app.id).then(() => {
+                                                                        queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
+                                                                        toast.success("Aktivität gelöscht");
+                                                                    });
+                                                                } else {
+                                                                    deleteMutation.mutate(app.id);
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        title="Löschen"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </Button>
+                                                </div>
                                             </div>
-                                                        <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                        {!app.isActivity && app.is_important && (
-                                                            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                                                        )}
-                                                        <div className="font-medium text-sm text-slate-900">{app.title}</div>
-                                                        {app.isActivity && (
-                                                            <Badge variant="secondary" className="text-xs">
-                                                                Aktivität
-                                                            </Badge>
-                                                        )}
-                                                        {!app.isActivity && app.exported_to_outlook && (
-                                                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                                                <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                                Outlook
-                                                            </Badge>
-                                                        )}
-                                                        </div>
-                                                        {theme && (
-                                                        <Badge variant="outline" className="text-xs mt-1">
-                                                            {theme.name}
-                                                        </Badge>
-                                                        )}
-                                                        <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600">
-                                                        {app.start_date && (
-                                                            <span className="flex items-center gap-1">
-                                                                <Calendar className="w-3 h-3" />
-                                                                {format(new Date(app.start_date), 'dd.MM.yyyy', { locale: de })}
-                                                            </span>
-                                                        )}
-                                                        {app.start_date && (
-                                                            <span className="flex items-center gap-1">
-                                                                <Clock className="w-3 h-3" />
-                                                                {format(new Date(app.start_date), 'HH:mm')} Uhr
-                                                            </span>
-                                                        )}
-                                                        {app.location && (
-                                                            <span className="flex items-center gap-1">
-                                                                <MapPin className="w-3 h-3" />
-                                                                {app.location}
-                                                            </span>
-                                                        )}
-                                                        </div>
-                                                        </div>
-                                                        </div>
+                                            <div className="flex gap-2 flex-wrap">
+                                                {theme && (
+                                                    <Badge variant="outline" className="text-xs">
+                                                        {theme.name}
+                                                    </Badge>
+                                                )}
+                                                {app.isActivity && (
+                                                    <Badge variant="secondary" className="text-xs">
+                                                        Aktivität
+                                                    </Badge>
+                                                )}
+                                                {!app.isActivity && app.exported_to_outlook && (
+                                                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                        Outlook
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            <div className="text-xs text-slate-600 space-y-1">
+                                                {app.start_date && (
+                                                    <div className="flex items-center gap-1">
+                                                        <Calendar className="w-3 h-3" />
+                                                        {format(new Date(app.start_date), 'dd.MM.yyyy', { locale: de })}
+                                                    </div>
+                                                )}
+                                                {app.start_date && (
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="w-3 h-3" />
+                                                        {format(new Date(app.start_date), 'HH:mm')} Uhr
+                                                    </div>
+                                                )}
+                                                {app.location && (
+                                                    <div className="flex items-center gap-1">
+                                                        <MapPin className="w-3 h-3" />
+                                                        {app.location}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 );
                             })
