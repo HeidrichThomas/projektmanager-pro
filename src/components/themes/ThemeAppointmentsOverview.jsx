@@ -284,7 +284,16 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                     getAppointmentsForDay(selectedDate).map(app => {
                                         const theme = getTheme(app.theme_id);
                                         return (
-                                            <div key={app.id} className="p-3 bg-slate-50 rounded-lg border group cursor-pointer hover:bg-slate-100 transition-all">
+                                            <div 
+                                                key={app.id} 
+                                                className={`p-3 bg-slate-50 rounded-lg border group transition-all ${!app.isActivity ? 'cursor-pointer hover:bg-slate-100 hover:border-indigo-300' : ''}`}
+                                                onClick={() => {
+                                                    if (!app.isActivity) {
+                                                        setEditingAppointment(app);
+                                                        setShowForm(true);
+                                                    }
+                                                }}
+                                            >
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
@@ -334,17 +343,6 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                                 title="An Outlook übertragen"
                                                             >
                                                                 <Send className="w-3 h-3" />
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={(e) => { 
-                                                                    e.stopPropagation();
-                                                                    setEditingAppointment(app); 
-                                                                    setShowForm(true); 
-                                                                }}
-                                                            >
-                                                                <Pencil className="w-3 h-3" />
                                                             </Button>
                                                             <Button
                                                                 size="sm"
