@@ -9,10 +9,13 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMont
 import { de } from "date-fns/locale";
 import { toast } from "sonner";
 import ThemeAppointmentForm from "./ThemeAppointmentForm";
+import ThemeActivityForm from "./ThemeActivityForm";
 
 export default function ThemeAppointmentsOverview({ compact = false }) {
     const [showForm, setShowForm] = useState(false);
     const [editingAppointment, setEditingAppointment] = useState(null);
+    const [showActivityForm, setShowActivityForm] = useState(false);
+    const [editingActivity, setEditingActivity] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [checkedExpired, setCheckedExpired] = useState(false);
@@ -83,6 +86,22 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
             id: app.id,
             data: { ...app, is_important: !app.is_important }
         });
+    };
+
+    const updateActivityMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.ThemeActivity.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
+            setShowActivityForm(false);
+            setEditingActivity(null);
+            toast.success("Aktivität aktualisiert");
+        }
+    });
+
+    const handleActivitySave = (data) => {
+        if (editingActivity) {
+            updateActivityMutation.mutate({ id: editingActivity.id, data });
+        }
     };
 
     const handleExportToOutlook = (app) => {
@@ -377,21 +396,24 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                                 <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
                                                             </Button>
                                                         )}
-                                                        {!app.isActivity && (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (app.isActivity) {
+                                                                    setEditingActivity(app);
+                                                                    setShowActivityForm(true);
+                                                                } else {
                                                                     setEditingAppointment(app);
                                                                     setShowForm(true);
-                                                                }}
-                                                                className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
-                                                                title="Bearbeiten"
-                                                            >
-                                                                <Pencil className="w-3 h-3" />
-                                                            </Button>
-                                                        )}
+                                                                }
+                                                            }}
+                                                            className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
+                                                            title="Bearbeiten"
+                                                        >
+                                                            <Pencil className="w-3 h-3" />
+                                                        </Button>
                                                         {!app.isActivity && (
                                                             <Button
                                                                 size="sm"
@@ -514,73 +536,76 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                 </div>
                                                 </div>
                                                 <div className="flex gap-1">
-                                                {!app.isActivity && (
+                                                    {!app.isActivity && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleImportant(app);
+                                                            }}
+                                                            className={app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}
+                                                            title="Als wichtig markieren"
+                                                        >
+                                                            <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
+                                                        </Button>
+                                                    )}
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            toggleImportant(app);
-                                                        }}
-                                                        className={app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}
-                                                        title="Als wichtig markieren"
-                                                    >
-                                                        <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
-                                                    </Button>
-                                                )}
-                                                {!app.isActivity && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setEditingAppointment(app);
-                                                            setShowForm(true);
+                                                            if (app.isActivity) {
+                                                                setEditingActivity(app);
+                                                                setShowActivityForm(true);
+                                                            } else {
+                                                                setEditingAppointment(app);
+                                                                setShowForm(true);
+                                                            }
                                                         }}
                                                         className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
                                                         title="Bearbeiten"
                                                     >
                                                         <Pencil className="w-3 h-3" />
                                                     </Button>
-                                                )}
-                                                {!app.isActivity && (
+                                                    {!app.isActivity && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(e) => { 
+                                                                e.stopPropagation();
+                                                                handleExportToOutlook(app); 
+                                                            }}
+                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                            title="An Outlook übertragen"
+                                                        >
+                                                            <Send className="w-3 h-3" />
+                                                        </Button>
+                                                    )}
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
-                                                        onClick={(e) => { 
+                                                        onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handleExportToOutlook(app); 
-                                                        }}
-                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                        title="An Outlook übertragen"
-                                                    >
-                                                        <Send className="w-3 h-3" />
-                                                    </Button>
-                                                )}
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        const confirmMessage = app.isActivity 
-                                                            ? `Aktivität "${app.title}" wirklich löschen?`
-                                                            : `Termin "${app.title}" wirklich löschen?`;
-                                                        if (confirm(confirmMessage)) {
-                                                            if (app.isActivity) {
-                                                                base44.entities.ThemeActivity.delete(app.id).then(() => {
-                                                                    queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
-                                                                    toast.success("Aktivität gelöscht");
-                                                                });
-                                                            } else {
-                                                                deleteMutation.mutate(app.id);
+                                                            const confirmMessage = app.isActivity 
+                                                                ? `Aktivität "${app.title}" wirklich löschen?`
+                                                                : `Termin "${app.title}" wirklich löschen?`;
+                                                            if (confirm(confirmMessage)) {
+                                                                if (app.isActivity) {
+                                                                    base44.entities.ThemeActivity.delete(app.id).then(() => {
+                                                                        queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
+                                                                        toast.success("Aktivität gelöscht");
+                                                                    });
+                                                                } else {
+                                                                    deleteMutation.mutate(app.id);
+                                                                }
                                                             }
-                                                        }
-                                                    }}
-                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    title="Löschen"
-                                                >
-                                                    <Trash2 className="w-3 h-3" />
-                                                </Button>
+                                                        }}
+                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        title="Löschen"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </Button>
                                                 </div>
                                         </div>
                                     </div>
@@ -600,6 +625,13 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                 onClose={() => { setShowForm(false); setEditingAppointment(null); }}
                 onSave={handleSave}
                 appointment={editingAppointment}
+            />
+
+            <ThemeActivityForm
+                open={showActivityForm}
+                onClose={() => { setShowActivityForm(false); setEditingActivity(null); }}
+                onSave={handleActivitySave}
+                activity={editingActivity}
             />
         </div>
     );
