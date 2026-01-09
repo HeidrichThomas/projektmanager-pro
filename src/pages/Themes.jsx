@@ -31,6 +31,7 @@ export default function Themes() {
     const [showCompaniesAndSectorsOverview, setShowCompaniesAndSectorsOverview] = useState(false);
     const [viewMode, setViewMode] = useState("grid");
     const [editingCompany, setEditingCompany] = useState(null);
+    const [showAppointments, setShowAppointments] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -186,7 +187,10 @@ export default function Themes() {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card 
+                        className="cursor-pointer hover:shadow-lg transition-all"
+                        onClick={() => setShowAppointments(true)}
+                    >
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-slate-600">Anstehende Termine</CardTitle>
                             <Calendar className="w-4 h-4 text-blue-600" />
@@ -351,6 +355,15 @@ export default function Themes() {
                     setShowCompanyManagement(true);
                 }}
             />
+
+            <Dialog open={showAppointments} onOpenChange={setShowAppointments}>
+                <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Terminverwaltung</DialogTitle>
+                    </DialogHeader>
+                    <ThemeAppointmentsOverview />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
