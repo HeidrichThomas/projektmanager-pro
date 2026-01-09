@@ -11,7 +11,7 @@ import { de } from "date-fns/locale";
 import { toast } from "sonner";
 import ThemeAppointmentForm from "@/components/themes/ThemeAppointmentForm";
 
-export default function MiniAppointmentCalendar() {
+export default function MiniAppointmentCalendar({ compact = false }) {
     const [showForm, setShowForm] = useState(false);
     const [editingAppointment, setEditingAppointment] = useState(null);
     const [showDialog, setShowDialog] = useState(false);
@@ -86,6 +86,73 @@ export default function MiniAppointmentCalendar() {
     ]
         .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
         .slice(0, 5);
+
+    if (compact) {
+        return (
+            <div className="space-y-2">
+                {upcomingAppointments.length > 0 ? (
+                    upcomingAppointments.slice(0, 3).map(app => {
+                        const theme = getTheme(app.theme_id);
+                        return (
+                            <div 
+                                key={`${app.isActivity ? 'activity' : 'appointment'}-${app.id}`} 
+                                className={`text-xs p-2 bg-slate-50 rounded border group ${!app.isActivity ? 'cursor-pointer hover:bg-slate-100' : ''}`}
+                                onClick={() => {
+                                    if (!app.isActivity) {
+                                        setEditingAppointment(app);
+                                        setShowForm(true);
+                                    }
+                                }}
+                            >
+                                <div className="flex items-start justify-between gap-1">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-medium text-slate-900 truncate">{app.title}</div>
+                                        {theme && (
+                                            <div className="text-xs text-slate-500 truncate mt-0.5">
+                                                {theme.name}
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-2 text-slate-500 mt-1">
+                                            {app.start_date && (
+                                                <>
+                                                    <span className="flex items-center gap-0.5">
+                                                        <Calendar className="w-3 h-3" />
+                                                        {format(new Date(app.start_date), 'dd.MM.')}
+                                                    </span>
+                                                    <span className="flex items-center gap-0.5">
+                                                        <Clock className="w-3 h-3" />
+                                                        {format(new Date(app.start_date), 'HH:mm')}
+                                                    </span>
+                                                </>
+                                            )}
+                                            {app.isActivity && (
+                                                <Badge variant="secondary" className="text-xs py-0 h-4">
+                                                    Aktivität
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {!app.isActivity && (
+                                        <Pencil className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <p className="text-xs text-slate-500 text-center py-3">
+                        Keine anstehenden Termine
+                    </p>
+                )}
+                <ThemeAppointmentForm
+                    open={showForm}
+                    onClose={() => { setShowForm(false); setEditingAppointment(null); }}
+                    onSave={handleSave}
+                    appointment={editingAppointment}
+                />
+            </div>
+        );
+    }
 
     return (
         <>
