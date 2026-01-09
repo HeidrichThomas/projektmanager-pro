@@ -10,7 +10,6 @@ import {
 
 
 import MiniActivityCalendar from "@/components/layout/MiniActivityCalendar";
-import MiniAppointmentCalendar from "@/components/layout/MiniAppointmentCalendar";
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -72,7 +71,6 @@ export default function Layout({ children, currentPageName }) {
                                 {item.page === "Themes" && (
                                     <div className="space-y-3">
                                         <MiniActivityCalendar />
-                                        <MiniAppointmentCalendar />
                                     </div>
                                 )}
                             </div>
