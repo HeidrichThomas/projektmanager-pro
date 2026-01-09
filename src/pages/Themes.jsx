@@ -29,6 +29,7 @@ export default function Themes() {
     const [showDocuments, setShowDocuments] = useState(false);
     const [showCompaniesAndSectorsOverview, setShowCompaniesAndSectorsOverview] = useState(false);
     const [viewMode, setViewMode] = useState("grid");
+    const [editingCompany, setEditingCompany] = useState(null);
 
     const queryClient = useQueryClient();
 
@@ -326,7 +327,11 @@ export default function Themes() {
 
             <ThemeCompanyManagement
                 open={showCompanyManagement}
-                onClose={() => setShowCompanyManagement(false)}
+                onClose={() => {
+                    setShowCompanyManagement(false);
+                    setEditingCompany(null);
+                }}
+                editingCompany={editingCompany}
             />
 
             <SectorManagement
@@ -343,6 +348,10 @@ export default function Themes() {
                 open={showCompaniesAndSectorsOverview}
                 onClose={() => setShowCompaniesAndSectorsOverview(false)}
                 companies={companies}
+                onEditCompany={(company) => {
+                    setEditingCompany(company);
+                    setShowCompanyManagement(true);
+                }}
             />
         </div>
     );
