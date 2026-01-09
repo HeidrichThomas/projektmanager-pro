@@ -223,7 +223,7 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                             <Calendar className="w-5 h-5 text-indigo-600" />
                             Terminkalender
                         </CardTitle>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
                                 size="sm"
