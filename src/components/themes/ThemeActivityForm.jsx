@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Save, X, Upload, Trash2, FileText, Phone, Users, Mail, Milestone } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 const activityTypes = {
     notiz: { label: "Notiz", icon: FileText, color: "text-slate-600" },
@@ -31,11 +32,23 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
         file_names: []
     });
     const [uploading, setUploading] = useState(false);
+    const [showAddContact, setShowAddContact] = useState(false);
+    const [newContact, setNewContact] = useState({ name: "", position: "", phone: "", email: "" });
+
+    const queryClient = useQueryClient();
 
     const { data: companies = [] } = useQuery({
         queryKey: ['themeCompanies'],
         queryFn: () => base44.entities.ThemeCompany.list(),
         enabled: open
+    });
+
+    const updateCompanyMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.ThemeCompany.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeCompanies'] });
+            toast.success("Ansprechpartner hinzugefügt");
+        }
     });
 
     useEffect(() => {
@@ -69,6 +82,20 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
         } else {
             setFormData({...formData, contact_person_ids: [...currentIds, contactName]});
         }
+    };
+
+    const handleAddNewContact = () => {
+        if (!newContact.name.trim() || !selectedCompany) return;
+        
+        const updatedContacts = [...(selectedCompany.contact_persons || []), newContact];
+        updateCompanyMutation.mutate({
+            id: selectedCompany.id,
+            data: { ...selectedCompany, contact_persons: updatedContacts }
+        });
+        
+        setFormData({...formData, contact_person_ids: [...(formData.contact_person_ids || []), newContact.name]});
+        setNewContact({ name: "", position: "", phone: "", email: "" });
+        setShowAddContact(false);
     };
 
     const handleFileUpload = async (e) => {
@@ -185,24 +212,90 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                         </Select>
                     </div>
 
-                    {selectedCompany && availableContacts.length > 0 && (
+                    {selectedCompany && (
                         <div>
                             <Label>Ansprechpartner</Label>
-                            <div className="mt-1.5 space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3 bg-slate-50">
-                                {availableContacts.map((contact, index) => (
-                                    <div key={index} className="flex items-start gap-2">
-                                        <Checkbox
-                                            id={`contact-${index}`}
-                                            checked={formData.contact_person_ids?.includes(contact.name)}
-                                            onCheckedChange={() => toggleContact(contact.name)}
-                                        />
-                                        <label htmlFor={`contact-${index}`} className="text-sm cursor-pointer flex-1">
-                                            <div className="font-medium text-slate-900">{contact.name}</div>
-                                            {contact.position && <div className="text-xs text-slate-500">{contact.position}</div>}
-                                        </label>
+                            {availableContacts.length > 0 && (
+                                <div className="mt-1.5 space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3 bg-slate-50">
+                                    {availableContacts.map((contact, index) => (
+                                        <div key={index} className="flex items-start gap-2">
+                                            <Checkbox
+                                                id={`contact-${index}`}
+                                                checked={formData.contact_person_ids?.includes(contact.name)}
+                                                onCheckedChange={() => toggleContact(contact.name)}
+                                            />
+                                            <label htmlFor={`contact-${index}`} className="text-sm cursor-pointer flex-1">
+                                                <div className="font-medium text-slate-900">{contact.name}</div>
+                                                {contact.position && <div className="text-xs text-slate-500">{contact.position}</div>}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            
+                            {!showAddContact ? (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setShowAddContact(true)}
+                                    className="mt-2 w-full"
+                                >
+                                    <User className="w-4 h-4 mr-2" />
+                                    Neuer Ansprechpartner
+                                </Button>
+                            ) : (
+                                <div className="mt-2 p-3 border rounded-lg bg-white space-y-2">
+                                    <Input
+                                        placeholder="Name *"
+                                        value={newContact.name}
+                                        onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                                        size="sm"
+                                    />
+                                    <Input
+                                        placeholder="Position"
+                                        value={newContact.position}
+                                        onChange={(e) => setNewContact({...newContact, position: e.target.value})}
+                                        size="sm"
+                                    />
+                                    <Input
+                                        placeholder="Telefon"
+                                        value={newContact.phone}
+                                        onChange={(e) => setNewContact({...newContact, phone: e.target.value})}
+                                        size="sm"
+                                    />
+                                    <Input
+                                        placeholder="E-Mail"
+                                        type="email"
+                                        value={newContact.email}
+                                        onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                                        size="sm"
+                                    />
+                                    <div className="flex gap-2">
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            onClick={handleAddNewContact}
+                                            disabled={!newContact.name.trim()}
+                                            className="flex-1"
+                                        >
+                                            <Save className="w-4 h-4 mr-2" />
+                                            Hinzufügen
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setShowAddContact(false);
+                                                setNewContact({ name: "", position: "", phone: "", email: "" });
+                                            }}
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </Button>
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
 

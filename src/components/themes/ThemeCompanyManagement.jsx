@@ -45,6 +45,7 @@ export default function ThemeCompanyManagement({ open, onClose, editingCompany: 
         mobile_phone: "", 
         email: "" 
     });
+    const [editingContactIndex, setEditingContactIndex] = useState(null);
 
     const queryClient = useQueryClient();
 
@@ -173,6 +174,22 @@ export default function ThemeCompanyManagement({ open, onClose, editingCompany: 
             ...formData,
             contact_persons: formData.contact_persons.filter((_, i) => i !== index)
         });
+    };
+
+    const startEditContact = (contact, index) => {
+        setNewContact(contact);
+        setEditingContactIndex(index);
+    };
+
+    const saveEditContact = () => {
+        const updatedContacts = [...formData.contact_persons];
+        updatedContacts[editingContactIndex] = newContact;
+        setFormData({
+            ...formData,
+            contact_persons: updatedContacts
+        });
+        setNewContact({ name: "", position: "", phone: "", mobile_phone: "", email: "" });
+        setEditingContactIndex(null);
     };
 
     const handleSubmit = (e) => {
@@ -577,32 +594,104 @@ export default function ThemeCompanyManagement({ open, onClose, editingCompany: 
                             {formData.contact_persons && formData.contact_persons.length > 0 && (
                                 <div className="mt-3 space-y-2">
                                     {formData.contact_persons.map((contact, index) => (
-                                        <Card key={index} className="p-3 bg-white">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <User className="w-4 h-4 text-slate-500" />
-                                                        <span className="font-medium text-slate-900">{contact.name}</span>
+                                        <Card key={index} className="p-3 bg-white group">
+                                            {editingContactIndex === index ? (
+                                                <div className="space-y-2">
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <Input
+                                                            placeholder="Name"
+                                                            value={newContact.name}
+                                                            onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                                                            size="sm"
+                                                        />
+                                                        <Input
+                                                            placeholder="Position"
+                                                            value={newContact.position}
+                                                            onChange={(e) => setNewContact({...newContact, position: e.target.value})}
+                                                            size="sm"
+                                                        />
                                                     </div>
-                                                    {contact.position && (
-                                                        <p className="text-sm text-slate-600">{contact.position}</p>
-                                                    )}
-                                                    <div className="flex flex-wrap gap-3 mt-1 text-sm text-slate-500">
-                                                        {contact.phone && <span>☎ {contact.phone}</span>}
-                                                        {contact.mobile_phone && <span>📱 {contact.mobile_phone}</span>}
-                                                        {contact.email && <span>✉ {contact.email}</span>}
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <Input
+                                                            placeholder="Telefon"
+                                                            value={newContact.phone}
+                                                            onChange={(e) => setNewContact({...newContact, phone: e.target.value})}
+                                                            size="sm"
+                                                        />
+                                                        <Input
+                                                            placeholder="Handy"
+                                                            value={newContact.mobile_phone}
+                                                            onChange={(e) => setNewContact({...newContact, mobile_phone: e.target.value})}
+                                                            size="sm"
+                                                        />
+                                                        <Input
+                                                            placeholder="E-Mail"
+                                                            value={newContact.email}
+                                                            onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                                                            size="sm"
+                                                        />
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            onClick={saveEditContact}
+                                                            className="flex-1"
+                                                        >
+                                                            <Save className="w-4 h-4 mr-2" />
+                                                            Speichern
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                setEditingContactIndex(null);
+                                                                setNewContact({ name: "", position: "", phone: "", mobile_phone: "", email: "" });
+                                                            }}
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </Button>
                                                     </div>
                                                 </div>
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => removeContact(index)}
-                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
+                                            ) : (
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <User className="w-4 h-4 text-slate-500" />
+                                                            <span className="font-medium text-slate-900">{contact.name}</span>
+                                                        </div>
+                                                        {contact.position && (
+                                                            <p className="text-sm text-slate-600">{contact.position}</p>
+                                                        )}
+                                                        <div className="flex flex-wrap gap-3 mt-1 text-sm text-slate-500">
+                                                            {contact.phone && <span>☎ {contact.phone}</span>}
+                                                            {contact.mobile_phone && <span>📱 {contact.mobile_phone}</span>}
+                                                            {contact.email && <span>✉ {contact.email}</span>}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => startEditContact(contact, index)}
+                                                            className="text-slate-600 hover:text-slate-700 hover:bg-slate-50"
+                                                        >
+                                                            <Pencil className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => removeContact(index)}
+                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </Card>
                                     ))}
                                 </div>
