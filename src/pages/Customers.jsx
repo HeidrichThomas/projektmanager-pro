@@ -168,7 +168,7 @@ export default function Customers() {
                         <p className="text-slate-500 mt-1">Verwalten Sie Ihre Kunden- und Lieferantenkontakte</p>
                     </div>
                     <Button onClick={() => { setEditingCustomer(null); setShowForm(true); }} className="bg-slate-800 hover:bg-slate-900">
-                        <Plus className="w-4 h-4 mr-2" />
+                        <Plus className="w-5 h-5 mr-2" />
                         Neuer Kontakt
                     </Button>
                 </div>
@@ -197,17 +197,17 @@ export default function Customers() {
                             size="sm"
                             variant={viewMode === "grid" ? "secondary" : "ghost"}
                             onClick={() => setViewMode("grid")}
-                            className="px-3"
+                            className="px-3 h-10 w-10"
                         >
-                            <LayoutGrid className="w-4 h-4" />
+                            <LayoutGrid className="w-5 h-5" />
                         </Button>
                         <Button
                             size="sm"
                             variant={viewMode === "list" ? "secondary" : "ghost"}
                             onClick={() => setViewMode("list")}
-                            className="px-3"
+                            className="px-3 h-10 w-10"
                         >
-                            <List className="w-4 h-4" />
+                            <List className="w-5 h-5" />
                         </Button>
                     </div>
                 </div>
@@ -298,7 +298,7 @@ export default function Customers() {
                         </p>
                         {!search && (
                             <Button onClick={() => setShowForm(true)} className="bg-slate-800 hover:bg-slate-900">
-                                <Plus className="w-4 h-4 mr-2" />
+                                <Plus className="w-5 h-5 mr-2" />
                                 Ersten Kunden anlegen
                             </Button>
                         )}
