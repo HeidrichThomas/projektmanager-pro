@@ -72,37 +72,8 @@ export default function DateTimeWeather() {
                 }
             };
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const { latitude, longitude } = position.coords;
-                        try {
-                            const cityResponse = await base44.integrations.Core.InvokeLLM({
-                                prompt: `Gib mir die Stadt für diese Koordinaten: Latitude ${latitude}, Longitude ${longitude}. Nur die Stadtnamen als String, nichts anderes.`,
-                                response_json_schema: {
-                                    type: "object",
-                                    properties: {
-                                        city: { type: "string" }
-                                    }
-                                }
-                            });
-                            fetchWeather(latitude, longitude, cityResponse.city);
-                            localStorage.setItem('weatherPostalCode', '');
-                        } catch {
-                            setLoading(false);
-                        }
-                    },
-                    () => {
-                        if (postalCode) {
-                            setLoading(true);
-                        } else {
-                            setLoading(false);
-                        }
-                    }
-                );
-            } else if (postalCode) {
-                setLoading(true);
-            }
+            // Illertissen Koordinaten: 48.1644°N, 10.0814°E
+            fetchWeather(48.1644, 10.0814, 'Illertissen');
             }, []);
 
 
