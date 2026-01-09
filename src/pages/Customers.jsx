@@ -33,9 +33,12 @@ export default function Customers() {
         queryFn: () => base44.entities.Customer.list()
     });
 
-    // Reihenfolge aktualisieren, wenn Kunden sich ändern
+    // Kunden nach Status filtern
     React.useEffect(() => {
-        setOrderedCustomers(customers);
+        const active = customers.filter(c => c.is_active !== false);
+        const inactive = customers.filter(c => c.is_active === false);
+        setOrderedCustomers(active);
+        setInactiveCustomers(inactive);
     }, [customers]);
 
     const { data: projects = [] } = useQuery({
@@ -133,8 +136,7 @@ export default function Customers() {
             const customerId = result.draggableId;
             const customer = orderedCustomers.find(c => c.id === customerId);
             if (customer) {
-                setOrderedCustomers(orderedCustomers.filter(c => c.id !== customerId));
-                setInactiveCustomers([...inactiveCustomers, customer]);
+                updateMutation.mutate({ id: customer.id, data: { ...customer, is_active: false } });
             }
         }
         // Drag from inactive to active
@@ -142,10 +144,7 @@ export default function Customers() {
             const customerId = result.draggableId.replace('inactive-', '');
             const customer = inactiveCustomers.find(c => c.id === customerId);
             if (customer) {
-                setInactiveCustomers(inactiveCustomers.filter(c => c.id !== customerId));
-                const newCustomers = Array.from(orderedCustomers);
-                newCustomers.splice(result.destination.index, 0, customer);
-                setOrderedCustomers(newCustomers);
+                updateMutation.mutate({ id: customer.id, data: { ...customer, is_active: true } });
             }
         }
         // Reorder within active
