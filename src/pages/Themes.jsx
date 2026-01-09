@@ -18,7 +18,6 @@ import ThemeCompanyManagement from "@/components/themes/ThemeCompanyManagement";
 import DocumentManagement from "@/components/themes/DocumentManagement";
 import CompaniesAndSectorsOverview from "@/components/themes/CompaniesAndSectorsOverview";
 import CompanyStatusColumns from "@/components/themes/CompanyStatusColumns";
-import ThemeAppointmentsOverview from "@/components/themes/ThemeAppointmentsOverview";
 import MiniAppointmentCalendar from "@/components/layout/MiniAppointmentCalendar";
 
 export default function Themes() {
@@ -189,14 +188,11 @@ export default function Themes() {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-slate-600">Durchschnittlicher Fortschritt</CardTitle>
-                            <TrendingUp className="w-4 h-4 text-emerald-600" />
+                            <CardTitle className="text-sm font-medium text-slate-600">Anstehende Termine</CardTitle>
+                            <Calendar className="w-4 h-4 text-blue-600" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-slate-900">{stats.avgProgress}%</div>
-                            <p className="text-xs text-slate-500 mt-1">
-                                {stats.completed} abgeschlossen
-                            </p>
+                            <MiniAppointmentCalendar compact={true} />
                         </CardContent>
                     </Card>
 
