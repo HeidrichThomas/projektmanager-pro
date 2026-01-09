@@ -293,7 +293,7 @@ export default function Themes() {
                     viewMode === "kanban" ? (
                         <ThemeKanban themes={filteredThemes} onStatusChange={handleStatusChange} />
                     ) : (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                             {filteredThemes.map((theme) => (
                                 <ThemeCard
                                     key={theme.id}
