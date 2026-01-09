@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Plus, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Clock, MapPin, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Send, CheckCircle2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday, isBefore, startOfToday, getWeek, startOfWeek, endOfWeek } from "date-fns";
@@ -61,12 +61,38 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
         }
     });
 
+    const exportToOutlookMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.ThemeAppointment.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeAppointments'] });
+            toast.success("Als an Outlook übertragen markiert");
+        }
+    });
+
     const handleSave = (data) => {
         if (editingAppointment) {
             updateMutation.mutate({ id: editingAppointment.id, data });
         } else {
             createMutation.mutate(data);
         }
+    };
+
+    const handleExportToOutlook = (app) => {
+        const startDate = new Date(app.start_date);
+        const endDate = app.end_date ? new Date(app.end_date) : new Date(startDate.getTime() + 60 * 60 * 1000);
+        
+        const formatDateForOutlook = (date) => {
+            return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        };
+
+        const outlookUrl = `https://outlook.office.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject=${encodeURIComponent(app.title)}&startdt=${formatDateForOutlook(startDate)}&enddt=${formatDateForOutlook(endDate)}&body=${encodeURIComponent(app.description || '')}&location=${encodeURIComponent(app.location || '')}`;
+        
+        window.open(outlookUrl, '_blank');
+        
+        exportToOutlookMutation.mutate({ 
+            id: app.id, 
+            data: { ...app, exported_to_outlook: true } 
+        });
     };
 
     const getTheme = (themeId) => themes.find(t => t.id === themeId);
@@ -268,6 +294,12 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                                     Aktivität
                                                                 </Badge>
                                                             )}
+                                                            {!app.isActivity && app.exported_to_outlook && (
+                                                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                                    An Outlook übertragen
+                                                                </Badge>
+                                                            )}
                                                         </div>
                                                         {theme && (
                                                             <Badge variant="outline" className="text-xs mt-1">
@@ -294,14 +326,31 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
-                                                                onClick={() => { setEditingAppointment(app); setShowForm(true); }}
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation();
+                                                                    handleExportToOutlook(app); 
+                                                                }}
+                                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                title="An Outlook übertragen"
+                                                            >
+                                                                <Send className="w-3 h-3" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation();
+                                                                    setEditingAppointment(app); 
+                                                                    setShowForm(true); 
+                                                                }}
                                                             >
                                                                 <Pencil className="w-3 h-3" />
                                                             </Button>
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
-                                                                onClick={() => {
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     if (confirm(`Termin "${app.title}" wirklich löschen?`)) {
                                                                         deleteMutation.mutate(app.id);
                                                                     }
@@ -358,6 +407,12 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             Aktivität
                                                         </Badge>
                                                     )}
+                                                    {!app.isActivity && app.exported_to_outlook && (
+                                                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                            Outlook
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                                 {theme && (
                                                     <Badge variant="outline" className="text-xs mt-1">
@@ -386,13 +441,26 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                 </div>
                                             </div>
                                             {!app.isActivity && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    <Pencil className="w-3 h-3" />
-                                                </Button>
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation();
+                                                            handleExportToOutlook(app); 
+                                                        }}
+                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        title="An Outlook übertragen"
+                                                    >
+                                                        <Send className="w-3 h-3" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                    >
+                                                        <Pencil className="w-3 h-3" />
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
