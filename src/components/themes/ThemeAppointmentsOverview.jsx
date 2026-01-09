@@ -362,8 +362,8 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             )}
                                                         </div>
                                                     </div>
-                                                    {!app.isActivity && (
-                                                        <div className="flex gap-1">
+                                                    <div className="flex gap-1">
+                                                        {!app.isActivity && (
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
@@ -376,6 +376,8 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             >
                                                                 <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
                                                             </Button>
+                                                        )}
+                                                        {!app.isActivity && (
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
@@ -389,6 +391,8 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             >
                                                                 <Pencil className="w-3 h-3" />
                                                             </Button>
+                                                        )}
+                                                        {!app.isActivity && (
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
@@ -401,22 +405,32 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             >
                                                                 <Send className="w-3 h-3" />
                                                             </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    if (confirm(`Termin "${app.title}" wirklich löschen?`)) {
+                                                        )}
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const confirmMessage = app.isActivity 
+                                                                    ? `Aktivität "${app.title}" wirklich löschen?`
+                                                                    : `Termin "${app.title}" wirklich löschen?`;
+                                                                if (confirm(confirmMessage)) {
+                                                                    if (app.isActivity) {
+                                                                        base44.entities.ThemeActivity.delete(app.id).then(() => {
+                                                                            queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
+                                                                            toast.success("Aktivität gelöscht");
+                                                                        });
+                                                                    } else {
                                                                         deleteMutation.mutate(app.id);
                                                                     }
-                                                                }}
-                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                                title="Löschen"
-                                                            >
-                                                                <Trash2 className="w-3 h-3" />
-                                                            </Button>
-                                                        </div>
-                                                    )}
+                                                                }
+                                                            }}
+                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                            title="Löschen"
+                                                        >
+                                                            <Trash2 className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
@@ -498,9 +512,9 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                         </span>
                                                     )}
                                                 </div>
-                                            </div>
-                                            {!app.isActivity && (
+                                                </div>
                                                 <div className="flex gap-1">
+                                                {!app.isActivity && (
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
@@ -513,6 +527,8 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                     >
                                                         <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
                                                     </Button>
+                                                )}
+                                                {!app.isActivity && (
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
@@ -526,6 +542,8 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                     >
                                                         <Pencil className="w-3 h-3" />
                                                     </Button>
+                                                )}
+                                                {!app.isActivity && (
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
@@ -538,22 +556,32 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                     >
                                                         <Send className="w-3 h-3" />
                                                     </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (confirm(`Termin "${app.title}" wirklich löschen?`)) {
+                                                )}
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const confirmMessage = app.isActivity 
+                                                            ? `Aktivität "${app.title}" wirklich löschen?`
+                                                            : `Termin "${app.title}" wirklich löschen?`;
+                                                        if (confirm(confirmMessage)) {
+                                                            if (app.isActivity) {
+                                                                base44.entities.ThemeActivity.delete(app.id).then(() => {
+                                                                    queryClient.invalidateQueries({ queryKey: ['themeActivities'] });
+                                                                    toast.success("Aktivität gelöscht");
+                                                                });
+                                                            } else {
                                                                 deleteMutation.mutate(app.id);
                                                             }
-                                                        }}
-                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                        title="Löschen"
-                                                    >
-                                                        <Trash2 className="w-3 h-3" />
-                                                    </Button>
+                                                        }
+                                                    }}
+                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    title="Löschen"
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                </Button>
                                                 </div>
-                                            )}
                                         </div>
                                     </div>
                                 );
