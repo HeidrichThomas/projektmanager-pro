@@ -28,6 +28,11 @@ export default function ThemeAppointmentsOverview() {
         queryFn: () => base44.entities.Theme.list()
     });
 
+    const { data: activities = [] } = useQuery({
+        queryKey: ['themeActivities'],
+        queryFn: () => base44.entities.ThemeActivity.list()
+    });
+
     const createMutation = useMutation({
         mutationFn: (data) => base44.entities.ThemeAppointment.create(data),
         onSuccess: () => {
@@ -72,15 +77,34 @@ export default function ThemeAppointmentsOverview() {
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
     const getAppointmentsForDay = (day) => {
-        return appointments.filter(app => 
+        const regularApps = appointments.filter(app => 
             app.start_date && isSameDay(new Date(app.start_date), day)
         );
+        const activityApps = activities.filter(act => 
+            act.appointment_date && isSameDay(new Date(act.appointment_date), day)
+        );
+        return [...regularApps, ...activityApps.map(act => ({
+            ...act,
+            start_date: act.appointment_date,
+            isActivity: true
+        }))];
     };
 
-    const upcomingAppointments = appointments
-        .filter(app => app.start_date && !isBefore(new Date(app.start_date), startOfToday()))
+    const upcomingAppointments = [
+        ...appointments
+            .filter(app => app.start_date && !isBefore(new Date(app.start_date), startOfToday()))
+            .map(app => ({ ...app, isActivity: false })),
+        ...activities
+            .filter(act => act.appointment_date && !isBefore(new Date(act.appointment_date), startOfToday()))
+            .map(act => ({ 
+                ...act, 
+                start_date: act.appointment_date, 
+                title: act.title,
+                isActivity: true 
+            }))
+    ]
         .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-        .slice(0, 5);
+        .slice(0, 10);
 
     return (
         <div className="grid md:grid-cols-10 gap-6">
@@ -200,10 +224,17 @@ export default function ThemeAppointmentsOverview() {
                                     getAppointmentsForDay(selectedDate).map(app => {
                                         const theme = getTheme(app.theme_id);
                                         return (
-                                            <div key={app.id} className="p-3 bg-slate-50 rounded-lg border group">
+                                            <div key={app.id} className="p-3 bg-slate-50 rounded-lg border group cursor-pointer hover:bg-slate-100 transition-all">
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="flex-1">
-                                                        <div className="font-medium text-slate-900">{app.title}</div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="font-medium text-slate-900">{app.title}</div>
+                                                            {app.isActivity && (
+                                                                <Badge variant="secondary" className="text-xs">
+                                                                    Aktivität
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                         {theme && (
                                                             <Badge variant="outline" className="text-xs mt-1">
                                                                 {theme.name}
@@ -224,27 +255,29 @@ export default function ThemeAppointmentsOverview() {
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() => { setEditingAppointment(app); setShowForm(true); }}
-                                                        >
-                                                            <Pencil className="w-3 h-3" />
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() => {
-                                                                if (confirm(`Termin "${app.title}" wirklich löschen?`)) {
-                                                                    deleteMutation.mutate(app.id);
-                                                                }
-                                                            }}
-                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                        >
-                                                            <Trash2 className="w-3 h-3" />
-                                                        </Button>
-                                                    </div>
+                                                    {!app.isActivity && (
+                                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() => { setEditingAppointment(app); setShowForm(true); }}
+                                                            >
+                                                                <Pencil className="w-3 h-3" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() => {
+                                                                    if (confirm(`Termin "${app.title}" wirklich löschen?`)) {
+                                                                        deleteMutation.mutate(app.id);
+                                                                    }
+                                                                }}
+                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
@@ -271,31 +304,60 @@ export default function ThemeAppointmentsOverview() {
                             upcomingAppointments.map(app => {
                                 const theme = getTheme(app.theme_id);
                                 return (
-                                    <div key={app.id} className="p-3 border rounded-lg hover:shadow-sm transition-all">
-                                        <div className="font-medium text-sm text-slate-900">{app.title}</div>
-                                        {theme && (
-                                            <Badge variant="outline" className="text-xs mt-1">
-                                                {theme.name}
-                                            </Badge>
-                                        )}
-                                        <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600">
-                                            {app.start_date && (
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar className="w-3 h-3" />
-                                                    {format(new Date(app.start_date), 'dd.MM.yyyy', { locale: de })}
-                                                </span>
-                                            )}
-                                            {app.start_date && (
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    {format(new Date(app.start_date), 'HH:mm')} Uhr
-                                                </span>
-                                            )}
-                                            {app.location && (
-                                                <span className="flex items-center gap-1">
-                                                    <MapPin className="w-3 h-3" />
-                                                    {app.location}
-                                                </span>
+                                    <div 
+                                        key={`${app.isActivity ? 'activity' : 'appointment'}-${app.id}`} 
+                                        className="p-3 border rounded-lg hover:shadow-sm transition-all cursor-pointer group"
+                                        onClick={() => !app.isActivity && (setEditingAppointment(app), setShowForm(true))}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="font-medium text-sm text-slate-900">{app.title}</div>
+                                                    {app.isActivity && (
+                                                        <Badge variant="secondary" className="text-xs">
+                                                            Aktivität
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                {theme && (
+                                                    <Badge variant="outline" className="text-xs mt-1">
+                                                        {theme.name}
+                                                    </Badge>
+                                                )}
+                                                <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600">
+                                                    {app.start_date && (
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="w-3 h-3" />
+                                                            {format(new Date(app.start_date), 'dd.MM.yyyy', { locale: de })}
+                                                        </span>
+                                                    )}
+                                                    {app.start_date && (
+                                                        <span className="flex items-center gap-1">
+                                                            <Clock className="w-3 h-3" />
+                                                            {format(new Date(app.start_date), 'HH:mm')} Uhr
+                                                        </span>
+                                                    )}
+                                                    {app.location && (
+                                                        <span className="flex items-center gap-1">
+                                                            <MapPin className="w-3 h-3" />
+                                                            {app.location}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {!app.isActivity && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingAppointment(app);
+                                                        setShowForm(true);
+                                                    }}
+                                                >
+                                                    <Pencil className="w-3 h-3" />
+                                                </Button>
                                             )}
                                         </div>
                                     </div>
