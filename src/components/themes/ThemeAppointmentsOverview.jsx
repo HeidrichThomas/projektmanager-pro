@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,6 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
     const [editingAppointment, setEditingAppointment] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [checkedExpired, setCheckedExpired] = useState(false);
     
     const queryClient = useQueryClient();
 
@@ -139,26 +138,6 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
     ]
         .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
         .slice(0, 10);
-
-    // Prüfe auf überschrittene Termine
-    useEffect(() => {
-        if (!compact && appointments.length > 0 && !checkedExpired) {
-            const now = new Date();
-            const expiredAppointments = appointments.filter(app => 
-                app.start_date && isBefore(new Date(app.start_date), now)
-            );
-            
-            if (expiredAppointments.length > 0) {
-                const expiredList = expiredAppointments.map(app => `• ${app.title}`).join('\n');
-                if (confirm(`Folgende Termine sind bereits abgelaufen:\n\n${expiredList}\n\nMöchten Sie diese Termine löschen?`)) {
-                    expiredAppointments.forEach(app => {
-                        deleteMutation.mutate(app.id);
-                    });
-                }
-            }
-            setCheckedExpired(true);
-        }
-    }, [appointments, compact, checkedExpired]);
 
     if (compact) {
         return (
