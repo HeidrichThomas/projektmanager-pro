@@ -28,6 +28,7 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
         company_id: "",
         contact_person_ids: [],
         activity_date: new Date().toISOString().slice(0, 16),
+        appointment_date: "",
         file_urls: [],
         file_names: []
     });
@@ -66,6 +67,7 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                 company_id: "",
                 contact_person_ids: [],
                 activity_date: new Date().toISOString().slice(0, 16),
+                appointment_date: "",
                 file_urls: [],
                 file_names: []
             });
@@ -180,6 +182,17 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                                 required
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <Label>Termin (optional)</Label>
+                        <Input
+                            type="datetime-local"
+                            value={formData.appointment_date}
+                            onChange={(e) => setFormData({...formData, appointment_date: e.target.value})}
+                            className="mt-1.5"
+                            placeholder="Zukünftiger Termin"
+                        />
                     </div>
 
                     <div>
