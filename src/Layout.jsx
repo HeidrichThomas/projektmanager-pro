@@ -10,7 +10,6 @@ import {
 
 
 import MiniActivityCalendar from "@/components/layout/MiniActivityCalendar";
-import ThemeAppointmentsOverview from "@/components/themes/ThemeAppointmentsOverview";
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -65,18 +64,11 @@ export default function Layout({ children, currentPageName }) {
                         </div>
                     </div>
                     
-                    <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+                    <nav className="flex-1 px-4 space-y-1">
                         {navigation.map((item) => (
                             <div key={item.name}>
                                 <NavLink item={item} />
-                                {item.page === "Themes" && (
-                                    <div className="space-y-3">
-                                        <MiniActivityCalendar />
-                                        <div className="px-2">
-                                            <ThemeAppointmentsOverview />
-                                        </div>
-                                    </div>
-                                )}
+                                {item.page === "Themes" && <MiniActivityCalendar />}
                             </div>
                         ))}
                     </nav>

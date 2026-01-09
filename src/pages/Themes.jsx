@@ -179,10 +179,7 @@ export default function Themes() {
                             <Calendar className="w-4 h-4 text-blue-600" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-slate-900">{stats.totalActivities}</div>
-                            <p className="text-xs text-slate-500 mt-1">
-                                Gesamt erfasst
-                            </p>
+                            <ThemeAppointmentsOverview compact={true} />
                         </CardContent>
                     </Card>
 
