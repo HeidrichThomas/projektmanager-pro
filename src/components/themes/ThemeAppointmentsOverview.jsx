@@ -85,7 +85,7 @@ export default function ThemeAppointmentsOverview() {
     return (
         <div className="grid md:grid-cols-10 gap-6">
             {/* Kalenderansicht */}
-            <Card className="md:col-span-2">
+            <Card className="md:col-span-3">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
@@ -261,7 +261,7 @@ export default function ThemeAppointmentsOverview() {
             </Card>
 
             {/* Anstehende Termine */}
-            <Card className="md:col-span-8">
+            <Card className="md:col-span-7">
                 <CardHeader>
                     <CardTitle className="text-lg">Anstehende Termine</CardTitle>
                 </CardHeader>
