@@ -382,20 +382,25 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-1">
-                                                        {!app.isActivity && (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (app.isActivity) {
+                                                                    updateActivityMutation.mutate({
+                                                                        id: app.id,
+                                                                        data: { ...app, is_important: !app.is_important }
+                                                                    });
+                                                                } else {
                                                                     toggleImportant(app);
-                                                                }}
-                                                                className={app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}
-                                                                title="Als wichtig markieren"
-                                                            >
-                                                                <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
-                                                            </Button>
-                                                        )}
+                                                                }
+                                                            }}
+                                                            className={app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}
+                                                            title="Als wichtig markieren"
+                                                        >
+                                                            <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
+                                                        </Button>
                                                         <Button
                                                             size="sm"
                                                             variant="ghost"
@@ -414,20 +419,18 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                         >
                                                             <Pencil className="w-3 h-3" />
                                                         </Button>
-                                                        {!app.isActivity && (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={(e) => { 
-                                                                    e.stopPropagation();
-                                                                    handleExportToOutlook(app); 
-                                                                }}
-                                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                                title="An Outlook übertragen"
-                                                            >
-                                                                <Send className="w-3 h-3" />
-                                                            </Button>
-                                                        )}
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(e) => { 
+                                                                e.stopPropagation();
+                                                                handleExportToOutlook(app); 
+                                                            }}
+                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                            title="An Outlook übertragen"
+                                                        >
+                                                            <Send className="w-3 h-3" />
+                                                        </Button>
                                                         <Button
                                                             size="sm"
                                                             variant="ghost"
@@ -536,20 +539,25 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                 </div>
                                                 </div>
                                                 <div className="flex gap-1">
-                                                    {!app.isActivity && (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (app.isActivity) {
+                                                                updateActivityMutation.mutate({
+                                                                    id: app.id,
+                                                                    data: { ...app, is_important: !app.is_important }
+                                                                });
+                                                            } else {
                                                                 toggleImportant(app);
-                                                            }}
-                                                            className={app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}
-                                                            title="Als wichtig markieren"
-                                                        >
-                                                            <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
-                                                        </Button>
-                                                    )}
+                                                            }
+                                                        }}
+                                                        className={app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}
+                                                        title="Als wichtig markieren"
+                                                    >
+                                                        <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
+                                                    </Button>
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
@@ -568,20 +576,18 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                     >
                                                         <Pencil className="w-3 h-3" />
                                                     </Button>
-                                                    {!app.isActivity && (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={(e) => { 
-                                                                e.stopPropagation();
-                                                                handleExportToOutlook(app); 
-                                                            }}
-                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                            title="An Outlook übertragen"
-                                                        >
-                                                            <Send className="w-3 h-3" />
-                                                        </Button>
-                                                    )}
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation();
+                                                            handleExportToOutlook(app); 
+                                                        }}
+                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        title="An Outlook übertragen"
+                                                    >
+                                                        <Send className="w-3 h-3" />
+                                                    </Button>
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
