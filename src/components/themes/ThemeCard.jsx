@@ -20,43 +20,45 @@ export default function ThemeCard({ theme }) {
 
     return (
         <Link to={createPageUrl("ThemeDetail") + `?id=${theme.id}`}>
-            <Card className="p-5 hover:shadow-xl transition-all duration-300 border-slate-200 group cursor-pointer min-h-96 flex flex-col">
-                <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        <Lightbulb className="w-6 h-6 text-amber-600" />
+            <Card className="p-3 hover:shadow-xl transition-all duration-300 border-slate-200 group cursor-pointer flex flex-col h-48">
+                <div className="flex items-start gap-2 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <Lightbulb className="w-4 h-4 text-amber-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-2 mb-1">
+                        <h3 className="font-semibold text-sm text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-2">
                             {theme.name}
                         </h3>
                     </div>
                 </div>
 
-                <Badge variant="secondary" className={`${status.color} border mb-3 w-fit`}>
+                <Badge variant="secondary" className={`${status.color} border mb-2 w-fit text-xs`}>
                     {status.label}
                 </Badge>
 
                 {theme.description && (
-                    <p className="text-sm text-slate-600 line-clamp-3 mb-4 flex-1">
+                    <p className="text-xs text-slate-600 line-clamp-2 mb-2 flex-1">
                         {theme.description}
                     </p>
                 )}
 
-                <div className="space-y-3 mt-auto pt-4 border-t">
+                <div className="space-y-2 mt-auto pt-2 border-t">
                     <div>
                         <div className="flex justify-between items-center mb-1 text-xs">
                             <span className="text-slate-500">Fortschritt</span>
                             <span className="font-medium text-slate-700">{theme.progress || 0}%</span>
                         </div>
-                        <Progress value={theme.progress || 0} className="h-2" />
+                        <Progress value={theme.progress || 0} className="h-1.5" />
                     </div>
 
                     {(theme.start_date || theme.end_date) && (
                         <div className="flex items-center gap-1 text-xs text-slate-500">
                             <Calendar className="w-3 h-3" />
-                            {theme.start_date && format(new Date(theme.start_date), "dd.MM.yyyy", { locale: de })}
-                            {theme.start_date && theme.end_date && " - "}
-                            {theme.end_date && format(new Date(theme.end_date), "dd.MM.yyyy", { locale: de })}
+                            <span className="truncate">
+                                {theme.start_date && format(new Date(theme.start_date), "dd.MM.yy", { locale: de })}
+                                {theme.start_date && theme.end_date && " - "}
+                                {theme.end_date && format(new Date(theme.end_date), "dd.MM.yy", { locale: de })}
+                            </span>
                         </div>
                     )}
                 </div>
