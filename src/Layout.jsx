@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 
 
+import MiniActivityCalendar from "@/components/layout/MiniActivityCalendar";
+
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
     { name: "Projekte", icon: FolderKanban, page: "Projects" },
@@ -64,7 +66,10 @@ export default function Layout({ children, currentPageName }) {
                     
                     <nav className="flex-1 px-4 space-y-1">
                         {navigation.map((item) => (
-                            <NavLink key={item.name} item={item} />
+                            <div key={item.name}>
+                                <NavLink item={item} />
+                                {item.page === "Themes" && <MiniActivityCalendar />}
+                            </div>
                         ))}
                     </nav>
 
