@@ -29,52 +29,47 @@ export default function ThemeKanban({ themes, onStatusChange }) {
 
         return (
             <Link to={createPageUrl("ThemeDetail") + `?id=${theme.id}`}>
-                <Card className="p-4 hover:shadow-lg transition-all duration-300 border-slate-200 group cursor-pointer h-80 flex flex-col overflow-hidden">
-                    <div className="flex justify-between items-start mb-3 gap-2">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center shrink-0">
-                                <Lightbulb className="w-5 h-5 text-amber-600" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <h3 className="font-semibold text-sm text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-2">
-                                    {theme.name}
-                                </h3>
-                            </div>
+                <Card className="p-3 hover:shadow-xl transition-all duration-300 border-slate-200 group cursor-pointer flex flex-col h-48">
+                    <div className="flex items-start gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Lightbulb className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-2">
+                                {theme.name}
+                            </h3>
                         </div>
                     </div>
-                    
+
+                    <Badge variant="secondary" className={`${statusConfig[theme.status]?.color} border mb-2 w-fit text-xs`}>
+                        {statusConfig[theme.status]?.label}
+                    </Badge>
+
                     {theme.description && (
-                        <p className="text-xs text-slate-600 mb-3 line-clamp-2">
+                        <p className="text-xs text-slate-600 line-clamp-2 mb-2 flex-1">
                             {theme.description}
                         </p>
                     )}
-                    
-                    <div className="space-y-2 mt-auto">
+
+                    <div className="space-y-2 mt-auto pt-2 border-t">
                         <div>
-                            <div className="flex justify-between text-xs mb-1">
+                            <div className="flex justify-between items-center mb-1 text-xs">
                                 <span className="text-slate-500">Fortschritt</span>
                                 <span className="font-medium text-slate-700">{theme.progress || 0}%</span>
                             </div>
                             <Progress value={theme.progress || 0} className="h-1.5" />
                         </div>
-                        
+
                         {(theme.start_date || theme.end_date) && (
                             <div className="flex items-center gap-1 text-xs text-slate-500">
-                                <Calendar className="w-3 h-3 shrink-0" />
+                                <Calendar className="w-3 h-3" />
                                 <span className="truncate">
-                                    {theme.start_date && format(new Date(theme.start_date), "dd.MM.yyyy", { locale: de })}
+                                    {theme.start_date && format(new Date(theme.start_date), "dd.MM.yy", { locale: de })}
                                     {theme.start_date && theme.end_date && " - "}
-                                    {theme.end_date && format(new Date(theme.end_date), "dd.MM.yyyy", { locale: de })}
+                                    {theme.end_date && format(new Date(theme.end_date), "dd.MM.yy", { locale: de })}
                                 </span>
                             </div>
                         )}
-                    </div>
-                    
-                    <div className="mt-auto pt-2 border-t border-slate-100 flex justify-end">
-                        <span className="text-xs text-slate-400 group-hover:text-amber-600 flex items-center gap-0.5 transition-colors">
-                            Öffnen
-                            <ArrowRight className="w-3 h-3" />
-                        </span>
                     </div>
                 </Card>
             </Link>
