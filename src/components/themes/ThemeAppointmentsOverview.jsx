@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Send, CheckCircle2 } from "lucide-react";
+import { Calendar, Clock, MapPin, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Send, CheckCircle2, Star } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday, isBefore, startOfToday, getWeek, startOfWeek, endOfWeek } from "date-fns";
@@ -75,6 +75,13 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
         } else {
             createMutation.mutate(data);
         }
+    };
+
+    const toggleImportant = (app) => {
+        updateMutation.mutate({
+            id: app.id,
+            data: { ...app, is_important: !app.is_important }
+        });
     };
 
     const handleExportToOutlook = (app) => {
@@ -298,6 +305,9 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
+                                                            {!app.isActivity && app.is_important && (
+                                                                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                                            )}
                                                             <div className="font-medium text-slate-900">{app.title}</div>
                                                             {app.isActivity && (
                                                                 <Badge variant="secondary" className="text-xs">
@@ -332,7 +342,19 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                         </div>
                                                     </div>
                                                     {!app.isActivity && (
-                                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <div className="flex gap-1">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    toggleImportant(app);
+                                                                }}
+                                                                className={app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}
+                                                                title="Als wichtig markieren"
+                                                            >
+                                                                <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
+                                                            </Button>
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
@@ -342,6 +364,7 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                                     setShowForm(true);
                                                                 }}
                                                                 className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
+                                                                title="Bearbeiten"
                                                             >
                                                                 <Pencil className="w-3 h-3" />
                                                             </Button>
@@ -367,6 +390,7 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                                     }
                                                                 }}
                                                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                title="Löschen"
                                                             >
                                                                 <Trash2 className="w-3 h-3" />
                                                             </Button>
@@ -412,6 +436,9 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2">
+                                                    {!app.isActivity && app.is_important && (
+                                                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                                    )}
                                                     <div className="font-medium text-sm text-slate-900">{app.title}</div>
                                                     {app.isActivity && (
                                                         <Badge variant="secondary" className="text-xs">
@@ -452,7 +479,19 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                 </div>
                                             </div>
                                             {!app.isActivity && (
-                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex gap-1">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleImportant(app);
+                                                        }}
+                                                        className={app.is_important ? "text-amber-500" : "text-slate-400 hover:text-amber-500"}
+                                                        title="Als wichtig markieren"
+                                                    >
+                                                        <Star className={`w-3 h-3 ${app.is_important ? 'fill-amber-500' : ''}`} />
+                                                    </Button>
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
@@ -462,6 +501,7 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             setShowForm(true);
                                                         }}
                                                         className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
+                                                        title="Bearbeiten"
                                                     >
                                                         <Pencil className="w-3 h-3" />
                                                     </Button>
@@ -476,6 +516,20 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                         title="An Outlook übertragen"
                                                     >
                                                         <Send className="w-3 h-3" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (confirm(`Termin "${app.title}" wirklich löschen?`)) {
+                                                                deleteMutation.mutate(app.id);
+                                                            }
+                                                        }}
+                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        title="Löschen"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
                                                     </Button>
                                                 </div>
                                             )}
