@@ -175,6 +175,19 @@ export default function Themes() {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-slate-600">Anstehende Termine</CardTitle>
+                            <Calendar className="w-4 h-4 text-blue-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-slate-900">{stats.totalActivities}</div>
+                            <p className="text-xs text-slate-500 mt-1">
+                                Gesamt erfasst
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-slate-600">Durchschnittlicher Fortschritt</CardTitle>
                             <TrendingUp className="w-4 h-4 text-emerald-600" />
                         </CardHeader>
@@ -182,19 +195,6 @@ export default function Themes() {
                             <div className="text-2xl font-bold text-slate-900">{stats.avgProgress}%</div>
                             <p className="text-xs text-slate-500 mt-1">
                                 {stats.completed} abgeschlossen
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-slate-600">Aktivitäten</CardTitle>
-                            <Calendar className="w-4 h-4 text-blue-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-slate-900">{stats.totalActivities}</div>
-                            <p className="text-xs text-slate-500 mt-1">
-                                Gesamt erfasst
                             </p>
                         </CardContent>
                     </Card>
@@ -230,11 +230,6 @@ export default function Themes() {
                             </p>
                         </CardContent>
                     </Card>
-                </div>
-
-                {/* Terminübersicht */}
-                <div className="mb-8">
-                    <ThemeAppointmentsOverview />
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 mb-6 items-end">
