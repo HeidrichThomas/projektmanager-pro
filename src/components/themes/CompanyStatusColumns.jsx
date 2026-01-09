@@ -3,13 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, XCircle, User, Phone, Mail, AlertCircle } from "lucide-react";
+import { CheckCircle2, Circle, XCircle, User, Phone, Mail, AlertCircle, Pencil } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 
-export default function CompanyStatusColumns({ open, onClose, companies }) {
+export default function CompanyStatusColumns({ open, onClose, companies, onEditCompany }) {
     const queryClient = useQueryClient();
     const [confirmDialog, setConfirmDialog] = useState(null);
 
@@ -175,20 +175,33 @@ export default function CompanyStatusColumns({ open, onClose, companies }) {
                                                 companiesInGroup.map((company, index) => (
                                                     <Draggable key={company.id} draggableId={company.id} index={index}>
                                                         {(provided, snapshot) => (
-                                                            <Card
-                                                                ref={provided.innerRef}
-                                                                {...provided.draggableProps}
-                                                                {...provided.dragHandleProps}
-                                                                className={`p-3 hover:shadow-md transition-all cursor-move ${
-                                                                    snapshot.isDragging ? 'shadow-lg rotate-2' : ''
-                                                                }`}
-                                                            >
+                                                           <Card
+                                                               ref={provided.innerRef}
+                                                               {...provided.draggableProps}
+                                                               {...provided.dragHandleProps}
+                                                               className={`p-3 hover:shadow-md transition-all cursor-move group ${
+                                                                   snapshot.isDragging ? 'shadow-lg rotate-2' : ''
+                                                               }`}
+                                                           >
                                                                 <div className="flex items-start gap-2">
-                                                                    <Icon className={`w-4 h-4 mt-0.5 ${config.color} shrink-0`} />
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <h4 className="font-semibold text-slate-900 text-sm truncate">
-                                                                            {company.company_name}
-                                                                        </h4>
+                                                                   <Icon className={`w-4 h-4 mt-0.5 ${config.color} shrink-0`} />
+                                                                   <div className="flex-1 min-w-0">
+                                                                       <div className="flex items-start justify-between gap-2">
+                                                                           <h4 className="font-semibold text-slate-900 text-sm truncate">
+                                                                               {company.company_name}
+                                                                           </h4>
+                                                                           <Button
+                                                                               variant="ghost"
+                                                                               size="sm"
+                                                                               className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                                                               onClick={(e) => {
+                                                                                   e.stopPropagation();
+                                                                                   onEditCompany && onEditCompany(company);
+                                                                               }}
+                                                                           >
+                                                                               <Pencil className="w-3 h-3 text-slate-500" />
+                                                                           </Button>
+                                                                       </div>
                                                                         
                                                                         {(company.city || company.postal_code) && (
                                                                             <p className="text-xs text-slate-600 mt-0.5">
