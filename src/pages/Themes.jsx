@@ -18,6 +18,7 @@ import ThemeCompanyManagement from "@/components/themes/ThemeCompanyManagement";
 import DocumentManagement from "@/components/themes/DocumentManagement";
 import CompaniesAndSectorsOverview from "@/components/themes/CompaniesAndSectorsOverview";
 import CompanyStatusColumns from "@/components/themes/CompanyStatusColumns";
+import ThemeAppointmentsOverview from "@/components/themes/ThemeAppointmentsOverview";
 
 export default function Themes() {
     const [showForm, setShowForm] = useState(false);
