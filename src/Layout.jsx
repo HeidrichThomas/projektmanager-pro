@@ -7,7 +7,7 @@ import {
     LayoutDashboard, Building2, FolderKanban, Database,
     Menu, ChevronRight, CheckCircle2, Lightbulb
 } from "lucide-react";
-import MiniActivityCalendar from "@/components/layout/MiniActivityCalendar";
+
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -64,10 +64,7 @@ export default function Layout({ children, currentPageName }) {
                     
                     <nav className="flex-1 px-4 space-y-1">
                         {navigation.map((item) => (
-                            <div key={item.name}>
-                                <NavLink item={item} />
-                                {item.page === "Themes" && <MiniActivityCalendar />}
-                            </div>
+                            <NavLink key={item.name} item={item} />
                         ))}
                     </nav>
 
