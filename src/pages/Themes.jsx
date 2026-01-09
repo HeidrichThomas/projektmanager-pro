@@ -13,7 +13,7 @@ import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeCard from "@/components/themes/ThemeCard";
 import ThemeKanban from "@/components/themes/ThemeKanban";
 import SectorManagement from "@/components/themes/SectorManagement";
-import ThemeCalendar from "@/components/themes/ThemeCalendar";
+
 import ThemeCompanyManagement from "@/components/themes/ThemeCompanyManagement";
 import DocumentManagement from "@/components/themes/DocumentManagement";
 import CompaniesAndSectorsOverview from "@/components/themes/CompaniesAndSectorsOverview";
@@ -315,10 +315,6 @@ export default function Themes() {
                     </div>
                 )}
 
-                {/* Calendar */}
-                <div className="mt-8">
-                    <ThemeCalendar activities={activities} themes={themes} />
-                </div>
             </div>
 
             <ThemeForm
