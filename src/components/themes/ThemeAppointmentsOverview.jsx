@@ -336,6 +336,18 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setEditingAppointment(app);
+                                                                    setShowForm(true);
+                                                                }}
+                                                                className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
+                                                            >
+                                                                <Pencil className="w-3 h-3" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
                                                                 onClick={(e) => { 
                                                                     e.stopPropagation();
                                                                     handleExportToOutlook(app); 
@@ -441,6 +453,18 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                             </div>
                                             {!app.isActivity && (
                                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingAppointment(app);
+                                                            setShowForm(true);
+                                                        }}
+                                                        className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
+                                                    >
+                                                        <Pencil className="w-3 h-3" />
+                                                    </Button>
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
