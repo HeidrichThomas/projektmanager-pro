@@ -283,16 +283,17 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                                 {getAppointmentsForDay(selectedDate).length > 0 ? (
                                     getAppointmentsForDay(selectedDate).map(app => {
                                         const theme = getTheme(app.theme_id);
+                                        const handleClick = () => {
+                                            if (!app.isActivity) {
+                                                setEditingAppointment(app);
+                                                setShowForm(true);
+                                            }
+                                        };
                                         return (
                                             <div 
                                                 key={app.id} 
                                                 className={`p-3 bg-slate-50 rounded-lg border group transition-all ${!app.isActivity ? 'cursor-pointer hover:bg-slate-100 hover:border-indigo-300' : ''}`}
-                                                onClick={() => {
-                                                    if (!app.isActivity) {
-                                                        setEditingAppointment(app);
-                                                        setShowForm(true);
-                                                    }
-                                                }}
+                                                onClick={handleClick}
                                             >
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="flex-1">
@@ -384,16 +385,17 @@ export default function ThemeAppointmentsOverview({ compact = false }) {
                         {upcomingAppointments.length > 0 ? (
                             upcomingAppointments.map(app => {
                                 const theme = getTheme(app.theme_id);
+                                const handleClick = () => {
+                                    if (!app.isActivity) {
+                                        setEditingAppointment(app);
+                                        setShowForm(true);
+                                    }
+                                };
                                 return (
                                     <div 
                                         key={`${app.isActivity ? 'activity' : 'appointment'}-${app.id}`} 
                                         className={`p-3 border rounded-lg hover:shadow-sm transition-all group ${!app.isActivity ? 'cursor-pointer hover:border-indigo-300' : ''}`}
-                                        onClick={() => {
-                                            if (!app.isActivity) {
-                                                setEditingAppointment(app);
-                                                setShowForm(true);
-                                            }
-                                        }}
+                                        onClick={handleClick}
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1">
