@@ -19,6 +19,8 @@ import DocumentManagement from "@/components/themes/DocumentManagement";
 import CompaniesAndSectorsOverview from "@/components/themes/CompaniesAndSectorsOverview";
 import CompanyStatusColumns from "@/components/themes/CompanyStatusColumns";
 import MiniAppointmentCalendar from "@/components/layout/MiniAppointmentCalendar";
+import ThemeAppointmentsOverview from "@/components/themes/ThemeAppointmentsOverview";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Themes() {
     const [showForm, setShowForm] = useState(false);
