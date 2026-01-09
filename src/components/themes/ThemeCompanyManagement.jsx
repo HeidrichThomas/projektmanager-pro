@@ -11,11 +11,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 
-export default function ThemeCompanyManagement({ open, onClose }) {
+export default function ThemeCompanyManagement({ open, onClose, editingCompany: externalEditingCompany }) {
     const [editingCompany, setEditingCompany] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [importing, setImporting] = useState(false);
     const [transferDialog, setTransferDialog] = useState(null);
+
+    React.useEffect(() => {
+        if (externalEditingCompany) {
+            setEditingCompany(externalEditingCompany);
+            setFormData(externalEditingCompany);
+            setShowForm(true);
+        }
+    }, [externalEditingCompany]);
     const [formData, setFormData] = useState({
         company_name: "",
         street: "",
