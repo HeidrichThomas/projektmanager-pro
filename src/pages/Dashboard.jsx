@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -7,21 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
 import { 
     Building2, FolderKanban, CheckSquare, Calendar, 
-    ArrowRight, Clock, AlertCircle, TrendingUp, Search, X, User, Lightbulb, Layers
+    ArrowRight, Clock, AlertCircle, TrendingUp
 } from "lucide-react";
 import { format, isToday, isTomorrow, isPast } from "date-fns";
 import { de } from "date-fns/locale";
 import ActiveTimers from "@/components/dashboard/ActiveTimers";
 import DateTimeWeather from "@/components/dashboard/DateTimeWeather";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Dashboard() {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [showSearchResults, setShowSearchResults] = useState(false);
-
     const { data: customers = [], isLoading: loadingCustomers } = useQuery({
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
@@ -35,26 +30,6 @@ export default function Dashboard() {
     const { data: tasks = [], isLoading: loadingTasks } = useQuery({
         queryKey: ['tasks'],
         queryFn: () => base44.entities.Task.list()
-    });
-
-    const { data: themes = [] } = useQuery({
-        queryKey: ['themes'],
-        queryFn: () => base44.entities.Theme.list()
-    });
-
-    const { data: subThemes = [] } = useQuery({
-        queryKey: ['subThemes'],
-        queryFn: () => base44.entities.SubTheme.list()
-    });
-
-    const { data: activities = [] } = useQuery({
-        queryKey: ['activities'],
-        queryFn: () => base44.entities.Activity.list()
-    });
-
-    const { data: themeActivities = [] } = useQuery({
-        queryKey: ['themeActivities'],
-        queryFn: () => base44.entities.ThemeActivity.list()
     });
 
     const isLoading = loadingCustomers || loadingProjects || loadingTasks;
@@ -100,46 +75,6 @@ export default function Dashboard() {
         }
     ];
 
-    const searchResults = searchQuery.length > 1 ? {
-        customers: customers.filter(c => 
-            c.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.contact_name?.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-        projects: projects.filter(p => 
-            p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.description?.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-        tasks: tasks.filter(t => 
-            t.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            t.description?.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-        themes: themes.filter(th => 
-            th.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            th.description?.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-        subThemes: subThemes.filter(st => 
-            st.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            st.description?.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-        activities: activities.filter(a => 
-            a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            a.content?.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-        themeActivities: themeActivities.filter(ta => 
-            ta.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            ta.content?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-    } : null;
-
-    const totalResults = searchResults ? 
-        searchResults.customers.length + 
-        searchResults.projects.length + 
-        searchResults.tasks.length + 
-        searchResults.themes.length + 
-        searchResults.subThemes.length + 
-        searchResults.activities.length +
-        searchResults.themeActivities.length : 0;
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -147,39 +82,6 @@ export default function Dashboard() {
                     <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
                     <p className="text-slate-500 mt-1">Willkommen zurück! Hier ist Ihre Projektübersicht.</p>
                 </div>
-
-                {/* Global Search */}
-                <Card className="mb-8 shadow-sm">
-                    <CardContent className="p-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                            <Input
-                                placeholder="Suche über alles: Projekte, Kunden, Aufgaben, Themen..."
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    setSearchQuery(e.target.value);
-                                    if (e.target.value.length > 1) {
-                                        setShowSearchResults(true);
-                                    } else {
-                                        setShowSearchResults(false);
-                                    }
-                                }}
-                                className="pl-10 pr-10 h-12 text-base"
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => {
-                                        setSearchQuery("");
-                                        setShowSearchResults(false);
-                                    }}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                                >
-                                    <X className="w-5 h-5 text-slate-400 hover:text-slate-600" />
-                                </button>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
 
                 {/* Date, Time and Weather */}
                 <DateTimeWeather />
@@ -330,133 +232,6 @@ export default function Dashboard() {
                         </CardContent>
                     </Card>
                 </div>
-
-                {/* Search Results Dialog */}
-                <Dialog open={showSearchResults} onOpenChange={setShowSearchResults}>
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                                <Search className="w-5 h-5" />
-                                Suchergebnisse für "{searchQuery}"
-                            </DialogTitle>
-                            <p className="text-sm text-slate-500">{totalResults} Ergebnisse gefunden</p>
-                        </DialogHeader>
-                        
-                        <div className="space-y-6 mt-4">
-                            {searchResults?.customers.length > 0 && (
-                                <div>
-                                    <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                                        <Building2 className="w-4 h-4" />
-                                        Kunden ({searchResults.customers.length})
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {searchResults.customers.map(customer => (
-                                            <Link key={customer.id} to={createPageUrl("Customers")} onClick={() => setShowSearchResults(false)}>
-                                                <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
-                                                    <div className="font-medium text-slate-900">{customer.company}</div>
-                                                    {customer.contact_name && (
-                                                        <div className="text-sm text-slate-500">{customer.contact_name}</div>
-                                                    )}
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {searchResults?.projects.length > 0 && (
-                                <div>
-                                    <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                                        <FolderKanban className="w-4 h-4" />
-                                        Projekte ({searchResults.projects.length})
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {searchResults.projects.map(project => (
-                                            <Link key={project.id} to={createPageUrl("ProjectDetail") + `?id=${project.id}`} onClick={() => setShowSearchResults(false)}>
-                                                <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
-                                                    <div className="font-medium text-slate-900">{project.name}</div>
-                                                    {project.description && (
-                                                        <div className="text-sm text-slate-500 line-clamp-1">{project.description}</div>
-                                                    )}
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {searchResults?.tasks.length > 0 && (
-                                <div>
-                                    <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                                        <CheckSquare className="w-4 h-4" />
-                                        Aufgaben ({searchResults.tasks.length})
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {searchResults.tasks.map(task => (
-                                            <Link key={task.id} to={createPageUrl("ProjectDetail") + `?id=${task.project_id}`} onClick={() => setShowSearchResults(false)}>
-                                                <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
-                                                    <div className="font-medium text-slate-900">{task.title}</div>
-                                                    {task.description && (
-                                                        <div className="text-sm text-slate-500 line-clamp-1">{task.description}</div>
-                                                    )}
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {searchResults?.themes.length > 0 && (
-                                <div>
-                                    <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                                        <Lightbulb className="w-4 h-4" />
-                                        Themen ({searchResults.themes.length})
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {searchResults.themes.map(theme => (
-                                            <Link key={theme.id} to={createPageUrl("ThemeDetail") + `?id=${theme.id}`} onClick={() => setShowSearchResults(false)}>
-                                                <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
-                                                    <div className="font-medium text-slate-900">{theme.name}</div>
-                                                    {theme.description && (
-                                                        <div className="text-sm text-slate-500 line-clamp-1">{theme.description}</div>
-                                                    )}
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {searchResults?.subThemes.length > 0 && (
-                                <div>
-                                    <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                                        <Layers className="w-4 h-4" />
-                                        Unterthemen ({searchResults.subThemes.length})
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {searchResults.subThemes.map(subTheme => (
-                                            <Link key={subTheme.id} to={createPageUrl("SubThemeDetail") + `?id=${subTheme.id}&themeId=${subTheme.parent_theme_id}`} onClick={() => setShowSearchResults(false)}>
-                                                <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
-                                                    <div className="font-medium text-slate-900">{subTheme.name}</div>
-                                                    {subTheme.description && (
-                                                        <div className="text-sm text-slate-500 line-clamp-1">{subTheme.description}</div>
-                                                    )}
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {totalResults === 0 && (
-                                <div className="text-center py-8 text-slate-500">
-                                    <Search className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                                    <p>Keine Ergebnisse für "{searchQuery}"</p>
-                                </div>
-                            )}
-                        </div>
-                    </DialogContent>
-                </Dialog>
             </div>
         </div>
     );
