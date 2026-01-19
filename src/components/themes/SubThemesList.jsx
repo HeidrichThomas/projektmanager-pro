@@ -5,9 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Pencil, Trash2, Calendar, Layers } from "lucide-react";
+import { Pencil, Trash2, Calendar, Layers, Building2, User } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -17,6 +19,11 @@ const statusConfig = {
 };
 
 export default function SubThemesList({ subThemes, onEdit, onDelete, parentThemeId }) {
+    const { data: companies = [] } = useQuery({
+        queryKey: ['themeCompanies'],
+        queryFn: () => base44.entities.ThemeCompany.list()
+    });
+
     if (subThemes.length === 0) {
         return (
             <div className="text-center py-8 text-slate-500">
@@ -30,6 +37,9 @@ export default function SubThemesList({ subThemes, onEdit, onDelete, parentTheme
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {subThemes.map(subTheme => {
                 const status = statusConfig[subTheme.status] || statusConfig.geplant;
+                const subThemeCompanies = subTheme.company_ids 
+                    ? companies.filter(c => subTheme.company_ids.includes(c.id)) 
+                    : [];
                 
                 return (
                     <Link 
@@ -79,6 +89,35 @@ export default function SubThemesList({ subThemes, onEdit, onDelete, parentTheme
                                 <p className="text-sm text-slate-600 mb-3 line-clamp-2">
                                     {subTheme.description}
                                 </p>
+                            )}
+
+                            {subThemeCompanies.length > 0 && (
+                                <div className="mb-3 p-2 bg-slate-50 rounded-lg">
+                                    {subThemeCompanies.map((company, idx) => (
+                                        <div key={company.id} className={idx > 0 ? 'mt-2 pt-2 border-t' : ''}>
+                                            <div className="flex items-center gap-1 text-xs font-medium text-slate-700">
+                                                <Building2 className="w-3 h-3" />
+                                                {company.company_name}
+                                            </div>
+                                            {company.contact_persons && company.contact_persons.length > 0 && (
+                                                <div className="mt-1 ml-4 space-y-0.5">
+                                                    {company.contact_persons.slice(0, 2).map((contact, cidx) => (
+                                                        <div key={cidx} className="flex items-center gap-1 text-xs text-slate-600">
+                                                            <User className="w-2.5 h-2.5" />
+                                                            {contact.name}
+                                                            {contact.position && ` - ${contact.position}`}
+                                                        </div>
+                                                    ))}
+                                                    {company.contact_persons.length > 2 && (
+                                                        <div className="text-xs text-slate-500 ml-3.5">
+                                                            +{company.contact_persons.length - 2} weitere
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             )}
 
                             <div className="space-y-2">
