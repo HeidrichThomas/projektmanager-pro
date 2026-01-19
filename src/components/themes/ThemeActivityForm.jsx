@@ -10,6 +10,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { Loader2, Navigation } from "lucide-react";
 
 const activityTypes = {
     notiz: { label: "Notiz", icon: FileText, color: "text-slate-600" },
@@ -31,11 +32,16 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
         activity_date: new Date().toISOString().slice(0, 16),
         appointment_date: "",
         file_urls: [],
-        file_names: []
+        file_names: [],
+        requires_travel: false,
+        start_location: "Gartenstraße 17, 89257 Illertissen",
+        destination_address: "",
+        travel_distance_km: 0
     });
     const [uploading, setUploading] = useState(false);
     const [showAddContact, setShowAddContact] = useState(false);
     const [newContact, setNewContact] = useState({ name: "", position: "", phone: "", email: "" });
+    const [calculatingDistance, setCalculatingDistance] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -58,7 +64,11 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
             setFormData({
                 ...activity,
                 contact_person_ids: activity.contact_person_ids || [],
-                activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16)
+                activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16),
+                requires_travel: activity.requires_travel || false,
+                start_location: activity.start_location || "Gartenstraße 17, 89257 Illertissen",
+                destination_address: activity.destination_address || "",
+                travel_distance_km: activity.travel_distance_km || 0
             });
         } else if (open) {
             setFormData({
@@ -70,7 +80,11 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                 activity_date: new Date().toISOString().slice(0, 16),
                 appointment_date: "",
                 file_urls: [],
-                file_names: []
+                file_names: [],
+                requires_travel: false,
+                start_location: "Gartenstraße 17, 89257 Illertissen",
+                destination_address: "",
+                travel_distance_km: 0
             });
         }
     }, [activity, open]);
@@ -130,6 +144,40 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
         newUrls.splice(index, 1);
         newNames.splice(index, 1);
         setFormData({ ...formData, file_urls: newUrls, file_names: newNames });
+    };
+
+    const handleCalculateDistance = async () => {
+        if (!formData.start_location || !formData.destination_address) {
+            toast.error("Bitte Start- und Zielort eingeben");
+            return;
+        }
+
+        setCalculatingDistance(true);
+        try {
+            const response = await base44.integrations.Core.InvokeLLM({
+                prompt: `Nutze Google Maps um die Fahrtstrecke mit dem Auto von "${formData.start_location}" nach "${formData.destination_address}" zu ermitteln. 
+                Gib NUR die einfache Strecke (one-way) in Kilometern als Zahl zurück.`,
+                add_context_from_internet: true,
+                response_json_schema: {
+                    type: "object",
+                    properties: {
+                        one_way_km: { type: "number" }
+                    }
+                }
+            });
+
+            if (response.one_way_km && response.one_way_km > 0) {
+                const totalDistance = response.one_way_km * 2;
+                setFormData({ ...formData, travel_distance_km: parseFloat(totalDistance.toFixed(1)) });
+                toast.success(`Entfernung berechnet: ${totalDistance.toFixed(1)} km (Hin- und Rückfahrt)`);
+            } else {
+                toast.error("Keine gültigen Entfernungsdaten erhalten");
+            }
+        } catch (error) {
+            toast.error("Fehler bei der Berechnung der Entfernung");
+        } finally {
+            setCalculatingDistance(false);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -322,6 +370,78 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                             className="mt-1.5 h-32"
                         />
                     </div>
+
+                    {(formData.type === 'besuch' || formData.type === 'meeting') && (
+                        <div className="border-t pt-4">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Checkbox
+                                    id="requires_travel"
+                                    checked={formData.requires_travel}
+                                    onCheckedChange={(checked) => setFormData({...formData, requires_travel: checked})}
+                                />
+                                <Label htmlFor="requires_travel" className="cursor-pointer font-medium">
+                                    <div className="flex items-center gap-2">
+                                        <Navigation className="w-4 h-4 text-teal-600" />
+                                        Fahrt erforderlich (außer Haus)
+                                    </div>
+                                </Label>
+                            </div>
+
+                            {formData.requires_travel && (
+                                <div className="space-y-3 pl-6 border-l-2 border-teal-200">
+                                    <div>
+                                        <Label>Startort</Label>
+                                        <Input
+                                            value={formData.start_location}
+                                            onChange={(e) => setFormData({...formData, start_location: e.target.value})}
+                                            placeholder="z.B. Gartenstraße 17, 89257 Illertissen"
+                                            className="mt-1.5"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label>Zieladresse</Label>
+                                        <Input
+                                            value={formData.destination_address}
+                                            onChange={(e) => setFormData({...formData, destination_address: e.target.value})}
+                                            placeholder="z.B. Kundenadresse"
+                                            className="mt-1.5"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label>Gesamtkilometer (Hin- & Rückfahrt)</Label>
+                                        <div className="flex gap-2 mt-1.5">
+                                            <Input
+                                                type="number"
+                                                step="0.1"
+                                                value={formData.travel_distance_km}
+                                                onChange={(e) => setFormData({...formData, travel_distance_km: parseFloat(e.target.value) || 0})}
+                                                placeholder="0.0"
+                                                className="flex-1"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={handleCalculateDistance}
+                                                disabled={calculatingDistance || !formData.start_location || !formData.destination_address}
+                                            >
+                                                {calculatingDistance ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <Navigation className="w-4 h-4" />
+                                                )}
+                                                <span className="ml-2">Berechnen</span>
+                                            </Button>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mt-1">
+                                            Klicken Sie auf "Berechnen" um die Entfernung automatisch zu ermitteln
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     <div>
                         <Label>Dateien anhängen</Label>
