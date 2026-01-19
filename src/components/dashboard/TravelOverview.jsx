@@ -86,9 +86,10 @@ export default function TravelOverview() {
         if (!reportRef.current) return;
         
         const canvas = await html2canvas(reportRef.current, {
-            scale: 2,
+            scale: 2.5,
             useCORS: true,
-            logging: false
+            logging: false,
+            backgroundColor: '#ffffff'
         });
         
         const imgData = canvas.toDataURL("image/png");
@@ -96,7 +97,18 @@ export default function TravelOverview() {
         const imgWidth = 190;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
-        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+        let heightLeft = imgHeight;
+        let position = 10;
+        
+        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+        heightLeft -= 287;
+        
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight + 10;
+            pdf.addPage();
+            pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+            heightLeft -= 287;
+        }
         
         const fileName = `Fahrtenbericht_${months.find(m => m.value === selectedMonth)?.label}_${selectedYear}.pdf`;
         pdf.save(fileName);
@@ -205,11 +217,11 @@ export default function TravelOverview() {
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-slate-50">
-                                <TableHead className="w-28">Datum</TableHead>
-                                <TableHead>Projekt</TableHead>
-                                <TableHead>Kunde</TableHead>
-                                <TableHead>Aktivität</TableHead>
-                                <TableHead className="text-right">Kilometer</TableHead>
+                                <TableHead className="w-28 py-4">Datum</TableHead>
+                                <TableHead className="py-4">Projekt</TableHead>
+                                <TableHead className="py-4">Kunde</TableHead>
+                                <TableHead className="py-4">Aktivität</TableHead>
+                                <TableHead className="text-right py-4">Kilometer</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -220,28 +232,28 @@ export default function TravelOverview() {
                                     
                                     return (
                                         <TableRow key={activity.id} className="hover:bg-slate-50">
-                                            <TableCell className="font-medium text-sm">
+                                            <TableCell className="font-medium text-sm py-4">
                                                 <div className="flex items-center gap-1">
                                                     <Calendar className="w-3 h-3 text-slate-400" />
                                                     {format(parseISO(activity.activity_date), "dd.MM.yy", { locale: de })}
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="py-4">
                                                 <div className="flex items-center gap-1 text-sm">
                                                     <FolderKanban className="w-3 h-3 text-slate-400" />
                                                     <span className="truncate max-w-[150px]">{project?.name || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="py-4">
                                                 <div className="flex items-center gap-1 text-sm">
                                                     <Building2 className="w-3 h-3 text-slate-400" />
                                                     <span className="truncate max-w-[150px]">{customer?.company || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-sm text-slate-600 max-w-[200px] truncate">
+                                            <TableCell className="text-sm text-slate-600 max-w-[200px] truncate py-4">
                                                 {activity.title}
                                             </TableCell>
-                                            <TableCell className="text-right">
+                                            <TableCell className="text-right py-4">
                                                 <Badge variant="secondary" className="font-mono">
                                                     {activity.travel_distance_km?.toFixed(1)} km
                                                 </Badge>
