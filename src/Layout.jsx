@@ -124,16 +124,23 @@ export default function Layout({ children, currentPageName }) {
 
                         {/* Search */}
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <button
+                                onClick={() => {
+                                    if (searchQuery.length > 1) {
+                                        setShowSearchResults(true);
+                                    }
+                                }}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 hover:text-slate-600 transition-colors"
+                            >
+                                <Search className="w-4 h-4 text-slate-400" />
+                            </button>
                             <Input
                                 placeholder="Suchen..."
                                 value={searchQuery}
-                                onChange={(e) => {
-                                    setSearchQuery(e.target.value);
-                                    if (e.target.value.length > 1) {
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && searchQuery.length > 1) {
                                         setShowSearchResults(true);
-                                    } else {
-                                        setShowSearchResults(false);
                                     }
                                 }}
                                 className="pl-9 pr-9 h-9 text-sm"
