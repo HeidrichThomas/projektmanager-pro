@@ -280,6 +280,7 @@ export default function ThemeDetail() {
                     <CardContent>
                         <SubThemesList
                             subThemes={subThemes}
+                            parentThemeId={themeId}
                             onEdit={(subTheme) => {
                                 setEditingSubTheme(subTheme);
                                 setShowSubThemeForm(true);

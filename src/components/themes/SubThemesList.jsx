@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +16,7 @@ const statusConfig = {
     abgeschlossen: { label: "Abgeschlossen", color: "bg-emerald-100 text-emerald-700 border-emerald-200" }
 };
 
-export default function SubThemesList({ subThemes, onEdit, onDelete }) {
+export default function SubThemesList({ subThemes, onEdit, onDelete, parentThemeId }) {
     if (subThemes.length === 0) {
         return (
             <div className="text-center py-8 text-slate-500">
@@ -30,8 +32,12 @@ export default function SubThemesList({ subThemes, onEdit, onDelete }) {
                 const status = statusConfig[subTheme.status] || statusConfig.geplant;
                 
                 return (
-                    <Card key={subTheme.id} className="group hover:shadow-lg transition-all">
-                        <CardContent className="p-4">
+                    <Link 
+                        key={subTheme.id}
+                        to={createPageUrl("SubThemeDetail") + `?id=${subTheme.id}&themeId=${parentThemeId}`}
+                    >
+                        <Card className="group hover:shadow-lg transition-all cursor-pointer">
+                            <CardContent className="p-4">
                             <div className="flex items-start justify-between gap-2 mb-3">
                                 <div className="flex-1">
                                     <h4 className="font-semibold text-slate-900 mb-1">
@@ -46,7 +52,10 @@ export default function SubThemesList({ subThemes, onEdit, onDelete }) {
                                         size="sm"
                                         variant="ghost"
                                         className="h-7 w-7 p-0"
-                                        onClick={() => onEdit(subTheme)}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            onEdit(subTheme);
+                                        }}
                                     >
                                         <Pencil className="w-3 h-3" />
                                     </Button>
@@ -54,7 +63,8 @@ export default function SubThemesList({ subThemes, onEdit, onDelete }) {
                                         size="sm"
                                         variant="ghost"
                                         className="h-7 w-7 p-0 text-red-600"
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                            e.preventDefault();
                                             if (confirm(`"${subTheme.name}" wirklich löschen?`)) {
                                                 onDelete(subTheme.id);
                                             }
@@ -93,6 +103,7 @@ export default function SubThemesList({ subThemes, onEdit, onDelete }) {
                             </div>
                         </CardContent>
                     </Card>
+                </Link>
                 );
             })}
         </div>

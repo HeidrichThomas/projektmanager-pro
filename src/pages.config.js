@@ -6,6 +6,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
 import ThemeDetail from './pages/ThemeDetail';
 import Themes from './pages/Themes';
+import SubThemeDetail from './pages/SubThemeDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -18,6 +19,7 @@ export const PAGES = {
     "Projects": Projects,
     "ThemeDetail": ThemeDetail,
     "Themes": Themes,
+    "SubThemeDetail": SubThemeDetail,
 }
 
 export const pagesConfig = {
