@@ -138,7 +138,7 @@ export default function Layout({ children, currentPageName }) {
                                 placeholder="Suchen..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={(e) => {
+                                onKeyPress={(e) => {
                                     if (e.key === 'Enter' && searchQuery.length > 1) {
                                         setShowSearchResults(true);
                                     }
