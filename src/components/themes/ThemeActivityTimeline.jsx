@@ -58,7 +58,7 @@ export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) 
                                     )}
                                     
                                     <p className="text-sm text-slate-400">
-                                        {format(new Date(activity.activity_date), "dd. MMM. yyyy", { locale: de })}
+                                        {format(new Date(activity.activity_date), "dd. MMM. yyyy, HH:mm", { locale: de })} Uhr
                                     </p>
                                     
                                     {company && (
