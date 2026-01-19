@@ -335,9 +335,14 @@ export default function TravelOverview() {
                                                 <div className="break-words">{item.title}</div>
                                             </TableCell>
                                             <TableCell className="text-right py-6">
-                                                <Badge variant="secondary" className="font-mono">
-                                                    {item.distance?.toFixed(1)} km
-                                                </Badge>
+                                                <div className="text-right">
+                                                    <Badge variant="secondary" className="font-mono">
+                                                        {item.distance?.toFixed(1)} km
+                                                    </Badge>
+                                                    <div className="text-xs text-slate-400 mt-1">
+                                                        ({(item.distance / 2).toFixed(1)} km × 2)
+                                                    </div>
+                                                </div>
                                             </TableCell>
                                             <TableCell className="text-right py-6 text-xs text-slate-500">
                                                 {(rate * 100).toFixed(0)} ct

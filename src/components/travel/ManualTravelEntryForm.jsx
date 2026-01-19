@@ -20,6 +20,7 @@ export default function ManualTravelEntryForm({ open, onOpenChange, onSave }) {
         customer_id: "",
         notes: ""
     });
+    const [calculatingDistance, setCalculatingDistance] = useState(false);
 
     const { data: projects = [] } = useQuery({
         queryKey: ['projects'],
@@ -30,6 +31,36 @@ export default function ManualTravelEntryForm({ open, onOpenChange, onSave }) {
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
     });
+
+    const handleCalculateDistance = async () => {
+        if (!formData.start_location || !formData.destination) {
+            alert("Bitte Start- und Zielort eingeben");
+            return;
+        }
+
+        setCalculatingDistance(true);
+        try {
+            const response = await base44.integrations.Core.InvokeLLM({
+                prompt: `Berechne die einfache Wegstrecke in Kilometern von "${formData.start_location}" nach "${formData.destination}". 
+                Gib NUR die Gesamtstrecke für Hin- UND Rückfahrt (also 2x die einfache Strecke) als Zahl zurück.`,
+                add_context_from_internet: true,
+                response_json_schema: {
+                    type: "object",
+                    properties: {
+                        total_distance_km: { type: "number" }
+                    }
+                }
+            });
+
+            if (response.total_distance_km) {
+                setFormData({ ...formData, distance_km: response.total_distance_km.toFixed(1) });
+            }
+        } catch (error) {
+            alert("Fehler bei der Berechnung der Entfernung");
+        } finally {
+            setCalculatingDistance(false);
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -100,14 +131,24 @@ export default function ManualTravelEntryForm({ open, onOpenChange, onSave }) {
 
                     <div>
                         <Label>Kilometer (Hin- und Rückfahrt) *</Label>
-                        <Input
-                            type="number"
-                            step="0.1"
-                            value={formData.distance_km}
-                            onChange={(e) => setFormData({ ...formData, distance_km: e.target.value })}
-                            placeholder="z.B. 45.5"
-                            required
-                        />
+                        <div className="flex gap-2">
+                            <Input
+                                type="number"
+                                step="0.1"
+                                value={formData.distance_km}
+                                onChange={(e) => setFormData({ ...formData, distance_km: e.target.value })}
+                                placeholder="z.B. 45.5"
+                                required
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleCalculateDistance}
+                                disabled={calculatingDistance || !formData.start_location || !formData.destination}
+                            >
+                                {calculatingDistance ? "Berechne..." : "Berechnen"}
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
