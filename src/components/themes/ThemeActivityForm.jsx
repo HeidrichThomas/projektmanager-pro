@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Save, X, Upload, Trash2, FileText, Phone, Users, Mail, Milestone, User } from "lucide-react";
+import { Save, X, Upload, Trash2, FileText, Phone, Users, Mail, Milestone, User, MapPin } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,7 +17,8 @@ const activityTypes = {
     meeting: { label: "Meeting", icon: Users, color: "text-purple-600" },
     email: { label: "E-Mail", icon: Mail, color: "text-green-600" },
     dokument: { label: "Dokument", icon: FileText, color: "text-orange-600" },
-    meilenstein: { label: "Meilenstein", icon: Milestone, color: "text-amber-600" }
+    meilenstein: { label: "Meilenstein", icon: Milestone, color: "text-amber-600" },
+    besuch: { label: "Besuch", icon: MapPin, color: "text-teal-600" }
 };
 
 export default function ThemeActivityForm({ open, onClose, onSave, activity, themeId }) {

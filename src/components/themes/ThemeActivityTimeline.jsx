@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Phone, Users, Mail, Milestone, Pencil, Trash2, Download, Building2, User } from "lucide-react";
+import { FileText, Phone, Users, Mail, Milestone, Pencil, Trash2, Download, Building2, User, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
@@ -14,7 +14,8 @@ const activityTypes = {
     meeting: { label: "Meeting", icon: Users, color: "bg-purple-100 text-purple-700 border-purple-300" },
     email: { label: "E-Mail", icon: Mail, color: "bg-green-100 text-green-700 border-green-300" },
     dokument: { label: "Dokument", icon: FileText, color: "bg-orange-100 text-orange-700 border-orange-300" },
-    meilenstein: { label: "Meilenstein", icon: Milestone, color: "bg-amber-100 text-amber-700 border-amber-300" }
+    meilenstein: { label: "Meilenstein", icon: Milestone, color: "bg-amber-100 text-amber-700 border-amber-300" },
+    besuch: { label: "Besuch", icon: MapPin, color: "bg-teal-100 text-teal-700 border-teal-300" }
 };
 
 export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) {
