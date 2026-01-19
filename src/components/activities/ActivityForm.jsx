@@ -330,17 +330,36 @@ Beispiel-Antwort: 45.6`,
 
                                     <div>
                                         <Label className="text-slate-700 font-medium">Zieladresse</Label>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                if (value === 'manual') return;
+                                                const customer = customers.find(c => c.id === value);
+                                                if (customer && customer.street && customer.city) {
+                                                    const address = `${customer.street}, ${customer.postal_code || ''} ${customer.city}`.trim();
+                                                    setFormData({...formData, destination_address: address});
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger className="mt-1.5">
+                                                <SelectValue placeholder="Kunde auswählen oder manuell eingeben" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="manual">Manuell eingeben</SelectItem>
+                                                {customers
+                                                    .filter(c => c.street && c.city)
+                                                    .map(customer => (
+                                                        <SelectItem key={customer.id} value={customer.id}>
+                                                            {customer.company} - {customer.street}, {customer.city}
+                                                        </SelectItem>
+                                                    ))}
+                                            </SelectContent>
+                                        </Select>
                                         <Input
                                             value={formData.destination_address}
                                             onChange={(e) => setFormData({...formData, destination_address: e.target.value})}
-                                            placeholder="Adresse des Kunden"
-                                            className="mt-1.5"
+                                            placeholder="Oder hier manuell eingeben"
+                                            className="mt-2"
                                         />
-                                        {project && (
-                                            <p className="text-xs text-slate-500 mt-1">
-                                                Kundenadresse wird automatisch ausgefüllt
-                                            </p>
-                                        )}
                                     </div>
 
                                     <div className="flex gap-2 items-end">
