@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Phone, Mail, Users, FileText, StickyNote, Pencil, Trash2, Download, ExternalLink, Handshake } from "lucide-react";
+import { Phone, Mail, Users, FileText, StickyNote, Pencil, Trash2, Download, ExternalLink, Handshake, Car } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -75,9 +75,17 @@ export default function ActivityTimeline({ activities, onEdit, onDelete }) {
                                 </div>
                                 
                                 <div className="flex flex-col items-end gap-2">
-                                    <Badge variant="outline" className={`${config.color} text-xs`}>
-                                        {config.label}
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className={`${config.color} text-xs`}>
+                                            {config.label}
+                                        </Badge>
+                                        {activity.requires_travel && (
+                                            <div className="flex items-center gap-1 text-xs text-teal-600 bg-teal-50 px-2 py-1 rounded-lg border border-teal-200">
+                                                <Car className="w-3 h-3" />
+                                                <span>{activity.travel_distance_km || 0} km</span>
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <Button size="sm" variant="ghost" onClick={() => onEdit(activity)}>
                                             <Pencil className="w-3 h-3" />
