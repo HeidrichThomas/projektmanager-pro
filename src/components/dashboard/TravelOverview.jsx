@@ -23,6 +23,7 @@ export default function TravelOverview() {
     const [filterProject, setFilterProject] = useState("all");
     const [filterCustomer, setFilterCustomer] = useState("all");
     const [showManualEntryForm, setShowManualEntryForm] = useState(false);
+    const [editingEntry, setEditingEntry] = useState(null);
     const reportRef = useRef(null);
 
     const { data: activities = [] } = useQuery({
