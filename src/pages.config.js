@@ -8,6 +8,8 @@ import SubThemeDetail from './pages/SubThemeDetail';
 import ThemeDetail from './pages/ThemeDetail';
 import Themes from './pages/Themes';
 import TravelTracking from './pages/TravelTracking';
+import PrivateThemes from './pages/PrivateThemes';
+import PrivateThemeDetail from './pages/PrivateThemeDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +24,8 @@ export const PAGES = {
     "ThemeDetail": ThemeDetail,
     "Themes": Themes,
     "TravelTracking": TravelTracking,
+    "PrivateThemes": PrivateThemes,
+    "PrivateThemeDetail": PrivateThemeDetail,
 }
 
 export const pagesConfig = {
