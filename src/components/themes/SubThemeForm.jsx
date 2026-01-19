@@ -6,12 +6,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { X, Building2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 export default function SubThemeForm({ open, onClose, onSave, subTheme, parentThemeId }) {
+    const { data: companies = [] } = useQuery({
+        queryKey: ['themeCompanies'],
+        queryFn: () => base44.entities.ThemeCompany.list()
+    });
+
     const [formData, setFormData] = useState({
         parent_theme_id: parentThemeId || "",
         name: "",
         description: "",
+        company_ids: [],
         status: "geplant",
         progress: 0,
         start_date: "",
@@ -24,6 +34,7 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
                 parent_theme_id: subTheme.parent_theme_id || parentThemeId,
                 name: subTheme.name || "",
                 description: subTheme.description || "",
+                company_ids: subTheme.company_ids || [],
                 status: subTheme.status || "geplant",
                 progress: subTheme.progress || 0,
                 start_date: subTheme.start_date || "",
@@ -34,6 +45,7 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
                 parent_theme_id: parentThemeId || "",
                 name: "",
                 description: "",
+                company_ids: [],
                 status: "geplant",
                 progress: 0,
                 start_date: "",
@@ -41,6 +53,25 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
             });
         }
     }, [subTheme, open, parentThemeId]);
+
+    const handleAddCompany = (companyId) => {
+        if (!formData.company_ids.includes(companyId)) {
+            setFormData({
+                ...formData,
+                company_ids: [...formData.company_ids, companyId]
+            });
+        }
+    };
+
+    const handleRemoveCompany = (companyId) => {
+        setFormData({
+            ...formData,
+            company_ids: formData.company_ids.filter(id => id !== companyId)
+        });
+    };
+
+    const selectedCompanies = companies.filter(c => formData.company_ids.includes(c.id));
+    const availableCompanies = companies.filter(c => !formData.company_ids.includes(c.id));
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -74,6 +105,45 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
                             placeholder="Details zum Unterthema..."
                             rows={3}
                         />
+                    </div>
+
+                    <div>
+                        <Label className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4" />
+                            Beteiligte Firmen
+                        </Label>
+                        
+                        {selectedCompanies.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-2 mt-2">
+                                {selectedCompanies.map(company => (
+                                    <Badge key={company.id} variant="secondary" className="px-3 py-1">
+                                        {company.company_name}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveCompany(company.id)}
+                                            className="ml-2 hover:text-red-600"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
+                        
+                        {availableCompanies.length > 0 && (
+                            <Select onValueChange={handleAddCompany}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Firma hinzufügen..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableCompanies.map(company => (
+                                        <SelectItem key={company.id} value={company.id}>
+                                            {company.company_name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
