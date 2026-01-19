@@ -79,7 +79,7 @@ export default function MiniAppointmentCalendar({ compact = false }) {
     const upcomingAppointments = [
         ...appointments
             .filter(app => app.start_date && !isBefore(new Date(app.start_date), startOfToday()))
-            .map(app => ({ ...app, isActivity: false, isSubTheme: false })),
+            .map(app => ({ ...app, isActivity: false, isSubTheme: false, isTheme: false })),
         ...activities
             .filter(act => act.appointment_date && !isBefore(new Date(act.appointment_date), startOfToday()))
             .map(act => ({ 
@@ -87,17 +87,42 @@ export default function MiniAppointmentCalendar({ compact = false }) {
                 start_date: act.appointment_date, 
                 title: act.title,
                 isActivity: true,
-                isSubTheme: false
+                isSubTheme: false,
+                isTheme: false
+            })),
+        ...themes
+            .filter(th => th.start_date && !isBefore(new Date(th.start_date), startOfToday()))
+            .map(th => ({
+                ...th,
+                start_date: th.start_date,
+                title: `${th.name} (Start)`,
+                theme_id: th.id,
+                isActivity: false,
+                isSubTheme: false,
+                isTheme: true
+            })),
+        ...themes
+            .filter(th => th.end_date && !isBefore(new Date(th.end_date), startOfToday()))
+            .map(th => ({
+                ...th,
+                start_date: th.end_date,
+                title: `${th.name} (Ende)`,
+                theme_id: th.id,
+                isActivity: false,
+                isSubTheme: false,
+                isTheme: true,
+                isEndDate: true
             })),
         ...subThemes
             .filter(st => st.start_date && !isBefore(new Date(st.start_date), startOfToday()))
             .map(st => ({
                 ...st,
                 start_date: st.start_date,
-                title: st.name,
+                title: `${st.name} (Start)`,
                 theme_id: st.parent_theme_id,
                 isActivity: false,
-                isSubTheme: true
+                isSubTheme: true,
+                isTheme: false
             })),
         ...subThemes
             .filter(st => st.end_date && !isBefore(new Date(st.end_date), startOfToday()))
@@ -108,24 +133,25 @@ export default function MiniAppointmentCalendar({ compact = false }) {
                 theme_id: st.parent_theme_id,
                 isActivity: false,
                 isSubTheme: true,
+                isTheme: false,
                 isEndDate: true
             }))
     ]
-        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-        .slice(0, 5);
+        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 
     if (compact) {
+        const compactList = upcomingAppointments.slice(0, 3);
         return (
             <div className="space-y-2">
-                {upcomingAppointments.length > 0 ? (
-                    upcomingAppointments.slice(0, 3).map(app => {
+                {compactList.length > 0 ? (
+                    compactList.map(app => {
                         const theme = getTheme(app.theme_id);
                         return (
                             <div 
-                                key={`${app.isActivity ? 'activity' : app.isSubTheme ? 'subtheme' : 'appointment'}-${app.id}`} 
-                                className={`text-xs p-2 bg-slate-50 rounded border group ${!app.isActivity && !app.isSubTheme ? 'cursor-pointer hover:bg-slate-100' : ''}`}
+                                key={`${app.isActivity ? 'activity' : app.isSubTheme ? 'subtheme' : app.isTheme ? 'theme' : 'appointment'}-${app.id}`} 
+                                className={`text-xs p-2 bg-slate-50 rounded border group ${!app.isActivity && !app.isSubTheme && !app.isTheme ? 'cursor-pointer hover:bg-slate-100' : ''}`}
                                 onClick={() => {
-                                    if (!app.isActivity && !app.isSubTheme) {
+                                    if (!app.isActivity && !app.isSubTheme && !app.isTheme) {
                                         setEditingAppointment(app);
                                         setShowForm(true);
                                     }
@@ -164,9 +190,14 @@ export default function MiniAppointmentCalendar({ compact = false }) {
                                                     Unterthema
                                                 </Badge>
                                             )}
+                                            {app.isTheme && (
+                                                <Badge variant="secondary" className="text-xs py-0 h-4">
+                                                    Thema
+                                                </Badge>
+                                            )}
                                         </div>
                                     </div>
-                                    {!app.isActivity && !app.isSubTheme && (
+                                    {!app.isActivity && !app.isSubTheme && !app.isTheme && (
                                         <Pencil className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                                     )}
                                 </div>
@@ -209,14 +240,14 @@ export default function MiniAppointmentCalendar({ compact = false }) {
                 <CardContent className="pt-0">
                     <div className="space-y-2">
                         {upcomingAppointments.length > 0 ? (
-                            upcomingAppointments.map(app => {
+                            upcomingAppointments.slice(0, 5).map(app => {
                                 const theme = getTheme(app.theme_id);
                                 return (
                                     <div 
-                                        key={`${app.isActivity ? 'activity' : app.isSubTheme ? 'subtheme' : 'appointment'}-${app.id}`} 
-                                        className={`text-xs p-2 bg-slate-50 rounded border group ${!app.isActivity && !app.isSubTheme ? 'cursor-pointer hover:bg-slate-100' : ''}`}
+                                        key={`${app.isActivity ? 'activity' : app.isSubTheme ? 'subtheme' : app.isTheme ? 'theme' : 'appointment'}-${app.id}`} 
+                                        className={`text-xs p-2 bg-slate-50 rounded border group ${!app.isActivity && !app.isSubTheme && !app.isTheme ? 'cursor-pointer hover:bg-slate-100' : ''}`}
                                         onClick={() => {
-                                            if (!app.isActivity && !app.isSubTheme) {
+                                            if (!app.isActivity && !app.isSubTheme && !app.isTheme) {
                                                 setEditingAppointment(app);
                                                 setShowForm(true);
                                             }
@@ -255,9 +286,14 @@ export default function MiniAppointmentCalendar({ compact = false }) {
                                                             Unterthema
                                                         </Badge>
                                                     )}
+                                                    {app.isTheme && (
+                                                        <Badge variant="secondary" className="text-xs py-0 h-4">
+                                                            Thema
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                             </div>
-                                            {!app.isActivity && !app.isSubTheme && (
+                                            {!app.isActivity && !app.isSubTheme && !app.isTheme && (
                                                 <Pencil className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                                             )}
                                         </div>
@@ -302,10 +338,10 @@ export default function MiniAppointmentCalendar({ compact = false }) {
                             const theme = getTheme(app.theme_id);
                             return (
                                 <div 
-                                    key={`${app.isActivity ? 'activity' : app.isSubTheme ? 'subtheme' : 'appointment'}-${app.id}`} 
-                                    className={`p-3 border rounded-lg group ${!app.isActivity && !app.isSubTheme ? 'cursor-pointer hover:shadow-sm' : ''}`}
+                                    key={`${app.isActivity ? 'activity' : app.isSubTheme ? 'subtheme' : app.isTheme ? 'theme' : 'appointment'}-${app.id}`} 
+                                    className={`p-3 border rounded-lg group ${!app.isActivity && !app.isSubTheme && !app.isTheme ? 'cursor-pointer hover:shadow-sm' : ''}`}
                                     onClick={() => {
-                                        if (!app.isActivity && !app.isSubTheme) {
+                                        if (!app.isActivity && !app.isSubTheme && !app.isTheme) {
                                             setEditingAppointment(app);
                                             setShowForm(true);
                                             setShowDialog(false);
@@ -326,8 +362,13 @@ export default function MiniAppointmentCalendar({ compact = false }) {
                                                         Unterthema
                                                     </Badge>
                                                 )}
+                                                {app.isTheme && (
+                                                    <Badge variant="secondary" className="text-xs">
+                                                        Thema
+                                                    </Badge>
+                                                )}
                                             </div>
-                                            {theme && (
+                                            {theme && !app.isTheme && (
                                                 <Badge variant="outline" className="text-xs mt-1">
                                                     {theme.name}
                                                 </Badge>
@@ -355,7 +396,7 @@ export default function MiniAppointmentCalendar({ compact = false }) {
                                                 )}
                                             </div>
                                         </div>
-                                        {!app.isActivity && !app.isSubTheme && (
+                                        {!app.isActivity && !app.isSubTheme && !app.isTheme && (
                                             <div className="flex gap-1">
                                                 <Button
                                                     size="sm"
