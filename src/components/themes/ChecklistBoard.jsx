@@ -37,16 +37,19 @@ export default function ChecklistBoard({ items, onCreate, onUpdate, onDelete }) 
         
         if (!item) return;
 
-        if (source.droppableId !== destination.droppableId) {
+        // Spalte oder Position geändert
+        if (source.droppableId !== destination.droppableId || source.index !== destination.index) {
+            const destinationItems = itemsByColumn[destination.droppableId];
+            const newOrder = destinationItems.length > 0 
+                ? (destination.index < destinationItems.length 
+                    ? destinationItems[destination.index].order 
+                    : destinationItems[destinationItems.length - 1].order + 1)
+                : 0;
+
             onUpdate(item.id, {
                 ...item,
                 status: destination.droppableId,
-                order: destination.index
-            });
-        } else if (source.index !== destination.index) {
-            onUpdate(item.id, {
-                ...item,
-                order: destination.index
+                order: newOrder
             });
         }
     };
