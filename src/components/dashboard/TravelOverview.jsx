@@ -217,11 +217,11 @@ export default function TravelOverview() {
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-slate-50">
-                                <TableHead className="w-28 py-4">Datum</TableHead>
-                                <TableHead className="py-4">Projekt</TableHead>
-                                <TableHead className="py-4">Kunde</TableHead>
-                                <TableHead className="py-4">Aktivität</TableHead>
-                                <TableHead className="text-right py-4">Kilometer</TableHead>
+                                <TableHead className="w-28 py-6">Datum</TableHead>
+                                <TableHead className="py-6">Projekt</TableHead>
+                                <TableHead className="py-6">Kunde</TableHead>
+                                <TableHead className="py-6">Aktivität</TableHead>
+                                <TableHead className="text-right py-6">Kilometer</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -232,28 +232,28 @@ export default function TravelOverview() {
                                     
                                     return (
                                         <TableRow key={activity.id} className="hover:bg-slate-50">
-                                            <TableCell className="font-medium text-sm py-4">
+                                            <TableCell className="font-medium text-sm py-6">
                                                 <div className="flex items-center gap-1">
                                                     <Calendar className="w-3 h-3 text-slate-400" />
                                                     {format(parseISO(activity.activity_date), "dd.MM.yy", { locale: de })}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="py-4">
+                                            <TableCell className="py-6">
                                                 <div className="flex items-center gap-1 text-sm">
                                                     <FolderKanban className="w-3 h-3 text-slate-400" />
                                                     <span className="truncate max-w-[150px]">{project?.name || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="py-4">
+                                            <TableCell className="py-6">
                                                 <div className="flex items-center gap-1 text-sm">
                                                     <Building2 className="w-3 h-3 text-slate-400" />
                                                     <span className="truncate max-w-[150px]">{customer?.company || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-sm text-slate-600 max-w-[200px] truncate py-4">
+                                            <TableCell className="text-sm text-slate-600 max-w-[200px] truncate py-6">
                                                 {activity.title}
                                             </TableCell>
-                                            <TableCell className="text-right py-4">
+                                            <TableCell className="text-right py-6">
                                                 <Badge variant="secondary" className="font-mono">
                                                     {activity.travel_distance_km?.toFixed(1)} km
                                                 </Badge>
