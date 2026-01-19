@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     ArrowLeft, Layers, Pencil, Trash2, Plus, Clock, CheckSquare
@@ -17,6 +15,7 @@ import { toast } from "sonner";
 import SubThemeForm from "@/components/themes/SubThemeForm";
 import ThemeActivityForm from "@/components/themes/ThemeActivityForm";
 import ThemeActivityTimeline from "@/components/themes/ThemeActivityTimeline";
+import ChecklistBoard from "@/components/themes/ChecklistBoard";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -33,7 +32,6 @@ export default function SubThemeDetail() {
     const [showForm, setShowForm] = useState(false);
     const [showActivityForm, setShowActivityForm] = useState(false);
     const [editingActivity, setEditingActivity] = useState(null);
-    const [newChecklistItem, setNewChecklistItem] = useState("");
 
     const queryClient = useQueryClient();
 
@@ -102,11 +100,14 @@ export default function SubThemeDetail() {
     });
 
     const createChecklistMutation = useMutation({
-        mutationFn: (data) => base44.entities.ChecklistItem.create(data),
+        mutationFn: (data) => base44.entities.ChecklistItem.create({
+            ...data,
+            sub_theme_id: subThemeId,
+            order: checklistItems.length
+        }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['checklistItems', subThemeId] });
-            setNewChecklistItem("");
-            toast.success("Punkt hinzugefügt");
+            toast.success("Kachel erstellt");
         }
     });
 
@@ -114,6 +115,7 @@ export default function SubThemeDetail() {
         mutationFn: ({ id, data }) => base44.entities.ChecklistItem.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['checklistItems', subThemeId] });
+            toast.success("Kachel aktualisiert");
         }
     });
 
@@ -121,7 +123,7 @@ export default function SubThemeDetail() {
         mutationFn: (id) => base44.entities.ChecklistItem.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['checklistItems', subThemeId] });
-            toast.success("Punkt gelöscht");
+            toast.success("Kachel gelöscht");
         }
     });
 
@@ -139,16 +141,7 @@ export default function SubThemeDetail() {
         }
     };
 
-    const handleAddChecklistItem = (e) => {
-        e.preventDefault();
-        if (!newChecklistItem.trim()) return;
-        
-        createChecklistMutation.mutate({
-            sub_theme_id: subThemeId,
-            title: newChecklistItem,
-            order: checklistItems.length
-        });
-    };
+
 
     if (!subTheme) {
         return (
@@ -161,7 +154,7 @@ export default function SubThemeDetail() {
         );
     }
 
-    const completedCount = checklistItems.filter(item => item.is_completed).length;
+    const erledigtCount = checklistItems.filter(item => item.status === 'erledigt').length;
     const totalCount = checklistItems.length;
 
     return (
@@ -222,68 +215,29 @@ export default function SubThemeDetail() {
                     </CardContent>
                 </Card>
 
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
-                    <Card className="shadow-sm">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                    <CheckSquare className="w-5 h-5 text-slate-600" />
-                                    Checkliste
-                                </CardTitle>
-                                <span className="text-sm text-slate-500">
-                                    {completedCount} / {totalCount}
-                                </span>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={handleAddChecklistItem} className="flex gap-2 mb-4">
-                                <Input
-                                    value={newChecklistItem}
-                                    onChange={(e) => setNewChecklistItem(e.target.value)}
-                                    placeholder="Neuen Punkt hinzufügen..."
-                                    className="flex-1"
-                                />
-                                <Button type="submit" size="sm">
-                                    <Plus className="w-4 h-4" />
-                                </Button>
-                            </form>
+                <Card className="shadow-sm mb-8">
+                    <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <CheckSquare className="w-5 h-5 text-slate-600" />
+                                Checkliste
+                            </CardTitle>
+                            <span className="text-sm text-slate-500">
+                                {erledigtCount} / {totalCount} erledigt
+                            </span>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <ChecklistBoard
+                            items={checklistItems}
+                            onCreate={(data) => createChecklistMutation.mutate(data)}
+                            onUpdate={(id, data) => updateChecklistMutation.mutate({ id, data })}
+                            onDelete={(id) => deleteChecklistMutation.mutate(id)}
+                        />
+                    </CardContent>
+                </Card>
 
-                            <div className="space-y-2">
-                                {checklistItems.length > 0 ? (
-                                    checklistItems.map(item => (
-                                        <div key={item.id} className="flex items-center gap-2 p-2 rounded hover:bg-slate-50 group">
-                                            <Checkbox
-                                                checked={item.is_completed}
-                                                onCheckedChange={(checked) => {
-                                                    updateChecklistMutation.mutate({
-                                                        id: item.id,
-                                                        data: { ...item, is_completed: checked }
-                                                    });
-                                                }}
-                                            />
-                                            <span className={`flex-1 text-sm ${item.is_completed ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-                                                {item.title}
-                                            </span>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 text-red-600"
-                                                onClick={() => deleteChecklistMutation.mutate(item.id)}
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                            </Button>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-sm text-slate-500 text-center py-4">
-                                        Noch keine Punkte hinzugefügt
-                                    </p>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="shadow-sm">
+                <Card className="shadow-sm mb-8">
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardTitle className="text-lg flex items-center gap-2">
@@ -318,7 +272,6 @@ export default function SubThemeDetail() {
                             />
                         </CardContent>
                     </Card>
-                </div>
             </div>
 
             <SubThemeForm
