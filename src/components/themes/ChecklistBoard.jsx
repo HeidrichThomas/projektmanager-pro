@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import ChecklistItemForm from "./ChecklistItemForm";
 
@@ -94,63 +96,85 @@ export default function ChecklistBoard({ items, onCreate, onUpdate, onDelete }) 
                                                     <Card
                                                         ref={provided.innerRef}
                                                         {...provided.draggableProps}
-                                                        className={`group cursor-move ${
+                                                        className={`group ${column.id === 'erledigt' ? 'cursor-pointer' : 'cursor-move'} ${
                                                             snapshot.isDragging ? 'shadow-lg' : ''
                                                         }`}
+                                                        onClick={() => {
+                                                            if (column.id === 'erledigt') {
+                                                                setEditingItem(item);
+                                                                setShowForm(true);
+                                                            }
+                                                        }}
                                                     >
                                                         <CardContent className="p-3">
-                                                            <div className="flex items-start gap-2">
-                                                                <div
-                                                                    {...provided.dragHandleProps}
-                                                                    className="mt-1 text-slate-400"
-                                                                >
-                                                                    <GripVertical className="w-3 h-3" />
+                                                            {column.id === 'erledigt' ? (
+                                                                <div className="font-medium text-sm text-slate-900">
+                                                                    {item.title}
                                                                 </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="font-medium text-sm text-slate-900 mb-1 break-words">
-                                                                        {item.title}
+                                                            ) : (
+                                                                <div className="flex items-start gap-2">
+                                                                    <div
+                                                                        {...provided.dragHandleProps}
+                                                                        className="mt-1 text-slate-400"
+                                                                    >
+                                                                        <GripVertical className="w-3 h-3" />
                                                                     </div>
-                                                                    {item.description && (
-                                                                        <p className="text-xs text-slate-600 mb-2 line-clamp-2">
-                                                                            {item.description}
-                                                                        </p>
-                                                                    )}
-                                                                    {item.priority && (
-                                                                        <Badge
-                                                                            variant="secondary"
-                                                                            className={`${priorityColors[item.priority]} text-xs border`}
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="font-medium text-sm text-slate-900 mb-1 break-words">
+                                                                            {item.title}
+                                                                        </div>
+                                                                        {item.description && (
+                                                                            <p className="text-xs text-slate-600 mb-2 line-clamp-2">
+                                                                                {item.description}
+                                                                            </p>
+                                                                        )}
+                                                                        <div className="flex flex-wrap gap-2 items-center">
+                                                                            {item.priority && (
+                                                                                <Badge
+                                                                                    variant="secondary"
+                                                                                    className={`${priorityColors[item.priority]} text-xs border`}
+                                                                                >
+                                                                                    {item.priority === "niedrig" ? "Niedrig" : 
+                                                                                     item.priority === "mittel" ? "Mittel" : "Hoch"}
+                                                                                </Badge>
+                                                                            )}
+                                                                            {item.due_date && (
+                                                                                <div className="flex items-center gap-1 text-xs text-slate-600">
+                                                                                    <CalendarIcon className="w-3 h-3" />
+                                                                                    {format(new Date(item.due_date), "dd.MM.yy", { locale: de })}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100">
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="ghost"
+                                                                            className="h-6 w-6 p-0"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setEditingItem(item);
+                                                                                setShowForm(true);
+                                                                            }}
                                                                         >
-                                                                            {item.priority === "niedrig" ? "Niedrig" : 
-                                                                             item.priority === "mittel" ? "Mittel" : "Hoch"}
-                                                                        </Badge>
-                                                                    )}
+                                                                            <Pencil className="w-3 h-3" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="ghost"
+                                                                            className="h-6 w-6 p-0 text-red-600"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                if (confirm(`"${item.title}" wirklich löschen?`)) {
+                                                                                    onDelete(item.id);
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            <Trash2 className="w-3 h-3" />
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100">
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="ghost"
-                                                                        className="h-6 w-6 p-0"
-                                                                        onClick={() => {
-                                                                            setEditingItem(item);
-                                                                            setShowForm(true);
-                                                                        }}
-                                                                    >
-                                                                        <Pencil className="w-3 h-3" />
-                                                                    </Button>
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="ghost"
-                                                                        className="h-6 w-6 p-0 text-red-600"
-                                                                        onClick={() => {
-                                                                            if (confirm(`"${item.title}" wirklich löschen?`)) {
-                                                                                onDelete(item.id);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        <Trash2 className="w-3 h-3" />
-                                                                    </Button>
-                                                                </div>
-                                                            </div>
+                                                            )}
                                                         </CardContent>
                                                     </Card>
                                                 )}
