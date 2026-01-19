@@ -27,6 +27,11 @@ export default function TravelOverview() {
         queryFn: () => base44.entities.Activity.list()
     });
 
+    const { data: manualEntries = [] } = useQuery({
+        queryKey: ['manualTravelEntries'],
+        queryFn: () => base44.entities.ManualTravelEntry.list()
+    });
+
     const { data: projects = [] } = useQuery({
         queryKey: ['projects'],
         queryFn: () => base44.entities.Project.list()
@@ -35,6 +40,21 @@ export default function TravelOverview() {
     const { data: customers = [] } = useQuery({
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
+    });
+
+    const createManualEntryMutation = useMutation({
+        mutationFn: (data) => base44.entities.ManualTravelEntry.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['manualTravelEntries']);
+            setShowManualEntryForm(false);
+        }
+    });
+
+    const deleteManualEntryMutation = useMutation({
+        mutationFn: (id) => base44.entities.ManualTravelEntry.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['manualTravelEntries']);
+        }
     });
 
     const travelActivities = useMemo(() => {
@@ -222,6 +242,9 @@ export default function TravelOverview() {
                                 <TableHead className="py-6">Kunde</TableHead>
                                 <TableHead className="py-6">Aktivität</TableHead>
                                 <TableHead className="text-right py-6">Kilometer</TableHead>
+                                <TableHead className="text-right py-6">Satz</TableHead>
+                                <TableHead className="text-right py-6">Betrag</TableHead>
+                                <TableHead className="w-12 print:hidden"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
