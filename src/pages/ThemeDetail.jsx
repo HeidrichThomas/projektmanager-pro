@@ -22,6 +22,8 @@ import ThemeActivityForm from "@/components/themes/ThemeActivityForm";
 import ThemeActivityTimeline from "@/components/themes/ThemeActivityTimeline";
 import DocumentManagement from "@/components/themes/DocumentManagement";
 import ThemeTaskBoard from "@/components/themes/ThemeTaskBoard";
+import SubThemeForm from "@/components/themes/SubThemeForm";
+import SubThemesList from "@/components/themes/SubThemesList";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -38,6 +40,8 @@ export default function ThemeDetail() {
     const [showActivityForm, setShowActivityForm] = useState(false);
     const [editingActivity, setEditingActivity] = useState(null);
     const [showDocuments, setShowDocuments] = useState(false);
+    const [showSubThemeForm, setShowSubThemeForm] = useState(false);
+    const [editingSubTheme, setEditingSubTheme] = useState(null);
 
     const queryClient = useQueryClient();
 
@@ -65,6 +69,12 @@ export default function ThemeDetail() {
     const { data: documents = [] } = useQuery({
         queryKey: ['themeDocuments', themeId],
         queryFn: () => base44.entities.ThemeDocument.filter({ theme_id: themeId }, '-created_date'),
+        enabled: !!themeId
+    });
+
+    const { data: subThemes = [] } = useQuery({
+        queryKey: ['subThemes', themeId],
+        queryFn: () => base44.entities.SubTheme.filter({ parent_theme_id: themeId }, 'order'),
         enabled: !!themeId
     });
 
@@ -116,6 +126,33 @@ export default function ThemeDetail() {
         }
     });
 
+    const createSubThemeMutation = useMutation({
+        mutationFn: (data) => base44.entities.SubTheme.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['subThemes', themeId] });
+            setShowSubThemeForm(false);
+            toast.success("Unterthema erstellt");
+        }
+    });
+
+    const updateSubThemeMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.SubTheme.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['subThemes', themeId] });
+            setShowSubThemeForm(false);
+            setEditingSubTheme(null);
+            toast.success("Unterthema aktualisiert");
+        }
+    });
+
+    const deleteSubThemeMutation = useMutation({
+        mutationFn: (id) => base44.entities.SubTheme.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['subThemes', themeId] });
+            toast.success("Unterthema gelöscht");
+        }
+    });
+
     const handleProgressChange = (value) => {
         updateThemeMutation.mutate({ id: themeId, data: { progress: value[0] } });
     };
@@ -125,6 +162,14 @@ export default function ThemeDetail() {
             updateActivityMutation.mutate({ id: editingActivity.id, data });
         } else {
             createActivityMutation.mutate(data);
+        }
+    };
+
+    const handleSubThemeSave = (data) => {
+        if (editingSubTheme) {
+            updateSubThemeMutation.mutate({ id: editingSubTheme.id, data });
+        } else {
+            createSubThemeMutation.mutate(data);
         }
     };
 
@@ -212,6 +257,35 @@ export default function ThemeDetail() {
                         {theme.description && (
                             <p className="mt-4 pt-4 border-t text-slate-600">{theme.description}</p>
                         )}
+                    </CardContent>
+                </Card>
+
+                {/* Sub Themes */}
+                <Card className="mb-8 shadow-sm">
+                    <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">Unterthemen</CardTitle>
+                            <Button 
+                                onClick={() => { 
+                                    setEditingSubTheme(null); 
+                                    setShowSubThemeForm(true); 
+                                }} 
+                                className="bg-slate-800 hover:bg-slate-900"
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Unterthema hinzufügen
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <SubThemesList
+                            subThemes={subThemes}
+                            onEdit={(subTheme) => {
+                                setEditingSubTheme(subTheme);
+                                setShowSubThemeForm(true);
+                            }}
+                            onDelete={(id) => deleteSubThemeMutation.mutate(id)}
+                        />
                     </CardContent>
                 </Card>
 
@@ -357,6 +431,17 @@ export default function ThemeDetail() {
                 open={showDocuments}
                 onClose={() => setShowDocuments(false)}
                 themeId={themeId}
+            />
+
+            <SubThemeForm
+                open={showSubThemeForm}
+                onClose={() => {
+                    setShowSubThemeForm(false);
+                    setEditingSubTheme(null);
+                }}
+                onSave={handleSubThemeSave}
+                subTheme={editingSubTheme}
+                parentThemeId={themeId}
             />
         </div>
     );
