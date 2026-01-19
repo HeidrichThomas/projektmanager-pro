@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, Bell, TrendingDown, TrendingUp, File, Pencil, Trash2 } from "lucide-react";
+import { FileText, Calendar, Bell, TrendingDown, TrendingUp, File, Pencil, Trash2, Download } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -55,6 +55,23 @@ export default function PrivateActivityTimeline({ activities, onEdit, onDelete }
                                         <p className={`text-sm font-medium mt-2 ${activity.type === 'ausgabe' ? 'text-red-600' : 'text-green-600'}`}>
                                             {activity.type === 'ausgabe' ? '-' : '+'}{activity.amount.toFixed(2)} €
                                         </p>
+                                    )}
+                                    
+                                    {activity.file_urls && activity.file_urls.length > 0 && (
+                                        <div className="mt-3 space-y-1">
+                                            {activity.file_urls.map((url, idx) => (
+                                                <a
+                                                    key={idx}
+                                                    href={url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                    {activity.file_names?.[idx] || `Datei ${idx + 1}`}
+                                                </a>
+                                            ))}
+                                        </div>
                                     )}
                                 </div>
                                 
