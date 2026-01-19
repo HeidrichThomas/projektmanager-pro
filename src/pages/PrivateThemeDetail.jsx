@@ -10,6 +10,9 @@ import { createPageUrl } from "@/utils";
 import PrivateActivityForm from "@/components/private/PrivateActivityForm";
 import PrivateActivityTimeline from "@/components/private/PrivateActivityTimeline";
 import PrivateTaskList from "@/components/private/PrivateTaskList";
+import PrivateAppointmentCalendar from "@/components/private/PrivateAppointmentCalendar";
+import PrivateAppointmentForm from "@/components/private/PrivateAppointmentForm";
+import PrivateDocumentManager from "@/components/private/PrivateDocumentManager";
 
 export default function PrivateThemeDetail() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -17,6 +20,8 @@ export default function PrivateThemeDetail() {
 
     const [showActivityForm, setShowActivityForm] = useState(false);
     const [editingActivity, setEditingActivity] = useState(null);
+    const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+    const [editingAppointment, setEditingAppointment] = useState(null);
 
     const queryClient = useQueryClient();
 
@@ -33,6 +38,16 @@ export default function PrivateThemeDetail() {
     const { data: tasks = [] } = useQuery({
         queryKey: ['privateTasks', themeId],
         queryFn: () => base44.entities.PrivateTask.filter({ theme_id: themeId })
+    });
+
+    const { data: appointments = [] } = useQuery({
+        queryKey: ['privateAppointments', themeId],
+        queryFn: () => base44.entities.PrivateAppointment.filter({ theme_id: themeId }, '-start_date')
+    });
+
+    const { data: documents = [] } = useQuery({
+        queryKey: ['privateDocuments', themeId],
+        queryFn: () => base44.entities.PrivateDocument.filter({ theme_id: themeId }, '-created_date')
     });
 
     const createActivityMutation = useMutation({
@@ -60,11 +75,44 @@ export default function PrivateThemeDetail() {
         }
     });
 
+    const createAppointmentMutation = useMutation({
+        mutationFn: (data) => base44.entities.PrivateAppointment.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['privateAppointments', themeId] });
+            setShowAppointmentForm(false);
+            setEditingAppointment(null);
+        }
+    });
+
+    const updateAppointmentMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.PrivateAppointment.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['privateAppointments', themeId] });
+            setShowAppointmentForm(false);
+            setEditingAppointment(null);
+        }
+    });
+
+    const deleteAppointmentMutation = useMutation({
+        mutationFn: (id) => base44.entities.PrivateAppointment.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['privateAppointments', themeId] });
+        }
+    });
+
     const handleSaveActivity = (data) => {
         if (editingActivity) {
             updateActivityMutation.mutate({ id: editingActivity.id, data });
         } else {
             createActivityMutation.mutate({ ...data, theme_id: themeId });
+        }
+    };
+
+    const handleSaveAppointment = (data) => {
+        if (editingAppointment) {
+            updateAppointmentMutation.mutate({ id: editingAppointment.id, data });
+        } else {
+            createAppointmentMutation.mutate({ ...data, theme_id: themeId });
         }
     };
 
@@ -148,19 +196,23 @@ export default function PrivateThemeDetail() {
                     </TabsContent>
 
                     <TabsContent value="appointments">
-                        <Card>
-                            <CardContent className="pt-6">
-                                <p className="text-center text-slate-500">Termine-Verwaltung kommt bald...</p>
-                            </CardContent>
-                        </Card>
+                        <PrivateAppointmentCalendar
+                            appointments={appointments}
+                            onAdd={() => { setEditingAppointment(null); setShowAppointmentForm(true); }}
+                            onEdit={(apt) => { setEditingAppointment(apt); setShowAppointmentForm(true); }}
+                            onDelete={(apt) => {
+                                if (confirm("Termin löschen?")) {
+                                    deleteAppointmentMutation.mutate(apt.id);
+                                }
+                            }}
+                        />
                     </TabsContent>
 
                     <TabsContent value="documents">
-                        <Card>
-                            <CardContent className="pt-6">
-                                <p className="text-center text-slate-500">Dokumente-Verwaltung kommt bald...</p>
-                            </CardContent>
-                        </Card>
+                        <PrivateDocumentManager
+                            themeId={themeId}
+                            documents={documents}
+                        />
                     </TabsContent>
                 </Tabs>
 
@@ -171,6 +223,17 @@ export default function PrivateThemeDetail() {
                         onClose={() => {
                             setShowActivityForm(false);
                             setEditingActivity(null);
+                        }}
+                    />
+                )}
+
+                {showAppointmentForm && (
+                    <PrivateAppointmentForm
+                        appointment={editingAppointment}
+                        onSave={handleSaveAppointment}
+                        onClose={() => {
+                            setShowAppointmentForm(false);
+                            setEditingAppointment(null);
                         }}
                     />
                 )}
