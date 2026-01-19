@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
     LayoutDashboard, Building2, FolderKanban, Database,
-    Menu, ChevronRight, CheckCircle2, Lightbulb, Search, X, User, Layers
+    Menu, ChevronRight, CheckCircle2, Lightbulb, Search, X, User, Layers, Navigation
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -22,6 +22,7 @@ const navigation = [
 ];
 
 const bottomNavigation = [
+    { name: "Fahrtenbuch", icon: Navigation, page: "TravelTracking" },
     { name: "Datensicherung", icon: Database, page: "DataBackup" }
 ];
 

@@ -1,0 +1,316 @@
+import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Navigation, Calendar, Building2, MapPin, FileDown, TrendingUp } from "lucide-react";
+import { format, startOfMonth, endOfMonth, parseISO } from "date-fns";
+import { de } from "date-fns/locale";
+
+export default function TravelTracking() {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+    const { data: activities = [], isLoading } = useQuery({
+        queryKey: ['activities'],
+        queryFn: () => base44.entities.Activity.list()
+    });
+
+    const { data: projects = [] } = useQuery({
+        queryKey: ['projects'],
+        queryFn: () => base44.entities.Project.list()
+    });
+
+    const { data: customers = [] } = useQuery({
+        queryKey: ['customers'],
+        queryFn: () => base44.entities.Customer.list()
+    });
+
+    // Filter activities with travel
+    const travelActivities = activities.filter(a => a.requires_travel && a.travel_distance_km);
+
+    // Filter by selected month
+    const filteredActivities = travelActivities.filter(a => {
+        if (!a.activity_date) return false;
+        const date = parseISO(a.activity_date);
+        return date.getFullYear() === selectedYear && date.getMonth() + 1 === selectedMonth;
+    });
+
+    // Calculate totals
+    const monthlyTotal = filteredActivities.reduce((sum, a) => sum + (a.travel_distance_km || 0), 0);
+    const yearlyTotal = travelActivities
+        .filter(a => {
+            if (!a.activity_date) return false;
+            return parseISO(a.activity_date).getFullYear() === selectedYear;
+        })
+        .reduce((sum, a) => sum + (a.travel_distance_km || 0), 0);
+
+    // Group by project
+    const projectTotals = filteredActivities.reduce((acc, activity) => {
+        if (!acc[activity.project_id]) {
+            acc[activity.project_id] = {
+                projectId: activity.project_id,
+                totalKm: 0,
+                count: 0
+            };
+        }
+        acc[activity.project_id].totalKm += activity.travel_distance_km || 0;
+        acc[activity.project_id].count += 1;
+        return acc;
+    }, {});
+
+    const getProject = (id) => projects.find(p => p.id === id);
+    const getCustomer = (id) => customers.find(c => c.id === id);
+
+    const exportToCSV = () => {
+        const headers = ['Datum', 'Projekt', 'Kunde', 'Aktivität', 'Von', 'Nach', 'Kilometer'];
+        const rows = filteredActivities.map(a => {
+            const project = getProject(a.project_id);
+            const customer = project ? getCustomer(project.customer_id) : null;
+            return [
+                format(parseISO(a.activity_date), 'dd.MM.yyyy', { locale: de }),
+                project?.name || '',
+                customer?.company || '',
+                a.title,
+                a.start_location,
+                a.destination_address,
+                a.travel_distance_km?.toFixed(1) || '0'
+            ];
+        });
+        
+        rows.push(['', '', '', '', '', 'Gesamt:', monthlyTotal.toFixed(1)]);
+        
+        const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Fahrtenbuch_${selectedYear}_${String(selectedMonth).padStart(2, '0')}.csv`;
+        link.click();
+    };
+
+    const years = [currentYear - 2, currentYear - 1, currentYear, currentYear + 1];
+    const months = [
+        { value: 1, label: 'Januar' },
+        { value: 2, label: 'Februar' },
+        { value: 3, label: 'März' },
+        { value: 4, label: 'April' },
+        { value: 5, label: 'Mai' },
+        { value: 6, label: 'Juni' },
+        { value: 7, label: 'Juli' },
+        { value: 8, label: 'August' },
+        { value: 9, label: 'September' },
+        { value: 10, label: 'Oktober' },
+        { value: 11, label: 'November' },
+        { value: 12, label: 'Dezember' }
+    ];
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-8">
+                <div className="max-w-7xl mx-auto">
+                    <Skeleton className="h-10 w-64 mb-8" />
+                    <div className="grid md:grid-cols-3 gap-6 mb-8">
+                        {Array(3).fill(0).map((_, i) => (
+                            <Skeleton key={i} className="h-32" />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                        <Navigation className="w-8 h-8 text-blue-600" />
+                        Fahrtenbuch
+                    </h1>
+                    <p className="text-slate-500 mt-1">
+                        Übersicht aller geschäftlichen Fahrten für die Steuererklärung
+                    </p>
+                </div>
+
+                <div className="flex flex-wrap gap-4 mb-6">
+                    <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                        <SelectTrigger className="w-32">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {years.map(year => (
+                                <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {months.map(month => (
+                                <SelectItem key={month.value} value={String(month.value)}>
+                                    {month.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
+                    <Button onClick={exportToCSV} variant="outline" className="ml-auto">
+                        <FileDown className="w-4 h-4 mr-2" />
+                        CSV Export
+                    </Button>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                    <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-200">
+                        <CardHeader>
+                            <CardTitle className="text-sm font-medium text-slate-600">Monat ({months.find(m => m.value === selectedMonth)?.label})</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-3xl font-bold text-blue-600">
+                                {monthlyTotal.toFixed(1)} km
+                            </div>
+                            <p className="text-sm text-slate-500 mt-1">
+                                {filteredActivities.length} Fahrten
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-purple-50 to-white border-purple-200">
+                        <CardHeader>
+                            <CardTitle className="text-sm font-medium text-slate-600">Jahr {selectedYear}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-3xl font-bold text-purple-600">
+                                {yearlyTotal.toFixed(1)} km
+                            </div>
+                            <p className="text-sm text-slate-500 mt-1">
+                                {travelActivities.filter(a => a.activity_date && parseISO(a.activity_date).getFullYear() === selectedYear).length} Fahrten
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-200">
+                        <CardHeader>
+                            <CardTitle className="text-sm font-medium text-slate-600">Steuerlich absetzbar</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-3xl font-bold text-emerald-600">
+                                {(monthlyTotal * 0.30).toFixed(2)} €
+                            </div>
+                            <p className="text-sm text-slate-500 mt-1">
+                                bei 0,30 €/km
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {Object.keys(projectTotals).length > 0 && (
+                    <Card className="mb-8">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5" />
+                                Kilometer nach Projekt
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-3">
+                                {Object.values(projectTotals).map(({ projectId, totalKm, count }) => {
+                                    const project = getProject(projectId);
+                                    const customer = project ? getCustomer(project.customer_id) : null;
+                                    return (
+                                        <div key={projectId} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                            <div>
+                                                <div className="font-medium text-slate-900">{project?.name || 'Unbekanntes Projekt'}</div>
+                                                {customer && (
+                                                    <div className="text-sm text-slate-500 flex items-center gap-1">
+                                                        <Building2 className="w-3 h-3" />
+                                                        {customer.company}
+                                                    </div>
+                                                )}
+                                                <div className="text-xs text-slate-400">{count} Fahrten</div>
+                                            </div>
+                                            <div className="text-lg font-bold text-blue-600">
+                                                {totalKm.toFixed(1)} km
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Calendar className="w-5 h-5" />
+                            Einzelne Fahrten
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {filteredActivities.length > 0 ? (
+                            <div className="space-y-3">
+                                {filteredActivities.map(activity => {
+                                    const project = getProject(activity.project_id);
+                                    const customer = project ? getCustomer(project.customer_id) : null;
+                                    return (
+                                        <div key={activity.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div>
+                                                    <div className="font-medium text-slate-900">{activity.title}</div>
+                                                    <div className="text-sm text-slate-500">
+                                                        {format(parseISO(activity.activity_date), "dd.MM.yyyy HH:mm", { locale: de })}
+                                                    </div>
+                                                </div>
+                                                <div className="text-xl font-bold text-blue-600">
+                                                    {activity.travel_distance_km?.toFixed(1)} km
+                                                </div>
+                                            </div>
+                                            
+                                            {project && (
+                                                <div className="text-sm text-slate-600 mb-2">
+                                                    <span className="font-medium">{project.name}</span>
+                                                    {customer && <span> • {customer.company}</span>}
+                                                </div>
+                                            )}
+                                            
+                                            <div className="flex items-start gap-3 text-sm text-slate-500">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-1">
+                                                        <MapPin className="w-3 h-3" />
+                                                        <span className="font-medium">Von:</span>
+                                                    </div>
+                                                    <div className="ml-4">{activity.start_location}</div>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-1">
+                                                        <MapPin className="w-3 h-3" />
+                                                        <span className="font-medium">Nach:</span>
+                                                    </div>
+                                                    <div className="ml-4">{activity.destination_address}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-slate-500">
+                                <Navigation className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                                <p>Keine Fahrten in diesem Monat</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    );
+}

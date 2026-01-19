@@ -7,6 +7,7 @@ import Projects from './pages/Projects';
 import SubThemeDetail from './pages/SubThemeDetail';
 import ThemeDetail from './pages/ThemeDetail';
 import Themes from './pages/Themes';
+import TravelTracking from './pages/TravelTracking';
 import __Layout from './Layout.jsx';
 
 
@@ -20,6 +21,7 @@ export const PAGES = {
     "SubThemeDetail": SubThemeDetail,
     "ThemeDetail": ThemeDetail,
     "Themes": Themes,
+    "TravelTracking": TravelTracking,
 }
 
 export const pagesConfig = {

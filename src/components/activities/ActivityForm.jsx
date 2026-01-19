@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2, Handshake, Plus, Trash2 } from "lucide-react";
+import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2, Handshake, Plus, Trash2, MapPin, Navigation } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const typeConfig = {
     telefonat: { label: "Telefonat", icon: Phone, color: "text-green-600" },
@@ -27,22 +28,37 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
         contact_person: "",
         activity_date: new Date().toISOString().slice(0, 16),
         file_urls: [],
-        file_names: []
+        file_names: [],
+        requires_travel: false,
+        start_location: "Gartenstraße 17, 89257 Illertissen",
+        destination_address: "",
+        travel_distance_km: null
     });
     const [uploading, setUploading] = useState(false);
     const [selectedContactPerson, setSelectedContactPerson] = useState("");
     const [contactPersonsList, setContactPersonsList] = useState([]);
+    const [calculatingDistance, setCalculatingDistance] = useState(false);
+    const [project, setProject] = useState(null);
 
     const { data: customers = [] } = useQuery({
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
     });
 
+    const { data: projects = [] } = useQuery({
+        queryKey: ['projects'],
+        queryFn: () => base44.entities.Project.list()
+    });
+
     useEffect(() => {
         if (activity) {
             setFormData({
                 ...activity,
-                activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16)
+                activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16),
+                requires_travel: activity.requires_travel || false,
+                start_location: activity.start_location || "Gartenstraße 17, 89257 Illertissen",
+                destination_address: activity.destination_address || "",
+                travel_distance_km: activity.travel_distance_km || null
             });
             // Parse existing contact persons (comma-separated string to array)
             const existingContacts = activity.contact_person ? activity.contact_person.split(', ').filter(c => c.trim()) : [];
@@ -56,12 +72,32 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                 contact_person: "",
                 activity_date: new Date().toISOString().slice(0, 16),
                 file_urls: [],
-                file_names: []
+                file_names: [],
+                requires_travel: false,
+                start_location: "Gartenstraße 17, 89257 Illertissen",
+                destination_address: "",
+                travel_distance_km: null
             });
             setContactPersonsList([]);
         }
         setSelectedContactPerson("");
     }, [activity, projectId, open]);
+
+    useEffect(() => {
+        if (projectId) {
+            const currentProject = projects.find(p => p.id === projectId);
+            setProject(currentProject);
+            
+            // Set destination address from customer if available
+            if (currentProject && currentProject.customer_id && !activity) {
+                const customer = customers.find(c => c.id === currentProject.customer_id);
+                if (customer && customer.street && customer.city) {
+                    const address = `${customer.street}, ${customer.postal_code || ''} ${customer.city}`.trim();
+                    setFormData(prev => ({...prev, destination_address: address}));
+                }
+            }
+        }
+    }, [projectId, projects, customers, activity]);
 
     const handleFileUpload = async (e) => {
         const files = e.target.files;
@@ -99,6 +135,32 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
         const newList = contactPersonsList.filter((_, i) => i !== index);
         setContactPersonsList(newList);
         setFormData({...formData, contact_person: newList.join(', ')});
+    };
+
+    const calculateDistance = async () => {
+        if (!formData.start_location || !formData.destination_address) return;
+        
+        setCalculatingDistance(true);
+        try {
+            const result = await base44.integrations.Core.InvokeLLM({
+                prompt: `Berechne die Fahrstrecke in Kilometern zwischen diesen beiden Adressen:
+Start: ${formData.start_location}
+Ziel: ${formData.destination_address}
+
+Gib NUR die Gesamtkilometer für Hin- und Rückfahrt zurück (also die einfache Strecke mal 2).
+Beispiel-Antwort: 45.6`,
+                add_context_from_internet: true
+            });
+            
+            const distance = parseFloat(result);
+            if (!isNaN(distance)) {
+                setFormData({...formData, travel_distance_km: distance});
+            }
+        } catch (error) {
+            console.error("Fehler beim Berechnen der Entfernung:", error);
+        } finally {
+            setCalculatingDistance(false);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -239,6 +301,78 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                             className="mt-1.5"
                         />
                     </div>
+
+                    {(formData.type === 'besuch' || formData.type === 'meeting') && (
+                        <div className="border border-blue-200 bg-blue-50 rounded-lg p-4 space-y-4">
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="requires_travel"
+                                    checked={formData.requires_travel}
+                                    onCheckedChange={(checked) => setFormData({...formData, requires_travel: checked})}
+                                />
+                                <Label htmlFor="requires_travel" className="text-slate-700 font-medium cursor-pointer">
+                                    <MapPin className="w-4 h-4 inline mr-1" />
+                                    Fahrt erforderlich (außer Haus)
+                                </Label>
+                            </div>
+
+                            {formData.requires_travel && (
+                                <>
+                                    <div>
+                                        <Label className="text-slate-700 font-medium">Start-Standort</Label>
+                                        <Input
+                                            value={formData.start_location}
+                                            onChange={(e) => setFormData({...formData, start_location: e.target.value})}
+                                            placeholder="Gartenstraße 17, 89257 Illertissen"
+                                            className="mt-1.5"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label className="text-slate-700 font-medium">Zieladresse</Label>
+                                        <Input
+                                            value={formData.destination_address}
+                                            onChange={(e) => setFormData({...formData, destination_address: e.target.value})}
+                                            placeholder="Adresse des Kunden"
+                                            className="mt-1.5"
+                                        />
+                                        {project && (
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                Kundenadresse wird automatisch ausgefüllt
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="flex gap-2 items-end">
+                                        <div className="flex-1">
+                                            <Label className="text-slate-700 font-medium">Kilometer (Hin & Zurück)</Label>
+                                            <Input
+                                                type="number"
+                                                step="0.1"
+                                                value={formData.travel_distance_km || ''}
+                                                onChange={(e) => setFormData({...formData, travel_distance_km: parseFloat(e.target.value) || null})}
+                                                placeholder="0.0"
+                                                className="mt-1.5"
+                                            />
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            onClick={calculateDistance}
+                                            disabled={calculatingDistance || !formData.start_location || !formData.destination_address}
+                                            variant="outline"
+                                        >
+                                            {calculatingDistance ? (
+                                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                            ) : (
+                                                <Navigation className="w-4 h-4 mr-2" />
+                                            )}
+                                            Berechnen
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
                     
                     <div>
                         <Label className="text-slate-700 font-medium">Inhalt/Notizen</Label>
