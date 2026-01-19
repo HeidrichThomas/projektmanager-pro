@@ -9,11 +9,16 @@ import { base44 } from "@/api/base44Client";
 import { Upload, X } from "lucide-react";
 
 export default function PrivateActivityForm({ activity, onSave, onClose }) {
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return new Date().toISOString().slice(0, 16);
+        return new Date(dateString).toISOString().slice(0, 16);
+    };
+
     const [formData, setFormData] = useState({
         type: activity?.type || "notiz",
         title: activity?.title || "",
         content: activity?.content || "",
-        activity_date: activity?.activity_date || new Date().toISOString().slice(0, 16),
+        activity_date: activity ? formatDateForInput(activity.activity_date) : new Date().toISOString().slice(0, 16),
         amount: activity?.amount || "",
         file_urls: activity?.file_urls || [],
         file_names: activity?.file_names || []
