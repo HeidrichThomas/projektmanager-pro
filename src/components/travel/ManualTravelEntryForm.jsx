@@ -66,20 +66,40 @@ export default function ManualTravelEntryForm({ open, onOpenChange, onSave, entr
 
         setCalculatingDistance(true);
         try {
-            const response = await base44.integrations.Core.InvokeLLM({
-                prompt: `Berechne die einfache Wegstrecke in Kilometern von "${formData.start_location}" nach "${formData.destination}". 
-                Gib NUR die Gesamtstrecke für Hin- UND Rückfahrt (also 2x die einfache Strecke) als Zahl zurück.`,
-                add_context_from_internet: true,
-                response_json_schema: {
-                    type: "object",
-                    properties: {
-                        total_distance_km: { type: "number" }
+            // Zwei unabhängige Berechnungen durchführen
+            const [response1, response2] = await Promise.all([
+                base44.integrations.Core.InvokeLLM({
+                    prompt: `Berechne die einfache Wegstrecke in Kilometern von "${formData.start_location}" nach "${formData.destination}". 
+                    Gib NUR die Gesamtstrecke für Hin- UND Rückfahrt (also 2x die einfache Strecke) als Zahl zurück.`,
+                    add_context_from_internet: true,
+                    response_json_schema: {
+                        type: "object",
+                        properties: {
+                            total_distance_km: { type: "number" }
+                        }
                     }
-                }
-            });
+                }),
+                base44.integrations.Core.InvokeLLM({
+                    prompt: `Ermittle die Fahrtstrecke in Kilometern von "${formData.start_location}" nach "${formData.destination}". 
+                    Gib die komplette Distanz für Hin- UND Rückfahrt (zweimal die einfache Strecke) als Zahl zurück.`,
+                    add_context_from_internet: true,
+                    response_json_schema: {
+                        type: "object",
+                        properties: {
+                            total_distance_km: { type: "number" }
+                        }
+                    }
+                })
+            ]);
 
-            if (response.total_distance_km) {
-                setFormData({ ...formData, distance_km: response.total_distance_km.toFixed(1) });
+            // Mittelwert berechnen
+            if (response1.total_distance_km && response2.total_distance_km) {
+                const average = (response1.total_distance_km + response2.total_distance_km) / 2;
+                setFormData({ ...formData, distance_km: average.toFixed(1) });
+            } else if (response1.total_distance_km) {
+                setFormData({ ...formData, distance_km: response1.total_distance_km.toFixed(1) });
+            } else if (response2.total_distance_km) {
+                setFormData({ ...formData, distance_km: response2.total_distance_km.toFixed(1) });
             }
         } catch (error) {
             alert("Fehler bei der Berechnung der Entfernung");
