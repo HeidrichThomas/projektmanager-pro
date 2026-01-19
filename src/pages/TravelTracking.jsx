@@ -109,16 +109,17 @@ export default function TravelTracking() {
     }, 0);
 
     // Group by project
-    const projectTotals = filteredActivities.reduce((acc, activity) => {
-        if (!acc[activity.project_id]) {
-            acc[activity.project_id] = {
-                projectId: activity.project_id,
+    const projectTotals = filteredActivities.reduce((acc, item) => {
+        if (!item.project_id) return acc;
+        if (!acc[item.project_id]) {
+            acc[item.project_id] = {
+                projectId: item.project_id,
                 totalKm: 0,
                 count: 0
             };
         }
-        acc[activity.project_id].totalKm += activity.travel_distance_km || 0;
-        acc[activity.project_id].count += 1;
+        acc[item.project_id].totalKm += item.distance || 0;
+        acc[item.project_id].count += 1;
         return acc;
     }, {});
 
@@ -276,7 +277,7 @@ export default function TravelTracking() {
                                 {yearlyTotal.toFixed(1)} km
                             </div>
                             <p className="text-sm text-slate-500 mt-1">
-                                {travelActivities.filter(a => a.activity_date && parseISO(a.activity_date).getFullYear() === selectedYear).length} Fahrten
+                                {allTravelData.filter(item => item.date && parseISO(item.date).getFullYear() === selectedYear).length} Fahrten
                             </p>
                         </CardContent>
                     </Card>
