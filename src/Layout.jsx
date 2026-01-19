@@ -19,6 +19,9 @@ const navigation = [
     { name: "Projekte", icon: FolderKanban, page: "Projects" },
     { name: "Kunden & Lieferanten", icon: Building2, page: "Customers" },
     { name: "Business Themen", icon: Lightbulb, page: "Themes" },
+];
+
+const themeNavigation = [
     { name: "Private Themen", icon: User, page: "PrivateThemes" },
 ];
 
@@ -168,6 +171,9 @@ export default function Layout({ children, currentPageName }) {
                                 {item.page === "Themes" && (
                                     <div className="space-y-3">
                                         <MiniActivityCalendar />
+                                        {themeNavigation.map((themeItem) => (
+                                            <NavLink key={themeItem.name} item={themeItem} />
+                                        ))}
                                     </div>
                                 )}
                             </div>
@@ -210,6 +216,9 @@ export default function Layout({ children, currentPageName }) {
                             
                             <nav className="flex-1 px-4 space-y-1">
                                 {navigation.map((item) => (
+                                    <NavLink key={item.name} item={item} mobile />
+                                ))}
+                                {themeNavigation.map((item) => (
                                     <NavLink key={item.name} item={item} mobile />
                                 ))}
                             </nav>
