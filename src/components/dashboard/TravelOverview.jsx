@@ -1,18 +1,20 @@
 import React, { useState, useMemo, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Navigation, Calendar, Building2, FolderKanban, TrendingUp, Printer, FileDown } from "lucide-react";
+import { Navigation, Calendar, Building2, FolderKanban, TrendingUp, Printer, FileDown, Plus, Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import ManualTravelEntryForm from "@/components/travel/ManualTravelEntryForm";
 
 export default function TravelOverview() {
+    const queryClient = useQueryClient();
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
     
@@ -20,6 +22,7 @@ export default function TravelOverview() {
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [filterProject, setFilterProject] = useState("all");
     const [filterCustomer, setFilterCustomer] = useState("all");
+    const [showManualEntryForm, setShowManualEntryForm] = useState(false);
     const reportRef = useRef(null);
 
     const { data: activities = [] } = useQuery({
@@ -57,37 +60,84 @@ export default function TravelOverview() {
         }
     });
 
+    const calculateTaxRate = (date) => {
+        const entryDate = parseISO(date);
+        const cutoffDate = new Date('2026-01-01');
+        return entryDate < cutoffDate ? 0.30 : 0.38;
+    };
+
     const travelActivities = useMemo(() => {
         return activities
             .filter(a => a.requires_travel && a.travel_distance_km)
             .sort((a, b) => new Date(b.activity_date) - new Date(a.activity_date));
     }, [activities]);
 
+    const allTravelData = useMemo(() => {
+        const activities = travelActivities.map(a => ({
+            ...a,
+            type: 'activity',
+            date: a.activity_date,
+            distance: a.travel_distance_km
+        }));
+        
+        const manual = manualEntries.map(m => ({
+            ...m,
+            type: 'manual',
+            date: m.date,
+            distance: m.distance_km
+        }));
+        
+        return [...activities, ...manual].sort((a, b) => 
+            new Date(b.date) - new Date(a.date)
+        );
+    }, [travelActivities, manualEntries]);
+
     const filteredActivities = useMemo(() => {
-        return travelActivities.filter(a => {
-            if (!a.activity_date) return false;
-            const date = parseISO(a.activity_date);
+        return allTravelData.filter(item => {
+            if (!item.date) return false;
+            const date = parseISO(item.date);
             
             const monthMatch = date.getMonth() + 1 === selectedMonth;
             const yearMatch = date.getFullYear() === selectedYear;
-            const projectMatch = filterProject === "all" || a.project_id === filterProject;
+            const projectMatch = filterProject === "all" || item.project_id === filterProject;
             
             let customerMatch = true;
             if (filterCustomer !== "all") {
-                const project = projects.find(p => p.id === a.project_id);
-                customerMatch = project && project.customer_id === filterCustomer;
+                if (item.type === 'manual' && item.customer_id) {
+                    customerMatch = item.customer_id === filterCustomer;
+                } else if (item.type === 'activity') {
+                    const project = projects.find(p => p.id === item.project_id);
+                    customerMatch = project && project.customer_id === filterCustomer;
+                }
             }
             
             return monthMatch && yearMatch && projectMatch && customerMatch;
         });
-    }, [travelActivities, selectedMonth, selectedYear, filterProject, filterCustomer, projects]);
+    }, [allTravelData, selectedMonth, selectedYear, filterProject, filterCustomer, projects]);
 
     const monthlyTotal = useMemo(() => {
-        return filteredActivities.reduce((sum, a) => sum + (a.travel_distance_km || 0), 0);
+        return filteredActivities.reduce((sum, item) => sum + (item.distance || 0), 0);
+    }, [filteredActivities]);
+
+    const estimatedDeduction = useMemo(() => {
+        return filteredActivities.reduce((sum, item) => {
+            const rate = calculateTaxRate(item.date);
+            return sum + (item.distance * rate);
+        }, 0);
     }, [filteredActivities]);
 
     const getProject = (id) => projects.find(p => p.id === id);
     const getCustomer = (id) => customers.find(c => c.id === id);
+
+    const handleSaveManualEntry = (data) => {
+        createManualEntryMutation.mutate(data);
+    };
+
+    const handleDeleteManualEntry = (id) => {
+        if (confirm('Möchten Sie diesen manuellen Eintrag wirklich löschen?')) {
+            deleteManualEntryMutation.mutate(id);
+        }
+    };
 
     const months = [
         { value: 1, label: 'Januar' }, { value: 2, label: 'Februar' }, { value: 3, label: 'März' },
@@ -143,11 +193,15 @@ export default function TravelOverview() {
                         Geschäftliche Fahrten
                     </CardTitle>
                     <div className="flex gap-2">
-                        <Button onClick={handlePrint} variant="outline" size="sm">
+                        <Button onClick={() => setShowManualEntryForm(true)} size="sm" className="print:hidden">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Manuelle Fahrt
+                        </Button>
+                        <Button onClick={handlePrint} variant="outline" size="sm" className="print:hidden">
                             <Printer className="w-4 h-4 mr-2" />
                             Drucken
                         </Button>
-                        <Button onClick={handleExportPDF} variant="outline" size="sm">
+                        <Button onClick={handleExportPDF} variant="outline" size="sm" className="print:hidden">
                             <FileDown className="w-4 h-4 mr-2" />
                             PDF
                         </Button>
@@ -226,7 +280,7 @@ export default function TravelOverview() {
                                 {monthlyTotal.toFixed(1)} km
                             </div>
                             <div className="text-xs text-slate-500 mt-1">
-                                {filteredActivities.length} Fahrten • {(monthlyTotal * 0.30).toFixed(2)} € absetzbar
+                                {filteredActivities.length} Fahrten • {estimatedDeduction.toFixed(2)} € absetzbar
                             </div>
                         </div>
                         <TrendingUp className="w-12 h-12 text-blue-400 opacity-50" />
@@ -249,16 +303,20 @@ export default function TravelOverview() {
                         </TableHeader>
                         <TableBody>
                             {filteredActivities.length > 0 ? (
-                                filteredActivities.map(activity => {
-                                    const project = getProject(activity.project_id);
-                                    const customer = project ? getCustomer(project.customer_id) : null;
+                                filteredActivities.map(item => {
+                                    const project = item.project_id ? getProject(item.project_id) : null;
+                                    const customer = item.type === 'manual' && item.customer_id 
+                                        ? getCustomer(item.customer_id)
+                                        : project ? getCustomer(project.customer_id) : null;
+                                    const rate = calculateTaxRate(item.date);
+                                    const amount = item.distance * rate;
                                     
                                     return (
-                                        <TableRow key={activity.id} className="hover:bg-slate-50">
+                                        <TableRow key={`${item.type}-${item.id}`} className="hover:bg-slate-50">
                                             <TableCell className="font-medium text-sm py-6">
                                                 <div className="flex items-center gap-1">
                                                     <Calendar className="w-3 h-3 text-slate-400" />
-                                                    {format(parseISO(activity.activity_date), "dd.MM.yy", { locale: de })}
+                                                    {format(parseISO(item.date), "dd.MM.yy", { locale: de })}
                                                 </div>
                                             </TableCell>
                                             <TableCell className="py-6">
@@ -274,19 +332,37 @@ export default function TravelOverview() {
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-sm text-slate-600 py-6">
-                                                <div className="break-words">{activity.title}</div>
+                                                <div className="break-words">{item.title}</div>
                                             </TableCell>
                                             <TableCell className="text-right py-6">
                                                 <Badge variant="secondary" className="font-mono">
-                                                    {activity.travel_distance_km?.toFixed(1)} km
+                                                    {item.distance?.toFixed(1)} km
                                                 </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right py-6 text-xs text-slate-500">
+                                                {(rate * 100).toFixed(0)} ct
+                                            </TableCell>
+                                            <TableCell className="text-right py-6 font-medium">
+                                                {amount.toFixed(2)} €
+                                            </TableCell>
+                                            <TableCell className="text-right py-6 print:hidden">
+                                                {item.type === 'manual' && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleDeleteManualEntry(item.id)}
+                                                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                )}
                                             </TableCell>
                                         </TableRow>
                                     );
                                 })
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                                    <TableCell colSpan={8} className="text-center py-8 text-slate-500">
                                         <Navigation className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                                         Keine Fahrten in diesem Zeitraum
                                     </TableCell>
@@ -296,6 +372,12 @@ export default function TravelOverview() {
                     </Table>
                 </div>
             </CardContent>
+
+            <ManualTravelEntryForm
+                open={showManualEntryForm}
+                onOpenChange={setShowManualEntryForm}
+                onSave={handleSaveManualEntry}
+            />
         </Card>
     );
 }
