@@ -143,21 +143,44 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
         setCalculatingDistance(true);
         try {
             const result = await base44.integrations.Core.InvokeLLM({
-                prompt: `Berechne die Fahrstrecke in Kilometern zwischen diesen beiden Adressen:
-Start: ${formData.start_location}
-Ziel: ${formData.destination_address}
+                prompt: `Du bist ein Experte für Routenplanung und Entfernungsberechnungen.
 
-Gib NUR die Gesamtkilometer für Hin- und Rückfahrt zurück (also die einfache Strecke mal 2).
-Beispiel-Antwort: 45.6`,
-                add_context_from_internet: true
+Berechne die GENAUE Fahrstrecke in Kilometern zwischen diesen beiden Adressen in Deutschland:
+
+Start-Adresse: ${formData.start_location}
+Ziel-Adresse: ${formData.destination_address}
+
+WICHTIG:
+1. Nutze aktuelle Straßennetzdaten und Google Maps Informationen
+2. Berechne die tatsächliche Fahrstrecke (nicht Luftlinie)
+3. Gib die EINFACHE Strecke an (nur Hinfahrt)
+4. Die Rückfahrt wird automatisch verdoppelt
+
+Beispiel: Wenn die Hinfahrt 25,3 km beträgt, gib 25.3 zurück (nicht 50.6)`,
+                add_context_from_internet: true,
+                response_json_schema: {
+                    type: "object",
+                    properties: {
+                        distance_one_way_km: {
+                            type: "number",
+                            description: "Einfache Fahrstrecke in Kilometern"
+                        },
+                        route_description: {
+                            type: "string",
+                            description: "Kurze Routenbeschreibung"
+                        }
+                    },
+                    required: ["distance_one_way_km"]
+                }
             });
             
-            const distance = parseFloat(result);
-            if (!isNaN(distance)) {
-                setFormData({...formData, travel_distance_km: distance});
+            if (result && result.distance_one_way_km) {
+                const totalDistance = result.distance_one_way_km * 2;
+                setFormData({...formData, travel_distance_km: totalDistance});
             }
         } catch (error) {
             console.error("Fehler beim Berechnen der Entfernung:", error);
+            alert("Fehler bei der Berechnung. Bitte Kilometer manuell eingeben.");
         } finally {
             setCalculatingDistance(false);
         }
@@ -362,31 +385,34 @@ Beispiel-Antwort: 45.6`,
                                         />
                                     </div>
 
-                                    <div className="flex gap-2 items-end">
-                                        <div className="flex-1">
-                                            <Label className="text-slate-700 font-medium">Kilometer (Hin & Zurück)</Label>
+                                    <div>
+                                        <Label className="text-slate-700 font-medium">Kilometer (Hin & Zurück)</Label>
+                                        <div className="flex gap-2 mt-1.5">
                                             <Input
                                                 type="number"
                                                 step="0.1"
                                                 value={formData.travel_distance_km || ''}
                                                 onChange={(e) => setFormData({...formData, travel_distance_km: parseFloat(e.target.value) || null})}
                                                 placeholder="0.0"
-                                                className="mt-1.5"
+                                                className="flex-1"
                                             />
+                                            <Button
+                                                type="button"
+                                                onClick={calculateDistance}
+                                                disabled={calculatingDistance || !formData.start_location || !formData.destination_address}
+                                                variant="outline"
+                                            >
+                                                {calculatingDistance ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                                ) : (
+                                                    <Navigation className="w-4 h-4 mr-2" />
+                                                )}
+                                                Berechnen
+                                            </Button>
                                         </div>
-                                        <Button
-                                            type="button"
-                                            onClick={calculateDistance}
-                                            disabled={calculatingDistance || !formData.start_location || !formData.destination_address}
-                                            variant="outline"
-                                        >
-                                            {calculatingDistance ? (
-                                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                            ) : (
-                                                <Navigation className="w-4 h-4 mr-2" />
-                                            )}
-                                            Berechnen
-                                        </Button>
+                                        <p className="text-xs text-slate-500 mt-1">
+                                            Berechnung über Google Maps. Bei Abweichungen bitte manuell korrigieren.
+                                        </p>
                                     </div>
                                 </>
                             )}
