@@ -19,6 +19,7 @@ const navigation = [
     { name: "Projekte", icon: FolderKanban, page: "Projects" },
     { name: "Kunden & Lieferanten", icon: Building2, page: "Customers" },
     { name: "Business Themen", icon: Lightbulb, page: "Themes" },
+    { name: "Private Themen", icon: User, page: "PrivateThemes" },
 ];
 
 const bottomNavigation = [
