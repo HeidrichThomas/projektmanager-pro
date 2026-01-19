@@ -18,10 +18,11 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
+        onClose();
     };
 
     return (
-        <Dialog open onOpenChange={onClose}>
+        <Dialog open={true} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>{activity ? "Aktivität bearbeiten" : "Neue Aktivität"}</DialogTitle>
