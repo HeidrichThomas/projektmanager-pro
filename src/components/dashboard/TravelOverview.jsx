@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Navigation, Calendar, Building2, FolderKanban, TrendingUp, Printer, FileDown, Plus, Trash2 } from "lucide-react";
+import { Navigation, Calendar, Building2, FolderKanban, TrendingUp, Printer, FileDown, Plus, Trash2, Edit2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
 import jsPDF from "jspdf";
@@ -50,6 +50,16 @@ export default function TravelOverview() {
         onSuccess: () => {
             queryClient.invalidateQueries(['manualTravelEntries']);
             setShowManualEntryForm(false);
+            setEditingEntry(null);
+        }
+    });
+
+    const updateManualEntryMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.ManualTravelEntry.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['manualTravelEntries']);
+            setShowManualEntryForm(false);
+            setEditingEntry(null);
         }
     });
 
@@ -129,8 +139,19 @@ export default function TravelOverview() {
     const getProject = (id) => projects.find(p => p.id === id);
     const getCustomer = (id) => customers.find(c => c.id === id);
 
-    const handleSaveManualEntry = (data) => {
-        createManualEntryMutation.mutate(data);
+    const handleSaveManualEntry = (...args) => {
+        if (args.length === 2) {
+            // Update: (id, data)
+            updateManualEntryMutation.mutate({ id: args[0], data: args[1] });
+        } else {
+            // Create: (data)
+            createManualEntryMutation.mutate(args[0]);
+        }
+    };
+
+    const handleEditEntry = (entry) => {
+        setEditingEntry(entry);
+        setShowManualEntryForm(true);
     };
 
     const handleDeleteManualEntry = (id) => {
@@ -352,14 +373,24 @@ export default function TravelOverview() {
                                             </TableCell>
                                             <TableCell className="text-right py-6 print:hidden">
                                                 {item.type === 'manual' && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => handleDeleteManualEntry(item.id)}
-                                                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                    <div className="flex gap-1 justify-end">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => handleEditEntry(item)}
+                                                            className="h-8 w-8"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => handleDeleteManualEntry(item.id)}
+                                                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
                                                 )}
                                             </TableCell>
                                         </TableRow>
@@ -380,8 +411,12 @@ export default function TravelOverview() {
 
             <ManualTravelEntryForm
                 open={showManualEntryForm}
-                onOpenChange={setShowManualEntryForm}
+                onOpenChange={(open) => {
+                    setShowManualEntryForm(open);
+                    if (!open) setEditingEntry(null);
+                }}
                 onSave={handleSaveManualEntry}
+                entry={editingEntry}
             />
         </Card>
     );

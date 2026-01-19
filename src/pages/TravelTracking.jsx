@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Navigation, Calendar, Building2, MapPin, FileDown, TrendingUp, Plus } from "lucide-react";
+import { Navigation, Calendar, Building2, MapPin, FileDown, TrendingUp, Plus, Edit2, Trash2 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
 import ManualTravelEntryForm from "@/components/travel/ManualTravelEntryForm";
@@ -18,6 +18,7 @@ export default function TravelTracking() {
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [showManualEntryForm, setShowManualEntryForm] = useState(false);
+    const [editingEntry, setEditingEntry] = useState(null);
 
     const { data: activities = [], isLoading } = useQuery({
         queryKey: ['activities'],
@@ -44,6 +45,23 @@ export default function TravelTracking() {
         onSuccess: () => {
             queryClient.invalidateQueries(['manualTravelEntries']);
             setShowManualEntryForm(false);
+            setEditingEntry(null);
+        }
+    });
+
+    const updateManualEntryMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.ManualTravelEntry.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['manualTravelEntries']);
+            setShowManualEntryForm(false);
+            setEditingEntry(null);
+        }
+    });
+
+    const deleteManualEntryMutation = useMutation({
+        mutationFn: (id) => base44.entities.ManualTravelEntry.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['manualTravelEntries']);
         }
     });
 
@@ -107,8 +125,25 @@ export default function TravelTracking() {
     const getProject = (id) => projects.find(p => p.id === id);
     const getCustomer = (id) => customers.find(c => c.id === id);
 
-    const handleSaveManualEntry = (data) => {
-        createManualEntryMutation.mutate(data);
+    const handleSaveManualEntry = (...args) => {
+        if (args.length === 2) {
+            // Update: (id, data)
+            updateManualEntryMutation.mutate({ id: args[0], data: args[1] });
+        } else {
+            // Create: (data)
+            createManualEntryMutation.mutate(args[0]);
+        }
+    };
+
+    const handleEditEntry = (entry) => {
+        setEditingEntry(entry);
+        setShowManualEntryForm(true);
+    };
+
+    const handleDeleteEntry = (id) => {
+        if (confirm('Möchten Sie diesen Eintrag wirklich löschen?')) {
+            deleteManualEntryMutation.mutate(id);
+        }
     };
 
     const exportToCSV = () => {
@@ -318,22 +353,44 @@ export default function TravelTracking() {
                                     return (
                                         <div key={`${item.type}-${item.id}`} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                                             <div className="flex items-start justify-between mb-2">
-                                                <div>
+                                                <div className="flex-1">
                                                     <div className="font-medium text-slate-900">{item.title}</div>
                                                     <div className="text-sm text-slate-500">
                                                         {format(parseISO(item.date), "dd.MM.yyyy HH:mm", { locale: de })}
                                                     </div>
                                                 </div>
-                                                <div>
-                                                    <div className="text-xl font-bold text-blue-600">
-                                                        {item.distance?.toFixed(1)} km
+                                                <div className="flex items-start gap-3">
+                                                    <div className="text-right">
+                                                        <div className="text-xl font-bold text-blue-600">
+                                                            {item.distance?.toFixed(1)} km
+                                                        </div>
+                                                        <div className="text-xs text-slate-400">
+                                                            ({(item.distance / 2).toFixed(1)} km × 2)
+                                                        </div>
+                                                        <div className="text-sm text-emerald-600 mt-1">
+                                                            {amount.toFixed(2)} €
+                                                        </div>
                                                     </div>
-                                                    <div className="text-xs text-slate-400 text-right">
-                                                        ({(item.distance / 2).toFixed(1)} km × 2)
-                                                    </div>
-                                                    <div className="text-sm text-emerald-600 text-right mt-1">
-                                                        {amount.toFixed(2)} €
-                                                    </div>
+                                                    {item.type === 'manual' && (
+                                                        <div className="flex gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => handleEditEntry(item)}
+                                                                className="h-8 w-8"
+                                                            >
+                                                                <Edit2 className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => handleDeleteEntry(item.id)}
+                                                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             
@@ -401,8 +458,12 @@ export default function TravelTracking() {
 
             <ManualTravelEntryForm
                 open={showManualEntryForm}
-                onOpenChange={setShowManualEntryForm}
+                onOpenChange={(open) => {
+                    setShowManualEntryForm(open);
+                    if (!open) setEditingEntry(null);
+                }}
                 onSave={handleSaveManualEntry}
+                entry={editingEntry}
             />
         </div>
     );

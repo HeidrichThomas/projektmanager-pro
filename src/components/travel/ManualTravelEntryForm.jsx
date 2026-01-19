@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 
-export default function ManualTravelEntryForm({ open, onOpenChange, onSave }) {
+export default function ManualTravelEntryForm({ open, onOpenChange, onSave, entry = null }) {
     const [formData, setFormData] = useState({
         date: format(new Date(), "yyyy-MM-dd"),
         title: "",
@@ -21,6 +21,32 @@ export default function ManualTravelEntryForm({ open, onOpenChange, onSave }) {
         notes: ""
     });
     const [calculatingDistance, setCalculatingDistance] = useState(false);
+
+    React.useEffect(() => {
+        if (entry) {
+            setFormData({
+                date: entry.date || format(new Date(), "yyyy-MM-dd"),
+                title: entry.title || "",
+                start_location: entry.start_location || "Gartenstraße 17, 89257 Illertissen",
+                destination: entry.destination || "",
+                distance_km: entry.distance_km || "",
+                project_id: entry.project_id || "",
+                customer_id: entry.customer_id || "",
+                notes: entry.notes || ""
+            });
+        } else {
+            setFormData({
+                date: format(new Date(), "yyyy-MM-dd"),
+                title: "",
+                start_location: "Gartenstraße 17, 89257 Illertissen",
+                destination: "",
+                distance_km: "",
+                project_id: "",
+                customer_id: "",
+                notes: ""
+            });
+        }
+    }, [entry, open]);
 
     const { data: projects = [] } = useQuery({
         queryKey: ['projects'],
@@ -66,28 +92,23 @@ export default function ManualTravelEntryForm({ open, onOpenChange, onSave }) {
         e.preventDefault();
         if (!formData.title || !formData.distance_km) return;
         
-        onSave({
+        const dataToSave = {
             ...formData,
             distance_km: parseFloat(formData.distance_km)
-        });
+        };
         
-        setFormData({
-            date: format(new Date(), "yyyy-MM-dd"),
-            title: "",
-            start_location: "Gartenstraße 17, 89257 Illertissen",
-            destination: "",
-            distance_km: "",
-            project_id: "",
-            customer_id: "",
-            notes: ""
-        });
+        if (entry) {
+            onSave(entry.id, dataToSave);
+        } else {
+            onSave(dataToSave);
+        }
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Manuelle Fahrt eintragen</DialogTitle>
+                    <DialogTitle>{entry ? "Fahrt bearbeiten" : "Manuelle Fahrt eintragen"}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -207,7 +228,7 @@ export default function ManualTravelEntryForm({ open, onOpenChange, onSave }) {
                             Abbrechen
                         </Button>
                         <Button type="submit">
-                            Fahrt speichern
+                            {entry ? "Änderungen speichern" : "Fahrt speichern"}
                         </Button>
                     </div>
                 </form>
