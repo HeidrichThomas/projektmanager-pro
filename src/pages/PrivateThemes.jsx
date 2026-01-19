@@ -31,6 +31,16 @@ export default function PrivateThemes() {
         queryFn: () => base44.entities.PrivateTheme.list('-created_date')
     });
 
+    const { data: allAppointments = [] } = useQuery({
+        queryKey: ['allPrivateAppointments'],
+        queryFn: () => base44.entities.PrivateAppointment.list()
+    });
+
+    const { data: allDocuments = [] } = useQuery({
+        queryKey: ['allPrivateDocuments'],
+        queryFn: () => base44.entities.PrivateDocument.list()
+    });
+
     const createMutation = useMutation({
         mutationFn: (data) => base44.entities.PrivateTheme.create(data),
         onSuccess: () => {
@@ -148,14 +158,20 @@ export default function PrivateThemes() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredThemes.map(theme => (
-                            <PrivateThemeCard
-                                key={theme.id}
-                                theme={theme}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                            />
-                        ))}
+                        {filteredThemes.map(theme => {
+                            const themeAppointments = allAppointments.filter(apt => apt.theme_id === theme.id);
+                            const themeDocuments = allDocuments.filter(doc => doc.theme_id === theme.id);
+                            return (
+                                <PrivateThemeCard
+                                    key={theme.id}
+                                    theme={theme}
+                                    appointments={themeAppointments}
+                                    documents={themeDocuments}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
+                                />
+                            );
+                        })}
                     </div>
                 )}
 
