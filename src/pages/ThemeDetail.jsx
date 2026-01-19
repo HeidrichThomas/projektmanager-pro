@@ -21,7 +21,6 @@ import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeActivityForm from "@/components/themes/ThemeActivityForm";
 import ThemeActivityTimeline from "@/components/themes/ThemeActivityTimeline";
 import DocumentManagement from "@/components/themes/DocumentManagement";
-import ThemeTaskBoard from "@/components/themes/ThemeTaskBoard";
 import SubThemeForm from "@/components/themes/SubThemeForm";
 import SubThemesList from "@/components/themes/SubThemesList";
 
@@ -287,16 +286,6 @@ export default function ThemeDetail() {
                             }}
                             onDelete={(id) => deleteSubThemeMutation.mutate(id)}
                         />
-                    </CardContent>
-                </Card>
-
-                {/* Task Board */}
-                <Card className="mb-8 shadow-sm">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">Aufgaben & Kacheln</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ThemeTaskBoard themeId={themeId} />
                     </CardContent>
                 </Card>
 
