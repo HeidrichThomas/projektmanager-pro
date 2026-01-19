@@ -41,6 +41,12 @@ export default function SubThemeDocumentDialog({ open, onClose, subThemeId }) {
         enabled: open && !!subThemeId
     });
 
+    const { data: checklistItems = [] } = useQuery({
+        queryKey: ['checklistItems', subThemeId],
+        queryFn: () => base44.entities.ChecklistItem.filter({ sub_theme_id: subThemeId }),
+        enabled: open && !!subThemeId
+    });
+
     const createMutation = useMutation({
         mutationFn: (data) => base44.entities.SubThemeDocument.create(data),
         onSuccess: () => {
@@ -149,62 +155,98 @@ export default function SubThemeDocumentDialog({ open, onClose, subThemeId }) {
 
                         {isLoading ? (
                             <p className="text-sm text-slate-500 text-center py-8">Lädt...</p>
-                        ) : documents.length === 0 ? (
+                        ) : documents.length === 0 && checklistItems.every(item => !item.file_urls || item.file_urls.length === 0) ? (
                             <div className="text-center py-12 text-slate-500">
                                 <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
                                 <p>Noch keine Dokumente</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {documents.map((doc) => {
-                                    const config = categoryConfig[doc.category] || categoryConfig.sonstiges;
-                                    return (
-                                        <div
-                                            key={doc.id}
-                                            className="border rounded-lg p-4 hover:shadow-md transition-shadow group"
-                                        >
-                                            <div className="flex items-start justify-between mb-2">
-                                                <h4 className="font-medium text-slate-900">{doc.title}</h4>
-                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => setEditingDoc(doc)}
+                            <div className="space-y-6">
+                                {documents.length > 0 && (
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-slate-700 mb-3">Unterthema-Dokumente</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {documents.map((doc) => {
+                                                const config = categoryConfig[doc.category] || categoryConfig.sonstiges;
+                                                return (
+                                                    <div
+                                                        key={doc.id}
+                                                        className="border rounded-lg p-4 hover:shadow-md transition-shadow group"
                                                     >
-                                                        <FileText className="w-3 h-3" />
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        className="text-red-600"
-                                                        onClick={() => {
-                                                            if (confirm("Dokument wirklich löschen?")) {
-                                                                deleteMutation.mutate(doc.id);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Trash2 className="w-3 h-3" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                            {doc.description && (
-                                                <p className="text-sm text-slate-600 mb-2">{doc.description}</p>
-                                            )}
-                                            <Badge className={`${config.color} text-xs mb-2`}>
-                                                {config.label}
-                                            </Badge>
-                                            <a
-                                                href={doc.file_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
-                                            >
-                                                <FileText className="w-4 h-4" />
-                                                {doc.file_name}
-                                            </a>
+                                                        <div className="flex items-start justify-between mb-2">
+                                                            <h4 className="font-medium text-slate-900">{doc.title}</h4>
+                                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={() => setEditingDoc(doc)}
+                                                                >
+                                                                    <FileText className="w-3 h-3" />
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="text-red-600"
+                                                                    onClick={() => {
+                                                                        if (confirm("Dokument wirklich löschen?")) {
+                                                                            deleteMutation.mutate(doc.id);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                        {doc.description && (
+                                                            <p className="text-sm text-slate-600 mb-2">{doc.description}</p>
+                                                        )}
+                                                        <Badge className={`${config.color} text-xs mb-2`}>
+                                                            {config.label}
+                                                        </Badge>
+                                                        <a
+                                                            href={doc.file_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                                                        >
+                                                            <FileText className="w-4 h-4" />
+                                                            {doc.file_name}
+                                                        </a>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                    );
-                                })}
+                                    </div>
+                                )}
+
+                                {checklistItems.some(item => item.file_urls && item.file_urls.length > 0) && (
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-slate-700 mb-3">Checklisten-Dokumente</h3>
+                                        <div className="space-y-4">
+                                            {checklistItems
+                                                .filter(item => item.file_urls && item.file_urls.length > 0)
+                                                .map((item) => (
+                                                    <div key={item.id} className="border rounded-lg p-4">
+                                                        <h4 className="font-medium text-slate-900 mb-3">{item.title}</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                            {item.file_urls.map((url, index) => (
+                                                                <a
+                                                                    key={index}
+                                                                    href={url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-2 p-2 bg-slate-50 hover:bg-slate-100 rounded border text-sm text-indigo-600 hover:text-indigo-700 transition-colors"
+                                                                >
+                                                                    <FileText className="w-4 h-4" />
+                                                                    {item.file_names?.[index] || `Datei ${index + 1}`}
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
