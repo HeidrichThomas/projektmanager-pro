@@ -1,13 +1,16 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Navigation, Calendar, Building2, FolderKanban, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Navigation, Calendar, Building2, FolderKanban, TrendingUp, Printer, FileDown } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function TravelOverview() {
     const currentYear = new Date().getFullYear();
@@ -17,6 +20,7 @@ export default function TravelOverview() {
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [filterProject, setFilterProject] = useState("all");
     const [filterCustomer, setFilterCustomer] = useState("all");
+    const reportRef = useRef(null);
 
     const { data: activities = [] } = useQuery({
         queryKey: ['activities'],
@@ -74,16 +78,61 @@ export default function TravelOverview() {
 
     const years = [currentYear - 1, currentYear, currentYear + 1];
 
+    const handlePrint = () => {
+        window.print();
+    };
+
+    const handleExportPDF = async () => {
+        if (!reportRef.current) return;
+        
+        const canvas = await html2canvas(reportRef.current, {
+            scale: 2,
+            useCORS: true,
+            logging: false
+        });
+        
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgWidth = 190;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+        
+        const fileName = `Fahrtenbericht_${months.find(m => m.value === selectedMonth)?.label}_${selectedYear}.pdf`;
+        pdf.save(fileName);
+    };
+
     return (
         <Card className="shadow-sm">
             <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <Navigation className="w-5 h-5 text-blue-600" />
-                    Geschäftliche Fahrten
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                        <Navigation className="w-5 h-5 text-blue-600" />
+                        Geschäftliche Fahrten
+                    </CardTitle>
+                    <div className="flex gap-2">
+                        <Button onClick={handlePrint} variant="outline" size="sm">
+                            <Printer className="w-4 h-4 mr-2" />
+                            Drucken
+                        </Button>
+                        <Button onClick={handleExportPDF} variant="outline" size="sm">
+                            <FileDown className="w-4 h-4 mr-2" />
+                            PDF
+                        </Button>
+                    </div>
+                </div>
             </CardHeader>
-            <CardContent>
-                <div className="flex flex-wrap gap-3 mb-4">
+            <CardContent ref={reportRef}>
+                <div className="mb-4 print:mb-6">
+                    <h2 className="text-xl font-bold text-slate-900 mb-1">Fahrtenbericht</h2>
+                    <p className="text-sm text-slate-600">
+                        {months.find(m => m.value === selectedMonth)?.label} {selectedYear}
+                        {filterProject !== "all" && ` • Projekt: ${projects.find(p => p.id === filterProject)?.name}`}
+                        {filterCustomer !== "all" && ` • Kunde: ${customers.find(c => c.id === filterCustomer)?.company}`}
+                    </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3 mb-4 print:hidden">
                     <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                         <SelectTrigger className="w-28">
                             <SelectValue />
