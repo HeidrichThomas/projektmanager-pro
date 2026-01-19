@@ -15,6 +15,7 @@ import { format, isToday, isTomorrow, isPast } from "date-fns";
 import { de } from "date-fns/locale";
 import ActiveTimers from "@/components/dashboard/ActiveTimers";
 import DateTimeWeather from "@/components/dashboard/DateTimeWeather";
+import TravelOverview from "@/components/dashboard/TravelOverview";
 
 export default function Dashboard() {
     const { data: customers = [], isLoading: loadingCustomers } = useQuery({
@@ -231,6 +232,11 @@ export default function Dashboard() {
                             )}
                         </CardContent>
                     </Card>
+                </div>
+
+                {/* Travel Overview */}
+                <div className="mt-8">
+                    <TravelOverview />
                 </div>
             </div>
         </div>
