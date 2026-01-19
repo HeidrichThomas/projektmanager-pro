@@ -17,9 +17,16 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!formData.title.trim()) {
+            alert("Bitte geben Sie einen Titel ein");
+            return;
+        }
         const dataToSave = {
-            ...formData,
-            activity_date: new Date(formData.activity_date).toISOString()
+            type: formData.type,
+            title: formData.title.trim(),
+            content: formData.content.trim(),
+            activity_date: formData.activity_date ? new Date(formData.activity_date).toISOString() : new Date().toISOString(),
+            ...(formData.amount && { amount: parseFloat(formData.amount) })
         };
         onSave(dataToSave);
         onClose();
