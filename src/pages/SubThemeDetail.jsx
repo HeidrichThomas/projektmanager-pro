@@ -9,13 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-    ArrowLeft, Layers, Pencil, Trash2, Plus, Clock, CheckSquare
+    ArrowLeft, Layers, Pencil, Trash2, Plus, Clock, CheckSquare, FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import SubThemeForm from "@/components/themes/SubThemeForm";
 import ThemeActivityForm from "@/components/themes/ThemeActivityForm";
 import ThemeActivityTimeline from "@/components/themes/ThemeActivityTimeline";
 import ChecklistBoard from "@/components/themes/ChecklistBoard";
+import SubThemeDocumentDialog from "@/components/themes/SubThemeDocumentDialog";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -32,6 +33,7 @@ export default function SubThemeDetail() {
     const [showForm, setShowForm] = useState(false);
     const [showActivityForm, setShowActivityForm] = useState(false);
     const [editingActivity, setEditingActivity] = useState(null);
+    const [showDocuments, setShowDocuments] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -182,7 +184,11 @@ export default function SubThemeDetail() {
                             </div>
                         </div>
                         
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
+                            <Button variant="outline" onClick={() => setShowDocuments(true)}>
+                                <FileText className="w-4 h-4 mr-2" />
+                                Dokumente
+                            </Button>
                             <Button variant="outline" onClick={() => setShowForm(true)}>
                                 <Pencil className="w-4 h-4 mr-2" />
                                 Bearbeiten
@@ -291,6 +297,12 @@ export default function SubThemeDetail() {
                 onSave={handleActivitySave}
                 activity={editingActivity}
                 themeId={parentThemeId}
+            />
+
+            <SubThemeDocumentDialog
+                open={showDocuments}
+                onClose={() => setShowDocuments(false)}
+                subThemeId={subThemeId}
             />
         </div>
     );

@@ -4,9 +4,9 @@ import Dashboard from './pages/Dashboard';
 import DataBackup from './pages/DataBackup';
 import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
+import SubThemeDetail from './pages/SubThemeDetail';
 import ThemeDetail from './pages/ThemeDetail';
 import Themes from './pages/Themes';
-import SubThemeDetail from './pages/SubThemeDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -17,9 +17,9 @@ export const PAGES = {
     "DataBackup": DataBackup,
     "ProjectDetail": ProjectDetail,
     "Projects": Projects,
+    "SubThemeDetail": SubThemeDetail,
     "ThemeDetail": ThemeDetail,
     "Themes": Themes,
-    "SubThemeDetail": SubThemeDetail,
 }
 
 export const pagesConfig = {
