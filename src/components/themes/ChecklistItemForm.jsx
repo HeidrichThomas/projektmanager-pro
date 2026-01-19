@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "lucide-react";
 
 export default function ChecklistItemForm({ open, onClose, onSave, item }) {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
         status: "geplant",
-        priority: "mittel"
+        priority: "mittel",
+        due_date: ""
     });
 
     useEffect(() => {
@@ -20,14 +22,16 @@ export default function ChecklistItemForm({ open, onClose, onSave, item }) {
                 title: item.title || "",
                 description: item.description || "",
                 status: item.status || "geplant",
-                priority: item.priority || "mittel"
+                priority: item.priority || "mittel",
+                due_date: item.due_date || ""
             });
         } else {
             setFormData({
                 title: "",
                 description: "",
                 status: "geplant",
-                priority: "mittel"
+                priority: "mittel",
+                due_date: ""
             });
         }
     }, [item, open]);
@@ -101,6 +105,16 @@ export default function ChecklistItemForm({ open, onClose, onSave, item }) {
                                 </SelectContent>
                             </Select>
                         </div>
+                    </div>
+
+                    <div>
+                        <Label>Fälligkeitsdatum</Label>
+                        <Input
+                            type="date"
+                            value={formData.due_date}
+                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                            className="mt-1.5"
+                        />
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">
