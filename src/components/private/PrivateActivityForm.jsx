@@ -17,7 +17,11 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
+        const dataToSave = {
+            ...formData,
+            activity_date: new Date(formData.activity_date).toISOString()
+        };
+        onSave(dataToSave);
         onClose();
     };
 
