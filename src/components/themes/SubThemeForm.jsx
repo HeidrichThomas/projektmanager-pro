@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { X, Building2 } from "lucide-react";
+import { X, Building2, User } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
@@ -22,11 +23,14 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
         name: "",
         description: "",
         company_ids: [],
+        contact_person_ids: [],
         status: "geplant",
         progress: 0,
         start_date: "",
         end_date: ""
     });
+
+    const [selectedContacts, setSelectedContacts] = useState([]);
 
     useEffect(() => {
         if (subTheme) {
@@ -35,6 +39,7 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
                 name: subTheme.name || "",
                 description: subTheme.description || "",
                 company_ids: subTheme.company_ids || [],
+                contact_person_ids: subTheme.contact_person_ids || [],
                 status: subTheme.status || "geplant",
                 progress: subTheme.progress || 0,
                 start_date: subTheme.start_date || "",
@@ -46,6 +51,7 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
                 name: "",
                 description: "",
                 company_ids: [],
+                contact_person_ids: [],
                 status: "geplant",
                 progress: 0,
                 start_date: "",
@@ -53,6 +59,24 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
             });
         }
     }, [subTheme, open, parentThemeId]);
+
+    useEffect(() => {
+        const contacts = [];
+        formData.company_ids.forEach(companyId => {
+            const company = companies.find(c => c.id === companyId);
+            if (company && company.contact_persons) {
+                company.contact_persons.forEach((cp, idx) => {
+                    contacts.push({
+                        id: `${companyId}_${idx}`,
+                        companyId: companyId,
+                        companyName: company.company_name,
+                        ...cp
+                    });
+                });
+            }
+        });
+        setSelectedContacts(contacts);
+    }, [formData.company_ids, companies]);
 
     const handleAddCompany = (companyId) => {
         if (!formData.company_ids.includes(companyId)) {
@@ -145,6 +169,48 @@ export default function SubThemeForm({ open, onClose, onSave, subTheme, parentTh
                             </Select>
                         )}
                     </div>
+
+                    {selectedContacts.length > 0 && (
+                        <div>
+                            <Label className="flex items-center gap-2 mb-2">
+                                <User className="w-4 h-4" />
+                                Ansprechpartner auswählen
+                            </Label>
+                            <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                                {selectedContacts.map(contact => (
+                                    <div key={contact.id} className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id={contact.id}
+                                            checked={formData.contact_person_ids.includes(contact.id)}
+                                            onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                    setFormData({
+                                                        ...formData,
+                                                        contact_person_ids: [...formData.contact_person_ids, contact.id]
+                                                    });
+                                                } else {
+                                                    setFormData({
+                                                        ...formData,
+                                                        contact_person_ids: formData.contact_person_ids.filter(id => id !== contact.id)
+                                                    });
+                                                }
+                                            }}
+                                        />
+                                        <label
+                                            htmlFor={contact.id}
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                                        >
+                                            <div className="text-slate-900">{contact.name}</div>
+                                            <div className="text-xs text-slate-500">
+                                                {contact.companyName}
+                                                {contact.position && ` • ${contact.position}`}
+                                            </div>
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>

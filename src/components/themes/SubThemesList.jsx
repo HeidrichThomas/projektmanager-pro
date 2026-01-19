@@ -41,6 +41,23 @@ export default function SubThemesList({ subThemes, onEdit, onDelete, parentTheme
                     ? companies.filter(c => subTheme.company_ids.includes(c.id)) 
                     : [];
                 
+                const selectedContactPersons = [];
+                if (subTheme.contact_person_ids && subTheme.contact_person_ids.length > 0) {
+                    subThemeCompanies.forEach(company => {
+                        if (company.contact_persons) {
+                            company.contact_persons.forEach((cp, idx) => {
+                                const contactId = `${company.id}_${idx}`;
+                                if (subTheme.contact_person_ids.includes(contactId)) {
+                                    selectedContactPersons.push({
+                                        ...cp,
+                                        companyName: company.company_name
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                
                 return (
                     <Link 
                         key={subTheme.id}
@@ -91,32 +108,31 @@ export default function SubThemesList({ subThemes, onEdit, onDelete, parentTheme
                                 </p>
                             )}
 
-                            {subThemeCompanies.length > 0 && (
-                                <div className="mb-3 p-2 bg-slate-50 rounded-lg">
-                                    {subThemeCompanies.map((company, idx) => (
-                                        <div key={company.id} className={idx > 0 ? 'mt-2 pt-2 border-t' : ''}>
-                                            <div className="flex items-center gap-1 text-xs font-medium text-slate-700">
-                                                <Building2 className="w-3 h-3" />
-                                                {company.company_name}
-                                            </div>
-                                            {company.contact_persons && company.contact_persons.length > 0 && (
-                                                <div className="mt-1 ml-4 space-y-0.5">
-                                                    {company.contact_persons.slice(0, 2).map((contact, cidx) => (
-                                                        <div key={cidx} className="flex items-center gap-1 text-xs text-slate-600">
-                                                            <User className="w-2.5 h-2.5" />
-                                                            {contact.name}
-                                                            {contact.position && ` - ${contact.position}`}
-                                                        </div>
-                                                    ))}
-                                                    {company.contact_persons.length > 2 && (
-                                                        <div className="text-xs text-slate-500 ml-3.5">
-                                                            +{company.contact_persons.length - 2} weitere
-                                                        </div>
-                                                    )}
+                            {(subThemeCompanies.length > 0 || selectedContactPersons.length > 0) && (
+                                <div className="mb-3 p-2 bg-slate-50 rounded-lg space-y-2">
+                                    {subThemeCompanies.map((company) => (
+                                        <div key={company.id} className="flex items-center gap-1 text-xs font-medium text-slate-700">
+                                            <Building2 className="w-3 h-3" />
+                                            {company.company_name}
+                                        </div>
+                                    ))}
+                                    {selectedContactPersons.length > 0 && (
+                                        <div className="space-y-0.5 mt-1">
+                                            {selectedContactPersons.slice(0, 2).map((contact, idx) => (
+                                                <div key={idx} className="flex items-center gap-1 text-xs text-slate-600">
+                                                    <User className="w-2.5 h-2.5" />
+                                                    {contact.name}
+                                                    {contact.position && ` - ${contact.position}`}
+                                                    <span className="text-slate-400">({contact.companyName})</span>
+                                                </div>
+                                            ))}
+                                            {selectedContactPersons.length > 2 && (
+                                                <div className="text-xs text-slate-500 ml-3.5">
+                                                    +{selectedContactPersons.length - 2} weitere
                                                 </div>
                                             )}
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             )}
 
