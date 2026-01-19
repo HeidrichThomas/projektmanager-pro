@@ -15,7 +15,6 @@ const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
     { name: "Projekte", icon: FolderKanban, page: "Projects" },
     { name: "Kunden & Lieferanten", icon: Building2, page: "Customers" },
-    { name: "Abgeschlossene Projekte", icon: CheckCircle2, page: "CompletedProjects" },
     { name: "Business Themen", icon: Lightbulb, page: "Themes" },
 ];
 
