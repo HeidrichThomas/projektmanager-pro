@@ -93,21 +93,21 @@ export default function TravelOverview() {
         });
         
         const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4");
-        const imgWidth = 190;
+        const pdf = new jsPDF("l", "mm", "a4");
+        const imgWidth = 277;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
         let heightLeft = imgHeight;
         let position = 10;
         
         pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-        heightLeft -= 287;
+        heightLeft -= 190;
         
         while (heightLeft > 0) {
             position = heightLeft - imgHeight + 10;
             pdf.addPage();
             pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-            heightLeft -= 287;
+            heightLeft -= 190;
         }
         
         const fileName = `Fahrtenbericht_${months.find(m => m.value === selectedMonth)?.label}_${selectedYear}.pdf`;
@@ -241,17 +241,17 @@ export default function TravelOverview() {
                                             <TableCell className="py-6">
                                                 <div className="flex items-center gap-1 text-sm">
                                                     <FolderKanban className="w-3 h-3 text-slate-400" />
-                                                    <span className="truncate max-w-[150px]">{project?.name || 'N/A'}</span>
+                                                    <span className="break-words">{project?.name || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="py-6">
                                                 <div className="flex items-center gap-1 text-sm">
                                                     <Building2 className="w-3 h-3 text-slate-400" />
-                                                    <span className="truncate max-w-[150px]">{customer?.company || 'N/A'}</span>
+                                                    <span className="break-words">{customer?.company || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-sm text-slate-600 max-w-[200px] truncate py-6">
-                                                {activity.title}
+                                            <TableCell className="text-sm text-slate-600 py-6">
+                                                <div className="break-words">{activity.title}</div>
                                             </TableCell>
                                             <TableCell className="text-right py-6">
                                                 <Badge variant="secondary" className="font-mono">
