@@ -1,24 +1,32 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Navigation, Calendar, Building2, MapPin, FileDown, TrendingUp } from "lucide-react";
+import { Navigation, Calendar, Building2, MapPin, FileDown, TrendingUp, Plus } from "lucide-react";
 import { format, startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
+import ManualTravelEntryForm from "@/components/travel/ManualTravelEntryForm";
 
 export default function TravelTracking() {
+    const queryClient = useQueryClient();
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
     
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+    const [showManualEntryForm, setShowManualEntryForm] = useState(false);
 
     const { data: activities = [], isLoading } = useQuery({
         queryKey: ['activities'],
         queryFn: () => base44.entities.Activity.list()
+    });
+
+    const { data: manualEntries = [] } = useQuery({
+        queryKey: ['manualTravelEntries'],
+        queryFn: () => base44.entities.ManualTravelEntry.list()
     });
 
     const { data: projects = [] } = useQuery({
@@ -31,24 +39,56 @@ export default function TravelTracking() {
         queryFn: () => base44.entities.Customer.list()
     });
 
-    // Filter activities with travel
-    const travelActivities = activities.filter(a => a.requires_travel && a.travel_distance_km);
+    const createManualEntryMutation = useMutation({
+        mutationFn: (data) => base44.entities.ManualTravelEntry.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['manualTravelEntries']);
+            setShowManualEntryForm(false);
+        }
+    });
+
+    // Combine activities and manual entries
+    const travelActivities = activities
+        .filter(a => a.requires_travel && a.travel_distance_km)
+        .map(a => ({ ...a, type: 'activity', date: a.activity_date, distance: a.travel_distance_km }));
+    
+    const manualTravelData = manualEntries.map(m => ({ 
+        ...m, 
+        type: 'manual', 
+        date: m.date, 
+        distance: m.distance_km 
+    }));
+
+    const allTravelData = [...travelActivities, ...manualTravelData].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+    );
 
     // Filter by selected month
-    const filteredActivities = travelActivities.filter(a => {
-        if (!a.activity_date) return false;
-        const date = parseISO(a.activity_date);
+    const filteredActivities = allTravelData.filter(item => {
+        if (!item.date) return false;
+        const date = parseISO(item.date);
         return date.getFullYear() === selectedYear && date.getMonth() + 1 === selectedMonth;
     });
 
     // Calculate totals
-    const monthlyTotal = filteredActivities.reduce((sum, a) => sum + (a.travel_distance_km || 0), 0);
-    const yearlyTotal = travelActivities
-        .filter(a => {
-            if (!a.activity_date) return false;
-            return parseISO(a.activity_date).getFullYear() === selectedYear;
+    const calculateTaxRate = (date) => {
+        const entryDate = parseISO(date);
+        const cutoffDate = new Date('2026-01-01');
+        return entryDate < cutoffDate ? 0.30 : 0.38;
+    };
+
+    const monthlyTotal = filteredActivities.reduce((sum, item) => sum + (item.distance || 0), 0);
+    const yearlyTotal = allTravelData
+        .filter(item => {
+            if (!item.date) return false;
+            return parseISO(item.date).getFullYear() === selectedYear;
         })
-        .reduce((sum, a) => sum + (a.travel_distance_km || 0), 0);
+        .reduce((sum, item) => sum + (item.distance || 0), 0);
+
+    const monthlyDeduction = filteredActivities.reduce((sum, item) => {
+        const rate = calculateTaxRate(item.date);
+        return sum + (item.distance * rate);
+    }, 0);
 
     // Group by project
     const projectTotals = filteredActivities.reduce((acc, activity) => {
@@ -66,6 +106,10 @@ export default function TravelTracking() {
 
     const getProject = (id) => projects.find(p => p.id === id);
     const getCustomer = (id) => customers.find(c => c.id === id);
+
+    const handleSaveManualEntry = (data) => {
+        createManualEntryMutation.mutate(data);
+    };
 
     const exportToCSV = () => {
         const headers = ['Datum', 'Projekt', 'Kunde', 'Aktivität', 'Von', 'Nach', 'Kilometer'];
@@ -162,7 +206,12 @@ export default function TravelTracking() {
                         </SelectContent>
                     </Select>
 
-                    <Button onClick={exportToCSV} variant="outline" className="ml-auto">
+                    <Button onClick={() => setShowManualEntryForm(true)} className="ml-auto">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Manuelle Fahrt
+                    </Button>
+                    
+                    <Button onClick={exportToCSV} variant="outline">
                         <FileDown className="w-4 h-4 mr-2" />
                         CSV Export
                     </Button>
@@ -203,10 +252,10 @@ export default function TravelTracking() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-emerald-600">
-                                {(monthlyTotal * 0.30).toFixed(2)} €
+                                {monthlyDeduction.toFixed(2)} €
                             </div>
-                            <p className="text-sm text-slate-500 mt-1">
-                                bei 0,30 €/km
+                            <p className="text-xs text-slate-500 mt-1">
+                                0,30€/km bis 31.12.2025, 0,38€/km ab 01.01.2026
                             </p>
                         </CardContent>
                     </Card>
@@ -258,20 +307,33 @@ export default function TravelTracking() {
                     <CardContent>
                         {filteredActivities.length > 0 ? (
                             <div className="space-y-3">
-                                {filteredActivities.map(activity => {
-                                    const project = getProject(activity.project_id);
-                                    const customer = project ? getCustomer(project.customer_id) : null;
+                                {filteredActivities.map(item => {
+                                    const project = item.project_id ? getProject(item.project_id) : null;
+                                    const customer = item.type === 'manual' && item.customer_id 
+                                        ? getCustomer(item.customer_id)
+                                        : project ? getCustomer(project.customer_id) : null;
+                                    const rate = calculateTaxRate(item.date);
+                                    const amount = item.distance * rate;
+                                    
                                     return (
-                                        <div key={activity.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                        <div key={`${item.type}-${item.id}`} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                                             <div className="flex items-start justify-between mb-2">
                                                 <div>
-                                                    <div className="font-medium text-slate-900">{activity.title}</div>
+                                                    <div className="font-medium text-slate-900">{item.title}</div>
                                                     <div className="text-sm text-slate-500">
-                                                        {format(parseISO(activity.activity_date), "dd.MM.yyyy HH:mm", { locale: de })}
+                                                        {format(parseISO(item.date), "dd.MM.yyyy HH:mm", { locale: de })}
                                                     </div>
                                                 </div>
-                                                <div className="text-xl font-bold text-blue-600">
-                                                    {activity.travel_distance_km?.toFixed(1)} km
+                                                <div>
+                                                    <div className="text-xl font-bold text-blue-600">
+                                                        {item.distance?.toFixed(1)} km
+                                                    </div>
+                                                    <div className="text-xs text-slate-400 text-right">
+                                                        ({(item.distance / 2).toFixed(1)} km × 2)
+                                                    </div>
+                                                    <div className="text-sm text-emerald-600 text-right mt-1">
+                                                        {amount.toFixed(2)} €
+                                                    </div>
                                                 </div>
                                             </div>
                                             
@@ -282,22 +344,47 @@ export default function TravelTracking() {
                                                 </div>
                                             )}
                                             
-                                            <div className="flex items-start gap-3 text-sm text-slate-500">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-1">
-                                                        <MapPin className="w-3 h-3" />
-                                                        <span className="font-medium">Von:</span>
+                                            {item.type === 'activity' && (
+                                                <div className="flex items-start gap-3 text-sm text-slate-500">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-1">
+                                                            <MapPin className="w-3 h-3" />
+                                                            <span className="font-medium">Von:</span>
+                                                        </div>
+                                                        <div className="ml-4">{item.start_location}</div>
                                                     </div>
-                                                    <div className="ml-4">{activity.start_location}</div>
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-1">
-                                                        <MapPin className="w-3 h-3" />
-                                                        <span className="font-medium">Nach:</span>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-1">
+                                                            <MapPin className="w-3 h-3" />
+                                                            <span className="font-medium">Nach:</span>
+                                                        </div>
+                                                        <div className="ml-4">{item.destination_address}</div>
                                                     </div>
-                                                    <div className="ml-4">{activity.destination_address}</div>
                                                 </div>
-                                            </div>
+                                            )}
+                                            
+                                            {item.type === 'manual' && (item.start_location || item.destination) && (
+                                                <div className="flex items-start gap-3 text-sm text-slate-500">
+                                                    {item.start_location && (
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <MapPin className="w-3 h-3" />
+                                                                <span className="font-medium">Von:</span>
+                                                            </div>
+                                                            <div className="ml-4">{item.start_location}</div>
+                                                        </div>
+                                                    )}
+                                                    {item.destination && (
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <MapPin className="w-3 h-3" />
+                                                                <span className="font-medium">Nach:</span>
+                                                            </div>
+                                                            <div className="ml-4">{item.destination}</div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -311,6 +398,12 @@ export default function TravelTracking() {
                     </CardContent>
                 </Card>
             </div>
+
+            <ManualTravelEntryForm
+                open={showManualEntryForm}
+                onOpenChange={setShowManualEntryForm}
+                onSave={handleSaveManualEntry}
+            />
         </div>
     );
 }
