@@ -21,6 +21,7 @@ import ThemeForm from "@/components/themes/ThemeForm";
 import ThemeActivityForm from "@/components/themes/ThemeActivityForm";
 import ThemeActivityTimeline from "@/components/themes/ThemeActivityTimeline";
 import DocumentManagement from "@/components/themes/DocumentManagement";
+import ThemeTaskBoard from "@/components/themes/ThemeTaskBoard";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -211,6 +212,16 @@ export default function ThemeDetail() {
                         {theme.description && (
                             <p className="mt-4 pt-4 border-t text-slate-600">{theme.description}</p>
                         )}
+                    </CardContent>
+                </Card>
+
+                {/* Task Board */}
+                <Card className="mb-8 shadow-sm">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-lg">Aufgaben & Kacheln</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ThemeTaskBoard themeId={themeId} />
                     </CardContent>
                 </Card>
 
