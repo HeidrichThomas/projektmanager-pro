@@ -234,12 +234,29 @@ export default function PrivateThemes() {
                         {filteredThemes.map(theme => {
                             const themeAppointments = allAppointments.filter(apt => apt.theme_id === theme.id);
                             const themeDocuments = allDocuments.filter(doc => doc.theme_id === theme.id);
+                            
+                            // Sammle Dokumente aus Aktivitäten
+                            const themeActivities = allActivities.filter(a => a.theme_id === theme.id);
+                            const activityDocuments = [];
+                            themeActivities.forEach(activity => {
+                                if (activity.file_urls && activity.file_urls.length > 0) {
+                                    activity.file_urls.forEach((url, index) => {
+                                        activityDocuments.push({
+                                            file_url: url,
+                                            file_name: activity.file_names?.[index] || `Datei ${index + 1}`
+                                        });
+                                    });
+                                }
+                            });
+                            
+                            const allThemeDocuments = [...themeDocuments, ...activityDocuments];
+                            
                             return (
                                 <PrivateThemeCard
                                     key={theme.id}
                                     theme={theme}
                                     appointments={themeAppointments}
-                                    documents={themeDocuments}
+                                    documents={allThemeDocuments}
                                     onEdit={handleEdit}
                                     onDelete={handleDelete}
                                 />
