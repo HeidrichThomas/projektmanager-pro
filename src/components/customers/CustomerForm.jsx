@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Save, X, Plus, Trash2 } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Save, X, Plus, Trash2, Link2 } from "lucide-react";
 
 export default function CustomerForm({ open, onClose, onSave, customer }) {
     const [formData, setFormData] = useState({
@@ -303,6 +303,20 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                                     onChange={(e) => setFormData({...formData, website: e.target.value})}
                                     className="pl-10"
                                     placeholder="www.firma.de"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <Label className="text-slate-700 font-medium">Link (optional)</Label>
+                            <div className="relative mt-1.5">
+                                <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <Input
+                                    value={formData.link || ""}
+                                    onChange={(e) => setFormData({...formData, link: e.target.value})}
+                                    className="pl-10"
+                                    placeholder="https://..."
+                                    type="url"
                                 />
                             </div>
                         </div>

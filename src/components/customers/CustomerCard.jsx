@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Pencil, Copy, Trash2 } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Pencil, Copy, Trash2, Link2 } from "lucide-react";
 
 export default function CustomerCard({ customer, onEdit, onCopy, onDelete, projectCount, onShowProjects }) {
     const typeConfig = {
@@ -109,6 +109,19 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
             </div>
             
             <div className="flex gap-2 pt-3 border-t border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity mt-auto">
+                {customer.link && (
+                    <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(customer.link, '_blank');
+                        }}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                        <Link2 className="w-3 h-3" />
+                    </Button>
+                )}
                 <Button size="sm" variant="outline" onClick={() => onEdit(customer)} className="flex-1">
                     <Pencil className="w-3 h-3 mr-1" />
                     Bearbeiten
