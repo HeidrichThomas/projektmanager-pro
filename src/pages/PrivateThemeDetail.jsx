@@ -212,6 +212,7 @@ export default function PrivateThemeDetail() {
                         <PrivateDocumentManager
                             themeId={themeId}
                             documents={documents}
+                            activities={activities}
                         />
                     </TabsContent>
                 </Tabs>
