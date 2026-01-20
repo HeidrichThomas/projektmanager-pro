@@ -19,6 +19,7 @@ const categoryConfig = {
 };
 
 export default function PrivateThemes() {
+    const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [editingTheme, setEditingTheme] = useState(null);
@@ -39,6 +40,16 @@ export default function PrivateThemes() {
     const { data: allDocuments = [] } = useQuery({
         queryKey: ['allPrivateDocuments'],
         queryFn: () => base44.entities.PrivateDocument.list()
+    });
+
+    const { data: allActivities = [] } = useQuery({
+        queryKey: ['allPrivateActivities'],
+        queryFn: () => base44.entities.PrivateActivity.list()
+    });
+
+    const { data: allTasks = [] } = useQuery({
+        queryKey: ['allPrivateTasks'],
+        queryFn: () => base44.entities.PrivateTask.list()
     });
 
     const createMutation = useMutation({
@@ -84,10 +95,55 @@ export default function PrivateThemes() {
         }
     };
 
+    const handleSearch = () => {
+        setSearchQuery(searchInput);
+    };
+
     const filteredThemes = themes.filter(theme => {
-        const matchesSearch = theme.name?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = selectedCategory === "all" || theme.category === selectedCategory;
-        return matchesSearch && matchesCategory;
+        
+        if (!searchQuery) return matchesCategory;
+        
+        const query = searchQuery.toLowerCase();
+        
+        // Suche in Thema
+        if (theme.name?.toLowerCase().includes(query) || 
+            theme.description?.toLowerCase().includes(query)) {
+            return matchesCategory;
+        }
+        
+        // Suche in Aktivitäten
+        const themeActivities = allActivities.filter(a => a.theme_id === theme.id);
+        const activityMatch = themeActivities.some(a => 
+            a.title?.toLowerCase().includes(query) || 
+            a.content?.toLowerCase().includes(query)
+        );
+        if (activityMatch) return matchesCategory;
+        
+        // Suche in Aufgaben
+        const themeTasks = allTasks.filter(t => t.theme_id === theme.id);
+        const taskMatch = themeTasks.some(t => 
+            t.title?.toLowerCase().includes(query) || 
+            t.description?.toLowerCase().includes(query)
+        );
+        if (taskMatch) return matchesCategory;
+        
+        // Suche in Terminen
+        const themeAppointments = allAppointments.filter(apt => apt.theme_id === theme.id);
+        const appointmentMatch = themeAppointments.some(apt => 
+            apt.title?.toLowerCase().includes(query) || 
+            apt.description?.toLowerCase().includes(query)
+        );
+        if (appointmentMatch) return matchesCategory;
+        
+        // Suche in Dokumenten
+        const themeDocuments = allDocuments.filter(doc => doc.theme_id === theme.id);
+        const documentMatch = themeDocuments.some(doc => 
+            doc.title?.toLowerCase().includes(query) || 
+            doc.description?.toLowerCase().includes(query)
+        );
+        
+        return documentMatch && matchesCategory;
     });
 
     return (
@@ -105,14 +161,20 @@ export default function PrivateThemes() {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <Input
-                            placeholder="Themen durchsuchen..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10"
-                        />
+                    <div className="relative flex-1 flex gap-2">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input
+                                placeholder="Themen durchsuchen..."
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                className="pl-10"
+                            />
+                        </div>
+                        <Button onClick={handleSearch} variant="outline" size="icon">
+                            <Search className="w-4 h-4" />
+                        </Button>
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2">
                         <Button
