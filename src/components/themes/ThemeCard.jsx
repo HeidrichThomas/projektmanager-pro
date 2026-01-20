@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Lightbulb, Building2, Calendar } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Lightbulb, Building2, Calendar, CheckSquare } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -17,10 +20,32 @@ const statusConfig = {
 
 export default function ThemeCard({ theme }) {
     const status = statusConfig[theme.status] || statusConfig.geplant;
+    const queryClient = useQueryClient();
+
+    const { data: checklistItems = [] } = useQuery({
+        queryKey: ['themeChecklistItems', theme.id],
+        queryFn: () => base44.entities.ThemeChecklistItem.filter({ theme_id: theme.id }, 'order')
+    });
+
+    const toggleItemMutation = useMutation({
+        mutationFn: ({ id, completed }) => base44.entities.ThemeChecklistItem.update(id, { completed }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['themeChecklistItems', theme.id] });
+        }
+    });
+
+    const handleCheckboxClick = (e, item) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleItemMutation.mutate({ id: item.id, completed: !item.completed });
+    };
+
+    const completedCount = checklistItems.filter(item => item.completed).length;
+    const totalCount = checklistItems.length;
 
     return (
         <Link to={createPageUrl("ThemeDetail") + `?id=${theme.id}`}>
-            <Card className="p-3 hover:shadow-xl transition-all duration-300 border-slate-200 group cursor-pointer flex flex-col h-48">
+            <Card className="p-3 hover:shadow-xl transition-all duration-300 border-slate-200 group cursor-pointer flex flex-col h-auto min-h-[12rem]">
                 <div className="flex items-start gap-2 mb-2">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                         <Lightbulb className="w-4 h-4 text-amber-600" />
@@ -40,6 +65,30 @@ export default function ThemeCard({ theme }) {
                     <p className="text-xs text-slate-600 line-clamp-2 mb-2 flex-1">
                         {theme.description}
                     </p>
+                )}
+
+                {checklistItems.length > 0 && (
+                    <div className="mb-2 space-y-1">
+                        <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
+                            <CheckSquare className="w-3 h-3" />
+                            <span>{completedCount}/{totalCount} erledigt</span>
+                        </div>
+                        {checklistItems.slice(0, 3).map((item) => (
+                            <div key={item.id} className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+                                <Checkbox
+                                    checked={item.completed}
+                                    onCheckedChange={() => handleCheckboxClick(event, item)}
+                                    className="h-3 w-3"
+                                />
+                                <span className={`text-xs ${item.completed ? 'line-through text-slate-400' : 'text-slate-600'} truncate flex-1`}>
+                                    {item.title}
+                                </span>
+                            </div>
+                        ))}
+                        {checklistItems.length > 3 && (
+                            <div className="text-xs text-slate-400 pl-5">+{checklistItems.length - 3} weitere</div>
+                        )}
+                    </div>
                 )}
 
                 <div className="space-y-2 mt-auto pt-2 border-t">
