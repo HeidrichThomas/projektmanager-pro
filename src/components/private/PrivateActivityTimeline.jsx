@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, Bell, TrendingDown, TrendingUp, File, Pencil, Trash2, Download, Phone, MapPin } from "lucide-react";
+import { FileText, Calendar, Bell, TrendingDown, TrendingUp, File, Pencil, Trash2, Download, Phone, MapPin, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
