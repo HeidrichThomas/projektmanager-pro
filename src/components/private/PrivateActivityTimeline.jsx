@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, Bell, TrendingDown, TrendingUp, File, Pencil, Trash2, Download } from "lucide-react";
+import { FileText, Calendar, Bell, TrendingDown, TrendingUp, File, Pencil, Trash2, Download, Phone, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -11,7 +11,9 @@ const activityTypes = {
     erinnerung: { label: "Erinnerung", icon: Bell, color: "bg-amber-100 text-amber-700" },
     ausgabe: { label: "Ausgabe", icon: TrendingDown, color: "bg-red-100 text-red-700" },
     einnahme: { label: "Einnahme", icon: TrendingUp, color: "bg-green-100 text-green-700" },
-    dokument: { label: "Dokument", icon: File, color: "bg-purple-100 text-purple-700" }
+    dokument: { label: "Dokument", icon: File, color: "bg-purple-100 text-purple-700" },
+    telefonat: { label: "Telefonat", icon: Phone, color: "bg-cyan-100 text-cyan-700" },
+    besuch: { label: "Besuch", icon: MapPin, color: "bg-emerald-100 text-emerald-700" }
 };
 
 export default function PrivateActivityTimeline({ activities, onEdit, onDelete }) {

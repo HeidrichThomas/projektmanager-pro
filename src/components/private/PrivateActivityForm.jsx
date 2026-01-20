@@ -88,6 +88,8 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
                                 <SelectItem value="ausgabe">Ausgabe</SelectItem>
                                 <SelectItem value="einnahme">Einnahme</SelectItem>
                                 <SelectItem value="dokument">Dokument</SelectItem>
+                                <SelectItem value="telefonat">Telefonat</SelectItem>
+                                <SelectItem value="besuch">Besuch</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
