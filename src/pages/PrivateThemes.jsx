@@ -161,20 +161,21 @@ export default function PrivateThemes() {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="relative flex-1 flex gap-2">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <Input
-                                placeholder="Themen durchsuchen..."
-                                value={searchInput}
-                                onChange={(e) => setSearchInput(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                className="pl-10"
-                            />
-                        </div>
-                        <Button onClick={handleSearch} variant="outline" size="icon">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Input
+                            placeholder="Themen durchsuchen..."
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            className="pl-10 pr-10"
+                        />
+                        <button
+                            onClick={handleSearch}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
                             <Search className="w-4 h-4" />
-                        </Button>
+                        </button>
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2">
                         <Button
