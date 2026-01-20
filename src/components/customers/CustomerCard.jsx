@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, User, MapPin, Phone, Smartphone, Mail, Globe, Pencil, Copy, Trash2, Link2 } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Pencil, Copy, Trash2, Link2 } from "lucide-react";
 
 export default function CustomerCard({ customer, onEdit, onCopy, onDelete, projectCount, onShowProjects }) {
     const typeConfig = {
@@ -84,18 +84,6 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
                         <Mail className="w-4 h-4 text-slate-400" />
                         <a href={`mailto:${customer.email}`} className="hover:text-slate-900 transition-colors">
                             {customer.email}
-                        </a>
-                    </div>
-                )}
-                
-                {customer.website && (
-                    <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-slate-400" />
-                        <a href={customer.website.startsWith('http') ? customer.website : `https://${customer.website}`} 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           className="hover:text-slate-900 transition-colors">
-                            {customer.website}
                         </a>
                     </div>
                 )}
