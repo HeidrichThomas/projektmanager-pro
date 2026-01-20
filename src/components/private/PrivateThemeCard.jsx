@@ -30,7 +30,7 @@ export default function PrivateThemeCard({ theme, appointments = [], documents =
     const otherDocuments = documents.filter(doc => !/\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name));
 
     return (
-        <Card className="hover:shadow-lg transition-all group">
+        <Card className="hover:shadow-lg transition-all group relative">
             <CardHeader>
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export default function PrivateThemeCard({ theme, appointments = [], documents =
                             </Badge>
                         </div>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                         <Button size="sm" variant="ghost" onClick={() => onEdit(theme)}>
                             <Pencil className="w-4 h-4" />
                         </Button>

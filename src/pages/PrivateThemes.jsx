@@ -162,13 +162,12 @@ export default function PrivateThemes() {
 
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input
                             placeholder="Themen durchsuchen..."
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                            className="pl-10 pr-10"
+                            className="pr-10"
                         />
                         <button
                             onClick={handleSearch}
