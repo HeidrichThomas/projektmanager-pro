@@ -129,16 +129,6 @@ export default function Layout({ children, currentPageName }) {
 
                         {/* Search */}
                         <div className="relative">
-                            <button
-                                onClick={() => {
-                                    if (searchQuery.length > 1) {
-                                        setShowSearchResults(true);
-                                    }
-                                }}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 hover:text-slate-600 transition-colors"
-                            >
-                                <Search className="w-4 h-4 text-slate-400" />
-                            </button>
                             <Input
                                 placeholder="Suchen..."
                                 value={searchQuery}
@@ -148,7 +138,7 @@ export default function Layout({ children, currentPageName }) {
                                         setShowSearchResults(true);
                                     }
                                 }}
-                                className="pl-9 pr-9 h-9 text-sm"
+                                className="pr-16 h-9 text-sm"
                             />
                             {searchQuery && (
                                 <button
@@ -156,11 +146,21 @@ export default function Layout({ children, currentPageName }) {
                                         setSearchQuery("");
                                         setShowSearchResults(false);
                                     }}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                                    className="absolute right-9 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                                 >
-                                    <X className="w-4 h-4 text-slate-400 hover:text-slate-600" />
+                                    <X className="w-4 h-4" />
                                 </button>
                             )}
+                            <button
+                                onClick={() => {
+                                    if (searchQuery.length > 1) {
+                                        setShowSearchResults(true);
+                                    }
+                                }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                                <Search className="w-4 h-4" />
+                            </button>
                         </div>
                     </div>
                     

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Heart, Home, DollarSign, Users, Plane, GraduationCap, Package } from "lucide-react";
+import { Plus, Search, X, Heart, Home, DollarSign, Users, Plane, GraduationCap, Package } from "lucide-react";
 import PrivateThemeCard from "@/components/private/PrivateThemeCard";
 import PrivateThemeForm from "@/components/private/PrivateThemeForm";
 
@@ -167,8 +167,19 @@ export default function PrivateThemes() {
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                            className="pr-10"
+                            className="pr-20"
                         />
+                        {searchInput && (
+                            <button
+                                onClick={() => {
+                                    setSearchInput("");
+                                    setSearchQuery("");
+                                }}
+                                className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
                         <button
                             onClick={handleSearch}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
