@@ -11,7 +11,7 @@ import { Upload, File, Image, Trash2, Download, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
-export default function PrivateDocumentManager({ themeId, documents }) {
+export default function PrivateDocumentManager({ themeId, documents, activities = [] }) {
     const [uploading, setUploading] = useState(false);
     const [formData, setFormData] = useState({
         title: "",
@@ -73,6 +73,27 @@ export default function PrivateDocumentManager({ themeId, documents }) {
     const isImage = (filename) => {
         return /\.(jpg|jpeg|png|gif|webp)$/i.test(filename);
     };
+
+    // Sammle Dokumente aus Aktivitäten
+    const activityDocuments = [];
+    activities.forEach(activity => {
+        if (activity.file_urls && activity.file_urls.length > 0) {
+            activity.file_urls.forEach((url, index) => {
+                activityDocuments.push({
+                    id: `activity-${activity.id}-${index}`,
+                    file_url: url,
+                    file_name: activity.file_names?.[index] || `Datei ${index + 1}`,
+                    title: activity.file_names?.[index] || `Datei ${index + 1}`,
+                    description: `Von Aktivität: ${activity.title}`,
+                    category: 'sonstiges',
+                    source: 'activity',
+                    activity_id: activity.id
+                });
+            });
+        }
+    });
+
+    const allDocuments = [...documents, ...activityDocuments];
 
     return (
         <div className="space-y-6">
@@ -146,15 +167,15 @@ export default function PrivateDocumentManager({ themeId, documents }) {
             </Card>
 
             <div>
-                <h3 className="font-semibold text-slate-900 mb-4">Dokumente & Bilder ({documents.length})</h3>
-                {documents.length === 0 ? (
+                <h3 className="font-semibold text-slate-900 mb-4">Dokumente & Bilder ({allDocuments.length})</h3>
+                {allDocuments.length === 0 ? (
                     <div className="text-center py-12 text-slate-500">
                         <File className="w-12 h-12 mx-auto mb-3 text-slate-300" />
                         <p>Noch keine Dokumente hochgeladen</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {documents.map(doc => (
+                        {allDocuments.map(doc => (
                             <Card key={doc.id} className="overflow-hidden group">
                                 {isImage(doc.file_name) ? (
                                     <div className="aspect-video bg-slate-100 relative overflow-hidden">
@@ -190,18 +211,20 @@ export default function PrivateDocumentManager({ themeId, documents }) {
                                                 Öffnen
                                             </a>
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => {
-                                                if (confirm("Dokument löschen?")) {
-                                                    deleteDocumentMutation.mutate(doc.id);
-                                                }
-                                            }}
-                                            className="text-red-600"
-                                        >
-                                            <Trash2 className="w-3 h-3" />
-                                        </Button>
+                                        {doc.source !== 'activity' && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => {
+                                                    if (confirm("Dokument löschen?")) {
+                                                        deleteDocumentMutation.mutate(doc.id);
+                                                    }
+                                                }}
+                                                className="text-red-600"
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
