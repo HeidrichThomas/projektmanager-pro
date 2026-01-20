@@ -256,6 +256,17 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                     </div>
 
                     <div>
+                        <Label>Webseiten-Link (optional)</Label>
+                        <Input
+                            value={formData.link || ""}
+                            onChange={(e) => setFormData({...formData, link: e.target.value})}
+                            placeholder="https://..."
+                            className="mt-1.5"
+                            type="url"
+                        />
+                    </div>
+
+                    <div>
                         <Label>Firma</Label>
                         <Select
                             value={formData.company_id}

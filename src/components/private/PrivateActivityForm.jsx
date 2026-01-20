@@ -104,6 +104,16 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
                     </div>
 
                     <div>
+                        <Label>Webseiten-Link (optional)</Label>
+                        <Input
+                            value={formData.link || ""}
+                            onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                            placeholder="https://..."
+                            type="url"
+                        />
+                    </div>
+
+                    <div>
                         <Label>Datum & Uhrzeit</Label>
                         <Input
                             type="datetime-local"

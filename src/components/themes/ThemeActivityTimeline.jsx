@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Phone, Users, Mail, Milestone, Pencil, Trash2, Download, Building2, User, MapPin, Car } from "lucide-react";
+import { FileText, Phone, Users, Mail, Milestone, Pencil, Trash2, Download, Building2, User, MapPin, Car, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
@@ -106,6 +106,16 @@ export default function ThemeActivityTimeline({ activities, onEdit, onDelete }) 
                                         )}
                                     </div>
                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {activity.link && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => window.open(activity.link, '_blank')}
+                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                            >
+                                                <Link2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
                                         <Button
                                             size="sm"
                                             variant="ghost"

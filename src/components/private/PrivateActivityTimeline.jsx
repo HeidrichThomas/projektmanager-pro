@@ -82,6 +82,16 @@ export default function PrivateActivityTimeline({ activities, onEdit, onDelete }
                                         {config.label}
                                     </Badge>
                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {activity.link && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => window.open(activity.link, '_blank')}
+                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                            >
+                                                <Link2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
                                         <Button size="sm" variant="ghost" onClick={() => onEdit(activity)}>
                                             <Pencil className="w-4 h-4" />
                                         </Button>
