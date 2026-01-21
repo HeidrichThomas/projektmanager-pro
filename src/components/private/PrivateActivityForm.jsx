@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { Upload, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function PrivateActivityForm({ activity, onSave, onClose }) {
     const formatDateForInput = (dateString) => {
@@ -26,6 +27,17 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
         file_names: activity?.file_names || []
     });
     const [uploading, setUploading] = useState(false);
+    const [selectedCustomerId, setSelectedCustomerId] = useState("");
+    const [manualCompany, setManualCompany] = useState(false);
+    const [manualContact, setManualContact] = useState(false);
+
+    const { data: customers = [] } = useQuery({
+        queryKey: ['customers'],
+        queryFn: () => base44.entities.Customer.list()
+    });
+
+    const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+    const contactPersons = selectedCustomer?.contact_persons || [];
 
     const handleFileUpload = async (e) => {
         const file = e.target.files?.[0];
@@ -121,19 +133,114 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label>Firma (optional)</Label>
-                            <Input
-                                value={formData.company}
-                                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                                placeholder="Firmenname"
-                            />
+                            {!manualCompany ? (
+                                <div className="space-y-2">
+                                    <Select 
+                                        value={selectedCustomerId} 
+                                        onValueChange={(value) => {
+                                            setSelectedCustomerId(value);
+                                            const customer = customers.find(c => c.id === value);
+                                            if (customer) {
+                                                setFormData({ ...formData, company: customer.company, contact_person: "" });
+                                            }
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Firma auswählen..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {customers.map(customer => (
+                                                <SelectItem key={customer.id} value={customer.id}>
+                                                    {customer.company}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                            setManualCompany(true);
+                                            setSelectedCustomerId("");
+                                            setFormData({ ...formData, company: "" });
+                                        }}
+                                        className="w-full text-xs"
+                                    >
+                                        Oder manuell eingeben
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <Input
+                                        value={formData.company}
+                                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                                        placeholder="Firmenname"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setManualCompany(false)}
+                                        className="w-full text-xs"
+                                    >
+                                        Aus Kundenliste wählen
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                         <div>
                             <Label>Ansprechpartner (optional)</Label>
-                            <Input
-                                value={formData.contact_person}
-                                onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
-                                placeholder="Name"
-                            />
+                            {!manualContact && selectedCustomerId && contactPersons.length > 0 ? (
+                                <div className="space-y-2">
+                                    <Select 
+                                        value={formData.contact_person} 
+                                        onValueChange={(value) => setFormData({ ...formData, contact_person: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Ansprechpartner wählen..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {contactPersons.map((contact, idx) => (
+                                                <SelectItem key={idx} value={contact.name}>
+                                                    {contact.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                            setManualContact(true);
+                                            setFormData({ ...formData, contact_person: "" });
+                                        }}
+                                        className="w-full text-xs"
+                                    >
+                                        Oder manuell eingeben
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <Input
+                                        value={formData.contact_person}
+                                        onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
+                                        placeholder="Name"
+                                    />
+                                    {selectedCustomerId && contactPersons.length > 0 && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setManualContact(false)}
+                                            className="w-full text-xs"
+                                        >
+                                            Aus Ansprechpartnern wählen
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
 
