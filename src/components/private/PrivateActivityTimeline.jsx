@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, Bell, TrendingDown, TrendingUp, File, Pencil, Trash2, Download, Phone, MapPin, Link2, Mail } from "lucide-react";
+import { FileText, Calendar, Bell, TrendingDown, TrendingUp, File, Pencil, Trash2, Download, Phone, MapPin, Link2, Mail, Building2, User } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -48,6 +48,23 @@ export default function PrivateActivityTimeline({ activities, onEdit, onDelete }
                                     
                                     {activity.content && (
                                         <p className="text-sm text-slate-600 mb-2">{activity.content}</p>
+                                    )}
+                                    
+                                    {(activity.company || activity.contact_person) && (
+                                        <div className="flex flex-wrap gap-3 mb-2 text-sm text-slate-600">
+                                            {activity.company && (
+                                                <div className="flex items-center gap-1">
+                                                    <Building2 className="w-3.5 h-3.5" />
+                                                    <span>{activity.company}</span>
+                                                </div>
+                                            )}
+                                            {activity.contact_person && (
+                                                <div className="flex items-center gap-1">
+                                                    <User className="w-3.5 h-3.5" />
+                                                    <span>{activity.contact_person}</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     )}
                                     
                                     <p className="text-sm text-slate-400">

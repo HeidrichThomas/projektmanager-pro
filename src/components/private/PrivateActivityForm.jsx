@@ -18,6 +18,8 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
         type: activity?.type || "notiz",
         title: activity?.title || "",
         content: activity?.content || "",
+        company: activity?.company || "",
+        contact_person: activity?.contact_person || "",
         activity_date: activity ? formatDateForInput(activity.activity_date) : new Date().toISOString().slice(0, 16),
         amount: activity?.amount || "",
         file_urls: activity?.file_urls || [],
@@ -57,6 +59,8 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
             type: formData.type,
             title: formData.title.trim(),
             content: formData.content.trim(),
+            ...(formData.company && { company: formData.company.trim() }),
+            ...(formData.contact_person && { contact_person: formData.contact_person.trim() }),
             activity_date: formData.activity_date ? new Date(formData.activity_date).toISOString() : new Date().toISOString(),
             ...(formData.amount && { amount: parseFloat(formData.amount) }),
             ...(formData.file_urls.length > 0 && { 
@@ -112,6 +116,25 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
                             placeholder="https://..."
                             type="url"
                         />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Firma (optional)</Label>
+                            <Input
+                                value={formData.company}
+                                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                                placeholder="Firmenname"
+                            />
+                        </div>
+                        <div>
+                            <Label>Ansprechpartner (optional)</Label>
+                            <Input
+                                value={formData.contact_person}
+                                onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
+                                placeholder="Name"
+                            />
+                        </div>
                     </div>
 
                     <div>
