@@ -3,12 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, X, Heart, Home, DollarSign, Users, Plane, GraduationCap, Package } from "lucide-react";
+import { Plus, Search, X, Heart, Home, DollarSign, Users, Plane, GraduationCap, Package, Archive, ArchiveRestore } from "lucide-react";
 import PrivateThemeCard from "@/components/private/PrivateThemeCard";
 import PrivateThemeForm from "@/components/private/PrivateThemeForm";
 
 const categoryConfig = {
-    familie: { label: "Familie", icon: Users, color: "pink" },
+    familie_freunde: { label: "Familie / Freunde", icon: Users, color: "pink" },
     gesundheit: { label: "Gesundheit", icon: Heart, color: "red" },
     finanzen: { label: "Finanzen", icon: DollarSign, color: "green" },
     haushalt: { label: "Haushalt", icon: Home, color: "blue" },
@@ -24,6 +24,7 @@ export default function PrivateThemes() {
     const [showForm, setShowForm] = useState(false);
     const [editingTheme, setEditingTheme] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState("all");
+    const [showArchived, setShowArchived] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -76,6 +77,13 @@ export default function PrivateThemes() {
         }
     });
 
+    const toggleArchiveMutation = useMutation({
+        mutationFn: ({ id, archived }) => base44.entities.PrivateTheme.update(id, { archived }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['privateThemes'] });
+        }
+    });
+
     const handleSave = (data) => {
         if (editingTheme) {
             updateMutation.mutate({ id: editingTheme.id, data });
@@ -100,9 +108,10 @@ export default function PrivateThemes() {
     };
 
     const filteredThemes = themes.filter(theme => {
+        const matchesArchived = showArchived ? theme.archived : !theme.archived;
         const matchesCategory = selectedCategory === "all" || theme.category === selectedCategory;
         
-        if (!searchQuery) return matchesCategory;
+        if (!searchQuery) return matchesArchived && matchesCategory;
         
         const query = searchQuery.toLowerCase();
         
@@ -143,7 +152,7 @@ export default function PrivateThemes() {
             doc.description?.toLowerCase().includes(query)
         );
         
-        return documentMatch && matchesCategory;
+        return documentMatch && matchesCategory && matchesArchived;
     });
 
     return (
@@ -154,10 +163,19 @@ export default function PrivateThemes() {
                         <h1 className="text-3xl font-bold text-slate-900">Private Themen</h1>
                         <p className="text-slate-600 mt-1">Organisieren Sie Ihr privates Leben</p>
                     </div>
-                    <Button onClick={() => { setEditingTheme(null); setShowForm(true); }}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Neues Thema
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant={showArchived ? "default" : "outline"}
+                            onClick={() => setShowArchived(!showArchived)}
+                        >
+                            {showArchived ? <ArchiveRestore className="w-4 h-4 mr-2" /> : <Archive className="w-4 h-4 mr-2" />}
+                            {showArchived ? "Aktive" : "Archiv"}
+                        </Button>
+                        <Button onClick={() => { setEditingTheme(null); setShowForm(true); }}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Neues Thema
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -259,6 +277,7 @@ export default function PrivateThemes() {
                                     documents={allThemeDocuments}
                                     onEdit={handleEdit}
                                     onDelete={handleDelete}
+                                    onToggleArchive={(id, archived) => toggleArchiveMutation.mutate({ id, archived })}
                                 />
                             );
                         })}

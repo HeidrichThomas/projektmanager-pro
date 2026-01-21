@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Heart, Home, DollarSign, Users, Plane, GraduationCap, Package } from "lucide-react";
 
 const categoryConfig = {
-    familie: { label: "Familie", icon: Users },
+    familie_freunde: { label: "Familie / Freunde", icon: Users },
     gesundheit: { label: "Gesundheit", icon: Heart },
     finanzen: { label: "Finanzen", icon: DollarSign },
     haushalt: { label: "Haushalt", icon: Home },

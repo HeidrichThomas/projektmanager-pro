@@ -2,14 +2,14 @@ import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Heart, Home, DollarSign, Users, Plane, GraduationCap, Package, ChevronRight, Calendar, File, Image } from "lucide-react";
+import { Pencil, Trash2, Heart, Home, DollarSign, Users, Plane, GraduationCap, Package, ChevronRight, Calendar, File, Image, Archive, ArchiveRestore } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format, isFuture } from "date-fns";
 import { de } from "date-fns/locale";
 
 const categoryConfig = {
-    familie: { label: "Familie", icon: Users, color: "pink" },
+    familie_freunde: { label: "Familie / Freunde", icon: Users, color: "pink" },
     gesundheit: { label: "Gesundheit", icon: Heart, color: "red" },
     finanzen: { label: "Finanzen", icon: DollarSign, color: "green" },
     haushalt: { label: "Haushalt", icon: Home, color: "blue" },
@@ -19,7 +19,7 @@ const categoryConfig = {
     sonstiges: { label: "Sonstiges", icon: Package, color: "slate" }
 };
 
-export default function PrivateThemeCard({ theme, appointments = [], documents = [], onEdit, onDelete }) {
+export default function PrivateThemeCard({ theme, appointments = [], documents = [], onEdit, onDelete, onToggleArchive }) {
     const config = categoryConfig[theme.category] || categoryConfig.sonstiges;
     const Icon = config.icon;
 
@@ -47,6 +47,14 @@ export default function PrivateThemeCard({ theme, appointments = [], documents =
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                         <Button size="sm" variant="ghost" onClick={() => onEdit(theme)}>
                             <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => onToggleArchive(theme.id, !theme.archived)}
+                            title={theme.archived ? "Wiederherstellen" : "Archivieren"}
+                        >
+                            {theme.archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => onDelete(theme.id)} className="text-red-600 hover:text-red-700">
                             <Trash2 className="w-4 h-4" />
