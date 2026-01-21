@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2, Handshake, Plus, Trash2, MapPin, Navigation } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import FileDropzone from "@/components/ui/file-dropzone";
 
 const typeConfig = {
     telefonat: { label: "Telefonat", icon: Phone, color: "text-green-600" },
@@ -431,25 +432,25 @@ Beispiel: Wenn die Hinfahrt 25,3 km beträgt, gib 25.3 zurück (nicht 50.6)`,
                     
                     <div>
                         <Label className="text-slate-700 font-medium">Dateien anhängen</Label>
-                        <div className="mt-1.5">
-                            <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
-                                {uploading ? (
-                                    <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
-                                ) : (
-                                    <Upload className="w-5 h-5 text-slate-400" />
-                                )}
-                                <span className="text-sm text-slate-500">
-                                    {uploading ? "Wird hochgeladen..." : "Dateien auswählen (PDF, Bilder, etc.)"}
-                                </span>
-                                <input
-                                    type="file"
-                                    multiple
-                                    onChange={handleFileUpload}
-                                    className="hidden"
-                                    disabled={uploading}
-                                />
-                            </label>
-                        </div>
+                        <FileDropzone
+                            onFilesSelected={async (files) => {
+                                setUploading(true);
+                                const newUrls = [...(formData.file_urls || [])];
+                                const newNames = [...(formData.file_names || [])];
+                                
+                                for (const file of files) {
+                                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                                    newUrls.push(file_url);
+                                    newNames.push(file.name);
+                                }
+                                
+                                setFormData({...formData, file_urls: newUrls, file_names: newNames});
+                                setUploading(false);
+                            }}
+                            multiple={true}
+                            className="mt-2"
+                        />
+                        {uploading && <p className="text-sm text-slate-500 mt-2">Dateien werden hochgeladen...</p>}
                         
                         {formData.file_names?.length > 0 && (
                             <div className="mt-3 space-y-2">

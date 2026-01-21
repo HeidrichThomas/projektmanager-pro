@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Loader2, Navigation } from "lucide-react";
+import FileDropzone from "@/components/ui/file-dropzone";
 
 const activityTypes = {
     notiz: { label: "Notiz", icon: FileText, color: "text-slate-600" },
@@ -456,16 +457,31 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
 
                     <div>
                         <Label>Dateien anhängen</Label>
-                        <div className="mt-1.5">
-                            <Input
-                                type="file"
-                                onChange={handleFileUpload}
-                                multiple
-                                disabled={uploading}
-                                className="cursor-pointer"
-                            />
-                            {uploading && <p className="text-sm text-slate-500 mt-2">Dateien werden hochgeladen...</p>}
-                        </div>
+                        <FileDropzone
+                            onFilesSelected={async (files) => {
+                                setUploading(true);
+                                try {
+                                    const uploadPromises = files.map(async (file) => {
+                                        const result = await base44.integrations.Core.UploadFile({ file });
+                                        return { url: result.file_url, name: file.name };
+                                    });
+                                    
+                                    const uploads = await Promise.all(uploadPromises);
+                                    setFormData({
+                                        ...formData,
+                                        file_urls: [...(formData.file_urls || []), ...uploads.map(u => u.url)],
+                                        file_names: [...(formData.file_names || []), ...uploads.map(u => u.name)]
+                                    });
+                                } catch (error) {
+                                    console.error("Upload error:", error);
+                                } finally {
+                                    setUploading(false);
+                                }
+                            }}
+                            multiple={true}
+                            className="mt-2"
+                        />
+                        {uploading && <p className="text-sm text-slate-500 mt-2">Dateien werden hochgeladen...</p>}
                         
                         {formData.file_urls && formData.file_urls.length > 0 && (
                             <div className="mt-3 space-y-2">
