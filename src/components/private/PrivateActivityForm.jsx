@@ -36,8 +36,18 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
         queryFn: () => base44.entities.Customer.list()
     });
 
-    const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
-    const contactPersons = selectedCustomer?.contact_persons || [];
+    const { data: themeCompanies = [] } = useQuery({
+        queryKey: ['themeCompanies'],
+        queryFn: () => base44.entities.ThemeCompany.list()
+    });
+
+    const allCompanies = [
+        ...customers.map(c => ({ id: c.id, name: c.company, type: 'customer', contact_persons: c.contact_persons || [] })),
+        ...themeCompanies.map(c => ({ id: c.id, name: c.company_name, type: 'theme', contact_persons: c.contact_persons || [] }))
+    ].sort((a, b) => a.name.localeCompare(b.name));
+
+    const selectedCompany = allCompanies.find(c => c.id === selectedCustomerId);
+    const contactPersons = selectedCompany?.contact_persons || [];
 
     const handleFileUpload = async (e) => {
         const file = e.target.files?.[0];
@@ -139,9 +149,9 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
                                         value={selectedCustomerId} 
                                         onValueChange={(value) => {
                                             setSelectedCustomerId(value);
-                                            const customer = customers.find(c => c.id === value);
-                                            if (customer) {
-                                                setFormData({ ...formData, company: customer.company, contact_person: "" });
+                                            const company = allCompanies.find(c => c.id === value);
+                                            if (company) {
+                                                setFormData({ ...formData, company: company.name, contact_person: "" });
                                             }
                                         }}
                                     >
@@ -149,9 +159,9 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
                                             <SelectValue placeholder="Firma auswählen..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {customers.map(customer => (
-                                                <SelectItem key={customer.id} value={customer.id}>
-                                                    {customer.company}
+                                            {allCompanies.map(company => (
+                                                <SelectItem key={company.id} value={company.id}>
+                                                    {company.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
