@@ -27,17 +27,19 @@ export default function FileDropzone({ onFilesSelected, accept, multiple = true,
         e.stopPropagation();
         setIsDragging(false);
 
-        const files = Array.from(e.dataTransfer.files);
-        if (files.length > 0) {
+        const droppedFiles = e.dataTransfer?.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+            const files = Array.from(droppedFiles);
             onFilesSelected(multiple ? files : [files[0]]);
         }
     };
 
     const handleFileInput = (e) => {
-        const files = Array.from(e.target.files);
+        const files = Array.from(e.target.files || []);
         if (files.length > 0) {
             onFilesSelected(files);
         }
+        e.target.value = '';
     };
 
     return (
@@ -51,7 +53,10 @@ export default function FileDropzone({ onFilesSelected, accept, multiple = true,
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            onClick={() => document.getElementById('file-input-dropzone').click()}
+            onClick={(e) => {
+                e.stopPropagation();
+                document.getElementById('file-input-dropzone')?.click();
+            }}
         >
             <input
                 id="file-input-dropzone"
