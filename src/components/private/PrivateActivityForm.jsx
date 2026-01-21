@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { base44 } from "@/api/base44Client";
 import { Upload, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import FileDropzone from "@/components/ui/file-dropzone";
 
 export default function PrivateActivityForm({ activity, onSave, onClose }) {
     const formatDateForInput = (dateString) => {

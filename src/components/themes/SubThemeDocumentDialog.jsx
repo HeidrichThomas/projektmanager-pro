@@ -10,6 +10,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import FileDropzone from "@/components/ui/file-dropzone";
 
 const categoryConfig = {
     vertrag: { label: "Vertrag", color: "bg-purple-100 text-purple-700" },
@@ -293,11 +294,26 @@ export default function SubThemeDocumentDialog({ open, onClose, subThemeId }) {
 
                         <div>
                             <Label>Datei hochladen *</Label>
-                            <Input
-                                type="file"
-                                onChange={handleFileUpload}
-                                disabled={uploading}
-                                className="cursor-pointer"
+                            <FileDropzone
+                                onFilesSelected={async (files) => {
+                                    const file = files[0];
+                                    setUploading(true);
+                                    try {
+                                        const result = await base44.integrations.Core.UploadFile({ file });
+                                        setFormData({
+                                            ...formData,
+                                            file_url: result.file_url,
+                                            file_name: file.name,
+                                            file_size: file.size
+                                        });
+                                    } catch (error) {
+                                        toast.error("Fehler beim Hochladen");
+                                    } finally {
+                                        setUploading(false);
+                                    }
+                                }}
+                                multiple={false}
+                                className="mt-2"
                             />
                             {uploading && <p className="text-sm text-slate-500 mt-2">Lädt hoch...</p>}
                             {formData.file_name && (

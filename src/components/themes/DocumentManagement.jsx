@@ -13,6 +13,7 @@ import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import FileDropzone from "@/components/ui/file-dropzone";
 
 const categoryConfig = {
     vertrag: { label: "Vertrag", color: "bg-blue-100 text-blue-700" },
@@ -264,22 +265,33 @@ export default function DocumentManagement({ open, onClose, themeId = null }) {
                         {!editingDocument && (
                             <div>
                                 <Label>Datei hochladen *</Label>
-                                <div className="mt-1.5">
-                                    <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
-                                        <div className="text-center">
-                                            <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                                            <p className="text-sm text-slate-600">
-                                                {uploading ? "Wird hochgeladen..." : formData.file_name || "Datei auswählen"}
-                                            </p>
-                                        </div>
-                                        <input
-                                            type="file"
-                                            onChange={handleFileUpload}
-                                            className="hidden"
-                                            disabled={uploading}
-                                        />
-                                    </label>
-                                </div>
+                                <FileDropzone
+                                    onFilesSelected={async (files) => {
+                                        const file = files[0];
+                                        setUploading(true);
+                                        try {
+                                            const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                                            setFormData({
+                                                ...formData,
+                                                file_url,
+                                                file_name: file.name,
+                                                file_size: file.size,
+                                                title: formData.title || file.name
+                                            });
+                                        } catch (error) {
+                                            toast.error("Upload fehlgeschlagen");
+                                        } finally {
+                                            setUploading(false);
+                                        }
+                                    }}
+                                    multiple={false}
+                                    className="mt-2"
+                                />
+                                {formData.file_name && (
+                                    <p className="text-sm text-slate-600 mt-2">
+                                        {uploading ? "Wird hochgeladen..." : `Ausgewählt: ${formData.file_name}`}
+                                    </p>
+                                )}
                             </div>
                         )}
                         

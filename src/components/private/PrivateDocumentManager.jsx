@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, File, Image, Trash2, Download, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import FileDropzone from "@/components/ui/file-dropzone";
 
 export default function PrivateDocumentManager({ themeId, documents, activities = [] }) {
     const [uploading, setUploading] = useState(false);
@@ -102,13 +103,20 @@ export default function PrivateDocumentManager({ themeId, documents, activities 
                 <div className="space-y-4">
                     <div>
                         <Label>Datei auswählen</Label>
-                        <Input
-                            type="file"
-                            onChange={handleFileSelect}
+                        <FileDropzone
+                            onFilesSelected={(files) => {
+                                const file = files[0];
+                                setSelectedFile(file);
+                                if (!formData.title) {
+                                    setFormData({ ...formData, title: file.name });
+                                }
+                            }}
                             accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                            multiple={false}
+                            className="mt-2"
                         />
                         {selectedFile && (
-                            <p className="text-sm text-slate-600 mt-1">
+                            <p className="text-sm text-slate-600 mt-2">
                                 Ausgewählt: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
                             </p>
                         )}
