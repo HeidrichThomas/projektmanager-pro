@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Building2, User, MapPin, Phone, Smartphone, Mail, Save, X, Plus, Trash2, Link2 } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Save, X, Plus, Trash2, Link2, Edit2 } from "lucide-react";
 
 export default function CustomerForm({ open, onClose, onSave, customer }) {
     const [formData, setFormData] = useState({
@@ -32,6 +32,8 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
         phone: "",
         email: ""
     });
+    
+    const [editingContactIndex, setEditingContactIndex] = useState(null);
 
     useEffect(() => {
         if (customer) {
@@ -56,15 +58,32 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
             });
         }
         setNewContact({ name: "", position: "", phone: "", email: "" });
+        setEditingContactIndex(null);
     }, [customer, open]);
 
     const addContactPerson = () => {
         if (!newContact.name) return;
-        setFormData({
-            ...formData,
-            contact_persons: [...(formData.contact_persons || []), newContact]
-        });
+        
+        if (editingContactIndex !== null) {
+            const updatedContacts = [...formData.contact_persons];
+            updatedContacts[editingContactIndex] = newContact;
+            setFormData({
+                ...formData,
+                contact_persons: updatedContacts
+            });
+            setEditingContactIndex(null);
+        } else {
+            setFormData({
+                ...formData,
+                contact_persons: [...(formData.contact_persons || []), newContact]
+            });
+        }
         setNewContact({ name: "", position: "", phone: "", email: "" });
+    };
+
+    const editContactPerson = (index) => {
+        setNewContact(formData.contact_persons[index]);
+        setEditingContactIndex(index);
     };
 
     const removeContactPerson = (index) => {
@@ -72,6 +91,10 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
             ...formData,
             contact_persons: formData.contact_persons.filter((_, i) => i !== index)
         });
+        if (editingContactIndex === index) {
+            setNewContact({ name: "", position: "", phone: "", email: "" });
+            setEditingContactIndex(null);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -120,22 +143,35 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                                                         {contact.email && <span>{contact.email}</span>}
                                                     </div>
                                                 </div>
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => removeContactPerson(index)}
-                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                >
-                                                    <Trash2 className="w-3 h-3" />
-                                                </Button>
+                                                <div className="flex gap-1">
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => editContactPerson(index)}
+                                                        className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
+                                                    >
+                                                        <Edit2 className="w-3 h-3" />
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => removeContactPerson(index)}
+                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
                                 )}
 
                                 <div className="border-2 border-dashed border-slate-200 rounded-lg p-3">
-                                    <p className="text-sm font-medium text-slate-700 mb-2">Neuer Ansprechpartner</p>
+                                    <p className="text-sm font-medium text-slate-700 mb-2">
+                                        {editingContactIndex !== null ? "Ansprechpartner bearbeiten" : "Neuer Ansprechpartner"}
+                                    </p>
                                     <div className="grid grid-cols-2 gap-2">
                                         <Input
                                             placeholder="Name *"
@@ -158,16 +194,42 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                                             onChange={(e) => setNewContact({...newContact, email: e.target.value})}
                                         />
                                     </div>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={addContactPerson}
-                                        disabled={!newContact.name}
-                                        className="mt-2 w-full"
-                                    >
-                                        <Plus className="w-3 h-3 mr-1" />
-                                        Hinzufügen
-                                    </Button>
+                                    <div className="flex gap-2 mt-2">
+                                        {editingContactIndex !== null && (
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setNewContact({ name: "", position: "", phone: "", email: "" });
+                                                    setEditingContactIndex(null);
+                                                }}
+                                                className="flex-1"
+                                            >
+                                                <X className="w-3 h-3 mr-1" />
+                                                Abbrechen
+                                            </Button>
+                                        )}
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            onClick={addContactPerson}
+                                            disabled={!newContact.name}
+                                            className="flex-1"
+                                        >
+                                            {editingContactIndex !== null ? (
+                                                <>
+                                                    <Save className="w-3 h-3 mr-1" />
+                                                    Speichern
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Plus className="w-3 h-3 mr-1" />
+                                                    Hinzufügen
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
