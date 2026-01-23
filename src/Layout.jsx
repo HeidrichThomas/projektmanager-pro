@@ -114,7 +114,7 @@ export default function Layout({ children, currentPageName }) {
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
+            <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col print:!hidden">
                 <div className="flex flex-col flex-grow bg-white border-r border-slate-200 pt-6 pb-4 overflow-y-auto">
                     <div className="px-6 mb-6">
                         <div className="flex items-center gap-3 mb-4">
@@ -189,7 +189,7 @@ export default function Layout({ children, currentPageName }) {
             </aside>
 
             {/* Mobile Header */}
-            <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between bg-white border-b border-slate-200 px-4 py-3">
+            <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between bg-white border-b border-slate-200 px-4 py-3 print:!hidden">
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
                         <FolderKanban className="w-4 h-4 text-white" />
