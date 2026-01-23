@@ -18,7 +18,7 @@ export default function TravelOverview() {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
     
-    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+    const [selectedMonth, setSelectedMonth] = useState(String(currentMonth));
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [filterProject, setFilterProject] = useState("all");
     const [filterCustomer, setFilterCustomer] = useState("all");
@@ -107,10 +107,24 @@ export default function TravelOverview() {
         return allTravelData.filter(item => {
             if (!item.date) return false;
             const date = parseISO(item.date);
-            
-            const monthMatch = date.getMonth() + 1 === selectedMonth;
+            const month = date.getMonth() + 1;
             const yearMatch = date.getFullYear() === selectedYear;
             const projectMatch = filterProject === "all" || item.project_id === filterProject;
+            
+            let periodMatch;
+            if (selectedMonth === "0") {
+                periodMatch = true; // Ganzes Jahr
+            } else if (selectedMonth === "Q1") {
+                periodMatch = month >= 1 && month <= 3;
+            } else if (selectedMonth === "Q2") {
+                periodMatch = month >= 4 && month <= 6;
+            } else if (selectedMonth === "Q3") {
+                periodMatch = month >= 7 && month <= 9;
+            } else if (selectedMonth === "Q4") {
+                periodMatch = month >= 10 && month <= 12;
+            } else {
+                periodMatch = month === parseInt(selectedMonth);
+            }
             
             let customerMatch = true;
             if (filterCustomer !== "all") {
@@ -122,7 +136,7 @@ export default function TravelOverview() {
                 }
             }
             
-            return monthMatch && yearMatch && projectMatch && customerMatch;
+            return periodMatch && yearMatch && projectMatch && customerMatch;
         });
     }, [allTravelData, selectedMonth, selectedYear, filterProject, filterCustomer, projects]);
 
@@ -234,7 +248,12 @@ export default function TravelOverview() {
                 <div className="mb-4 print:mb-6">
                     <h2 className="text-xl font-bold text-slate-900 mb-1">Fahrtenbericht</h2>
                     <p className="text-sm text-slate-600">
-                        {months.find(m => m.value === selectedMonth)?.label} {selectedYear}
+                        {selectedMonth === "0" ? `Jahr ${selectedYear}` : 
+                         selectedMonth === "Q1" ? `Q1 ${selectedYear}` :
+                         selectedMonth === "Q2" ? `Q2 ${selectedYear}` :
+                         selectedMonth === "Q3" ? `Q3 ${selectedYear}` :
+                         selectedMonth === "Q4" ? `Q4 ${selectedYear}` :
+                         `${months.find(m => m.value === parseInt(selectedMonth))?.label} ${selectedYear}`}
                         {filterProject !== "all" && ` • Projekt: ${projects.find(p => p.id === filterProject)?.name}`}
                         {filterCustomer !== "all" && ` • Kunde: ${customers.find(c => c.id === filterCustomer)?.company}`}
                     </p>
@@ -252,16 +271,21 @@ export default function TravelOverview() {
                         </SelectContent>
                     </Select>
 
-                    <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
-                        <SelectTrigger className="w-32">
+                    <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(v)}>
+                        <SelectTrigger className="w-48">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="0">Ganzes Jahr</SelectItem>
                             {months.map(month => (
                                 <SelectItem key={month.value} value={String(month.value)}>
                                     {month.label}
                                 </SelectItem>
                             ))}
+                            <SelectItem value="Q1">Erstes Quartal</SelectItem>
+                            <SelectItem value="Q2">Zweites Quartal</SelectItem>
+                            <SelectItem value="Q3">Drittes Quartal</SelectItem>
+                            <SelectItem value="Q4">Viertes Quartal</SelectItem>
                         </SelectContent>
                     </Select>
 
