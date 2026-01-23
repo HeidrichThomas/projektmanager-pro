@@ -16,7 +16,7 @@ export default function TravelTracking() {
     const currentMonth = new Date().getMonth() + 1;
     
     const [selectedYear, setSelectedYear] = useState(currentYear);
-    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+    const [selectedMonth, setSelectedMonth] = useState(String(currentMonth));
     const [showManualEntryForm, setShowManualEntryForm] = useState(false);
     const [editingEntry, setEditingEntry] = useState(null);
 
@@ -81,13 +81,29 @@ export default function TravelTracking() {
         new Date(b.date) - new Date(a.date)
     );
 
-    // Filter by selected year and month
+    // Filter by selected year and month/quarter
     const filteredActivities = allTravelData.filter(item => {
         if (!item.date) return false;
         const date = parseISO(item.date);
         const yearMatch = date.getFullYear() === selectedYear;
-        const monthMatch = selectedMonth === 0 || date.getMonth() + 1 === selectedMonth;
-        return yearMatch && monthMatch;
+        const month = date.getMonth() + 1;
+        
+        let periodMatch;
+        if (selectedMonth === "0") {
+            periodMatch = true; // Ganzes Jahr
+        } else if (selectedMonth === "Q1") {
+            periodMatch = month >= 1 && month <= 3;
+        } else if (selectedMonth === "Q2") {
+            periodMatch = month >= 4 && month <= 6;
+        } else if (selectedMonth === "Q3") {
+            periodMatch = month >= 7 && month <= 9;
+        } else if (selectedMonth === "Q4") {
+            periodMatch = month >= 10 && month <= 12;
+        } else {
+            periodMatch = month === parseInt(selectedMonth);
+        }
+        
+        return yearMatch && periodMatch;
     });
 
     // Calculate totals
@@ -231,8 +247,8 @@ export default function TravelTracking() {
                         </SelectContent>
                     </Select>
 
-                    <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
-                        <SelectTrigger className="w-40">
+                    <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(v)}>
+                        <SelectTrigger className="w-48">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -242,6 +258,10 @@ export default function TravelTracking() {
                                     {month.label}
                                 </SelectItem>
                             ))}
+                            <SelectItem value="Q1">Erstes Quartal</SelectItem>
+                            <SelectItem value="Q2">Zweites Quartal</SelectItem>
+                            <SelectItem value="Q3">Drittes Quartal</SelectItem>
+                            <SelectItem value="Q4">Viertes Quartal</SelectItem>
                         </SelectContent>
                     </Select>
 
@@ -260,7 +280,12 @@ export default function TravelTracking() {
                     <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-200">
                         <CardHeader>
                             <CardTitle className="text-sm font-medium text-slate-600">
-                                {selectedMonth === 0 ? `Jahr ${selectedYear}` : `${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
+                                {selectedMonth === "0" ? `Jahr ${selectedYear}` : 
+                                 selectedMonth === "Q1" ? `Q1 ${selectedYear}` :
+                                 selectedMonth === "Q2" ? `Q2 ${selectedYear}` :
+                                 selectedMonth === "Q3" ? `Q3 ${selectedYear}` :
+                                 selectedMonth === "Q4" ? `Q4 ${selectedYear}` :
+                                 `${months.find(m => m.value === parseInt(selectedMonth))?.label} ${selectedYear}`}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -290,7 +315,7 @@ export default function TravelTracking() {
                     <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-200">
                         <CardHeader>
                             <CardTitle className="text-sm font-medium text-slate-600">
-                                Steuerlich absetzbar {selectedMonth === 0 ? '' : '(Monat)'}
+                                Steuerlich absetzbar {selectedMonth === "0" ? '' : selectedMonth.startsWith('Q') ? '(Quartal)' : '(Monat)'}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
