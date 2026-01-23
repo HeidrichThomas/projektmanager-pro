@@ -258,15 +258,31 @@ export default function ThemeDetail() {
                             <p className="mt-4 pt-4 border-t text-slate-600">{theme.description}</p>
                         )}
                         {activities.some(a => a.own_travel && a.travel_distance_km) && (
-                            <div className="mt-4 pt-4 border-t flex items-center gap-2 text-slate-700">
-                                <Navigation className="w-4 h-4" />
-                                <span className="font-medium">Gesamtkilometer (eigene Fahrten):</span>
-                                <span className="text-lg font-bold text-blue-600">
-                                    {activities
-                                        .filter(a => a.own_travel && a.travel_distance_km)
-                                        .reduce((sum, a) => sum + (a.travel_distance_km || 0), 0)
-                                        .toFixed(1)} km
-                                </span>
+                            <div className="mt-4 pt-4 border-t space-y-2">
+                                <div className="flex items-center gap-2 text-slate-700">
+                                    <Navigation className="w-4 h-4" />
+                                    <span className="font-medium">Gesamtkilometer (eigene Fahrten):</span>
+                                    <span className="text-lg font-bold text-blue-600">
+                                        {activities
+                                            .filter(a => a.own_travel && a.travel_distance_km)
+                                            .reduce((sum, a) => sum + (a.travel_distance_km || 0), 0)
+                                            .toFixed(1)} km
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-slate-700">
+                                    <Briefcase className="w-4 h-4" />
+                                    <span className="font-medium">Kilometerpauschale:</span>
+                                    <span className="text-lg font-bold text-green-600">
+                                        {activities
+                                            .filter(a => a.own_travel && a.travel_distance_km)
+                                            .reduce((sum, a) => {
+                                                const activityDate = new Date(a.activity_date);
+                                                const rate = activityDate < new Date('2026-01-01') ? 0.30 : 0.38;
+                                                return sum + (a.travel_distance_km * rate);
+                                            }, 0)
+                                            .toFixed(2)} €
+                                    </span>
+                                </div>
                             </div>
                         )}
                     </CardContent>
