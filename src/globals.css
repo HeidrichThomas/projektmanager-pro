@@ -39,7 +39,8 @@ css
 
 @media print {
   @page {
-    margin: 1cm;
+    size: landscape;
+    margin: 1.5cm;
   }
   
   body {
@@ -51,7 +52,29 @@ css
     display: none !important;
   }
   
-  .print\:mb-6 {
-    margin-bottom: 1.5rem !important;
+  /* Hide everything except the report */
+  body > div > div > div {
+    display: none;
+  }
+  
+  body > div > div > div:has([class*="TravelOverview"]) {
+    display: block !important;
+  }
+  
+  /* Compact table styling */
+  table {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+  
+  th, td {
+    padding: 2px 4px !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Remove unnecessary spacing */
+  .card {
+    box-shadow: none !important;
+    border: none !important;
   }
 }
