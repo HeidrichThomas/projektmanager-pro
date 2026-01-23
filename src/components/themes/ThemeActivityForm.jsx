@@ -35,6 +35,7 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
         file_urls: [],
         file_names: [],
         requires_travel: false,
+        own_travel: false,
         start_location: "Gartenstraße 17, 89257 Illertissen",
         destination_address: "",
         travel_distance_km: 0
@@ -67,6 +68,7 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                 contact_person_ids: activity.contact_person_ids || [],
                 activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16),
                 requires_travel: activity.requires_travel || false,
+                own_travel: activity.own_travel || false,
                 start_location: activity.start_location || "Gartenstraße 17, 89257 Illertissen",
                 destination_address: activity.destination_address || "",
                 travel_distance_km: activity.travel_distance_km || 0
@@ -83,6 +85,7 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                 file_urls: [],
                 file_names: [],
                 requires_travel: false,
+                own_travel: false,
                 start_location: "Gartenstraße 17, 89257 Illertissen",
                 destination_address: "",
                 travel_distance_km: 0
@@ -401,6 +404,17 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
 
                             {formData.requires_travel && (
                                 <div className="space-y-3 pl-6 border-l-2 border-teal-200">
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox
+                                            id="own_travel"
+                                            checked={formData.own_travel}
+                                            onCheckedChange={(checked) => setFormData({...formData, own_travel: checked})}
+                                        />
+                                        <Label htmlFor="own_travel" className="cursor-pointer font-medium">
+                                            Eigene Fahrt (selbst gefahren)
+                                        </Label>
+                                    </div>
+
                                     <div>
                                         <Label>Startort</Label>
                                         <Input
