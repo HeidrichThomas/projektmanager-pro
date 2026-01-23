@@ -192,14 +192,30 @@ export default function TravelOverview() {
         const element = document.getElementById('travel-report-content');
         if (!element) return;
         
-        // Clone the element to avoid modifying the original
+        // Clone and style for PDF
         const clonedElement = element.cloneNode(true);
         clonedElement.style.position = 'absolute';
         clonedElement.style.left = '-9999px';
         clonedElement.style.top = '0';
-        clonedElement.style.width = '1200px';
-        clonedElement.style.padding = '20px';
+        clonedElement.style.width = '1150px';
+        clonedElement.style.padding = '15px';
         clonedElement.style.backgroundColor = '#ffffff';
+        clonedElement.style.fontSize = '7px';
+        clonedElement.style.lineHeight = '1';
+        
+        // Make table ultra compact
+        const table = clonedElement.querySelector('table');
+        if (table) {
+            table.style.fontSize = '7px';
+            table.style.lineHeight = '1';
+            const cells = clonedElement.querySelectorAll('th, td');
+            cells.forEach(cell => {
+                cell.style.padding = '1px 2px';
+                cell.style.fontSize = '7px';
+                cell.style.lineHeight = '1';
+            });
+        }
+        
         document.body.appendChild(clonedElement);
         
         try {
@@ -207,9 +223,7 @@ export default function TravelOverview() {
                 scale: 2,
                 useCORS: true,
                 logging: false,
-                backgroundColor: '#ffffff',
-                windowWidth: 1200,
-                windowHeight: clonedElement.scrollHeight
+                backgroundColor: '#ffffff'
             });
             
             const imgData = canvas.toDataURL("image/png", 1.0);
@@ -217,19 +231,19 @@ export default function TravelOverview() {
             
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = pdfWidth - 30;
+            const imgWidth = pdfWidth - 20;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             
-            let position = 15;
-            pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight);
+            let position = 10;
+            pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
             
-            let heightLeft = imgHeight - (pdfHeight - 30);
+            let heightLeft = imgHeight - (pdfHeight - 20);
             
             while (heightLeft > 0) {
                 pdf.addPage();
-                position = -(imgHeight - heightLeft) + 15;
-                pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight);
-                heightLeft -= (pdfHeight - 30);
+                position = -(imgHeight - heightLeft) + 10;
+                pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+                heightLeft -= (pdfHeight - 20);
             }
             
             const periodLabel = selectedMonth === "0" ? `Jahr_${selectedYear}` :
@@ -360,16 +374,16 @@ export default function TravelOverview() {
                 </div>
 
                 <div className="border rounded-lg overflow-hidden print:border-slate-400 print:rounded-none">
-                    <Table className="print:!text-[8px]">
+                    <Table className="print:!text-[7px]">
                         <TableHeader>
                             <TableRow className="bg-slate-50 print:bg-slate-200">
-                                <TableHead className="w-28 py-6 print:!py-[2px] print:!text-[8px] print:!font-bold">Datum</TableHead>
-                                <TableHead className="py-6 print:!py-[2px] print:!text-[8px] print:!font-bold">Projekt</TableHead>
-                                <TableHead className="py-6 print:!py-[2px] print:!text-[8px] print:!font-bold">Kunde</TableHead>
-                                <TableHead className="py-6 print:!py-[2px] print:!text-[8px] print:!font-bold">Aktivität</TableHead>
-                                <TableHead className="text-right py-6 print:!py-[2px] print:!text-[8px] print:!font-bold">km</TableHead>
-                                <TableHead className="text-right py-6 print:!py-[2px] print:!text-[8px] print:!font-bold">Satz</TableHead>
-                                <TableHead className="text-right py-6 print:!py-[2px] print:!text-[8px] print:!font-bold">Betrag</TableHead>
+                                <TableHead className="w-28 py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Datum</TableHead>
+                                <TableHead className="py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Projekt</TableHead>
+                                <TableHead className="py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Kunde</TableHead>
+                                <TableHead className="py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Aktivität</TableHead>
+                                <TableHead className="text-right py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">km</TableHead>
+                                <TableHead className="text-right py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Satz</TableHead>
+                                <TableHead className="text-right py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Betrag</TableHead>
                                 <TableHead className="w-12 print:hidden"></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -385,33 +399,33 @@ export default function TravelOverview() {
                                     
                                     return (
                                         <TableRow key={`${item.type}-${item.id}`} className="hover:bg-slate-50 print:hover:bg-transparent">
-                                            <TableCell className="font-medium text-sm py-6 print:!py-[2px] print:!px-[3px] print:!text-[8px] print:!leading-none">
+                                            <TableCell className="font-medium text-sm py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
                                                 <Calendar className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
                                                 {format(parseISO(item.date), "dd.MM.yy", { locale: de })}
                                             </TableCell>
-                                            <TableCell className="py-6 print:!py-[2px] print:!px-[3px] print:!text-[8px] print:!leading-none">
+                                            <TableCell className="py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
                                                 <FolderKanban className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
-                                                <span className="break-words text-sm print:text-[8px]">{project?.name || 'N/A'}</span>
+                                                <span className="break-words text-sm print:text-[7px]">{project?.name || 'N/A'}</span>
                                             </TableCell>
-                                            <TableCell className="py-6 print:!py-[2px] print:!px-[3px] print:!text-[8px] print:!leading-none">
+                                            <TableCell className="py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
                                                 <Building2 className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
-                                                <span className="break-words text-sm print:text-[8px]">{customer?.company || 'N/A'}</span>
+                                                <span className="break-words text-sm print:text-[7px]">{customer?.company || 'N/A'}</span>
                                             </TableCell>
-                                            <TableCell className="text-sm text-slate-600 py-6 print:!py-[2px] print:!px-[3px] print:!text-[8px] print:!leading-none">
+                                            <TableCell className="text-sm text-slate-600 py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
                                                 <div className="break-words">{item.title}</div>
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[2px] print:!px-[3px] print:!text-[8px] print:!leading-none">
-                                                <Badge variant="secondary" className="font-mono print:border-0 print:bg-transparent print:p-0 print:text-[8px] print:font-normal">
+                                            <TableCell className="text-right py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
+                                                <Badge variant="secondary" className="font-mono print:border-0 print:bg-transparent print:p-0 print:text-[7px] print:font-normal">
                                                     {item.distance?.toFixed(1)}
                                                 </Badge>
                                                 <div className="text-xs text-slate-400 mt-1 print:hidden">
                                                     ({(item.distance / 2).toFixed(1)} km × 2)
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[2px] print:!px-[3px] text-xs text-slate-500 print:!text-[8px] print:!leading-none">
+                                            <TableCell className="text-right py-6 print:!py-[1px] print:!px-[2px] text-xs text-slate-500 print:!text-[7px] print:!leading-[1]">
                                                 {(rate * 100).toFixed(0)}
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[2px] print:!px-[3px] font-medium print:!text-[8px] print:!leading-none print:!font-semibold">
+                                            <TableCell className="text-right py-6 print:!py-[1px] print:!px-[2px] font-medium print:!text-[7px] print:!leading-[1] print:!font-semibold">
                                                 {amount.toFixed(2)}
                                             </TableCell>
                                             <TableCell className="text-right py-6 print:hidden">
