@@ -299,9 +299,9 @@ export default function TravelOverview() {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap gap-3 mb-4 print:hidden">
+                <div className="flex flex-wrap gap-3 mb-4 print:gap-1 print:mb-1">
                     <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(parseInt(v))}>
-                        <SelectTrigger className="w-28">
+                        <SelectTrigger className="w-28 print:!w-16 print:!h-6 print:!text-[8px] print:!px-1 print:!py-0">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -312,7 +312,7 @@ export default function TravelOverview() {
                     </Select>
 
                     <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(v)}>
-                        <SelectTrigger className="w-48">
+                        <SelectTrigger className="w-48 print:!w-24 print:!h-6 print:!text-[8px] print:!px-1 print:!py-0">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -330,7 +330,7 @@ export default function TravelOverview() {
                     </Select>
 
                     <Select value={filterProject} onValueChange={setFilterProject}>
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="w-40 print:!w-24 print:!h-6 print:!text-[8px] print:!px-1 print:!py-0">
                             <SelectValue placeholder="Alle Projekte" />
                         </SelectTrigger>
                         <SelectContent>
@@ -344,7 +344,7 @@ export default function TravelOverview() {
                     </Select>
 
                     <Select value={filterCustomer} onValueChange={setFilterCustomer}>
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="w-40 print:!w-24 print:!h-6 print:!text-[8px] print:!px-1 print:!py-0">
                             <SelectValue placeholder="Alle Kunden" />
                         </SelectTrigger>
                         <SelectContent>
@@ -399,31 +399,31 @@ export default function TravelOverview() {
                                     
                                     return (
                                         <TableRow key={`${item.type}-${item.id}`} className="hover:bg-slate-50 print:hover:bg-transparent">
-                                            <TableCell className="font-medium text-sm py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
-                                                <Calendar className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
-                                                {format(parseISO(item.date), "dd.MM.yy", { locale: de })}
+                                            <TableCell className="text-sm py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
+                                               <Calendar className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
+                                               {format(parseISO(item.date), "dd.MM.yy", { locale: de })}
                                             </TableCell>
-                                            <TableCell className="py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
-                                                <FolderKanban className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
-                                                <span className="break-words text-sm print:text-[8px]">{project?.name || 'N/A'}</span>
+                                            <TableCell className="text-sm py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
+                                               <FolderKanban className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
+                                               <span className="break-words">{project?.name || 'N/A'}</span>
                                             </TableCell>
-                                            <TableCell className="py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
-                                                <Building2 className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
-                                                <span className="break-words text-sm print:text-[8px]">{customer?.company || 'N/A'}</span>
+                                            <TableCell className="text-sm py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
+                                               <Building2 className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
+                                               <span className="break-words">{customer?.company || 'N/A'}</span>
                                             </TableCell>
-                                            <TableCell className="text-sm text-slate-600 py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
-                                                <div className="break-words">{item.title}</div>
+                                            <TableCell className="text-sm py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
+                                               <div className="break-words">{item.title}</div>
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
-                                                <Badge variant="secondary" className="font-mono print:border-0 print:bg-transparent print:p-0 print:text-[8px] print:font-normal">
-                                                    {item.distance?.toFixed(1)}
-                                                </Badge>
+                                            <TableCell className="text-sm text-right py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
+                                               <Badge variant="secondary" className="font-mono print:border-0 print:bg-transparent print:p-0 print:text-[8px] print:font-normal">
+                                                   {item.distance?.toFixed(1)}
+                                               </Badge>
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[3px] print:!px-[3px] text-xs text-slate-500 print:!text-[8px] print:!leading-tight">
-                                                {(rate * 100).toFixed(0)}
+                                            <TableCell className="text-sm text-right py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
+                                               {(rate * 100).toFixed(0)}
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[3px] print:!px-[3px] font-medium print:!text-[8px] print:!leading-tight print:!font-semibold">
-                                                {amount.toFixed(2)}
+                                            <TableCell className="text-sm text-right py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
+                                               {amount.toFixed(2)}
                                             </TableCell>
                                             <TableCell className="text-right py-6 print:hidden">
                                                 {item.type === 'manual' && (
