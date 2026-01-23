@@ -244,8 +244,8 @@ export default function TravelOverview() {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent ref={reportRef}>
-                <div className="mb-4 print:mb-6">
+            <CardContent ref={reportRef} className="print:px-8 print:py-6">
+                <div className="mb-4 print:mb-4">
                     <h2 className="text-xl font-bold text-slate-900 mb-1">Fahrtenbericht</h2>
                     <p className="text-sm text-slate-600">
                         {selectedMonth === "0" ? `Jahr ${selectedYear}` : 
@@ -337,13 +337,13 @@ export default function TravelOverview() {
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-slate-50">
-                                <TableHead className="w-28 py-6">Datum</TableHead>
-                                <TableHead className="py-6">Projekt</TableHead>
-                                <TableHead className="py-6">Kunde</TableHead>
-                                <TableHead className="py-6">Aktivität</TableHead>
-                                <TableHead className="text-right py-6">Kilometer</TableHead>
-                                <TableHead className="text-right py-6">Satz</TableHead>
-                                <TableHead className="text-right py-6">Betrag</TableHead>
+                                <TableHead className="w-28 py-6 print:py-2 print:text-xs print:font-semibold">Datum</TableHead>
+                                <TableHead className="py-6 print:py-2 print:text-xs print:font-semibold">Projekt</TableHead>
+                                <TableHead className="py-6 print:py-2 print:text-xs print:font-semibold">Kunde</TableHead>
+                                <TableHead className="py-6 print:py-2 print:text-xs print:font-semibold">Aktivität</TableHead>
+                                <TableHead className="text-right py-6 print:py-2 print:text-xs print:font-semibold">Kilometer</TableHead>
+                                <TableHead className="text-right py-6 print:py-2 print:text-xs print:font-semibold">Satz</TableHead>
+                                <TableHead className="text-right py-6 print:py-2 print:text-xs print:font-semibold">Betrag</TableHead>
                                 <TableHead className="w-12 print:hidden"></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -359,41 +359,41 @@ export default function TravelOverview() {
                                     
                                     return (
                                         <TableRow key={`${item.type}-${item.id}`} className="hover:bg-slate-50">
-                                            <TableCell className="font-medium text-sm py-6">
+                                            <TableCell className="font-medium text-sm py-6 print:py-1.5 print:text-xs">
                                                 <div className="flex items-center gap-1">
-                                                    <Calendar className="w-3 h-3 text-slate-400" />
+                                                    <Calendar className="w-3 h-3 text-slate-400 print:w-2.5 print:h-2.5" />
                                                     {format(parseISO(item.date), "dd.MM.yy", { locale: de })}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="py-6">
-                                                <div className="flex items-center gap-1 text-sm">
-                                                    <FolderKanban className="w-3 h-3 text-slate-400" />
+                                            <TableCell className="py-6 print:py-1.5">
+                                                <div className="flex items-center gap-1 text-sm print:text-xs">
+                                                    <FolderKanban className="w-3 h-3 text-slate-400 print:w-2.5 print:h-2.5" />
                                                     <span className="break-words">{project?.name || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="py-6">
-                                                <div className="flex items-center gap-1 text-sm">
-                                                    <Building2 className="w-3 h-3 text-slate-400" />
+                                            <TableCell className="py-6 print:py-1.5">
+                                                <div className="flex items-center gap-1 text-sm print:text-xs">
+                                                    <Building2 className="w-3 h-3 text-slate-400 print:w-2.5 print:h-2.5" />
                                                     <span className="break-words">{customer?.company || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-sm text-slate-600 py-6">
+                                            <TableCell className="text-sm text-slate-600 py-6 print:py-1.5 print:text-xs">
                                                 <div className="break-words">{item.title}</div>
                                             </TableCell>
-                                            <TableCell className="text-right py-6">
+                                            <TableCell className="text-right py-6 print:py-1.5">
                                                 <div className="text-right">
-                                                    <Badge variant="secondary" className="font-mono">
+                                                    <Badge variant="secondary" className="font-mono print:text-xs print:py-0">
                                                         {item.distance?.toFixed(1)} km
                                                     </Badge>
-                                                    <div className="text-xs text-slate-400 mt-1">
+                                                    <div className="text-xs text-slate-400 mt-1 print:text-[10px] print:mt-0">
                                                         ({(item.distance / 2).toFixed(1)} km × 2)
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-right py-6 text-xs text-slate-500">
+                                            <TableCell className="text-right py-6 print:py-1.5 text-xs text-slate-500 print:text-[10px]">
                                                 {(rate * 100).toFixed(0)} ct
                                             </TableCell>
-                                            <TableCell className="text-right py-6 font-medium">
+                                            <TableCell className="text-right py-6 print:py-1.5 font-medium print:text-xs">
                                                 {amount.toFixed(2)} €
                                             </TableCell>
                                             <TableCell className="text-right py-6 print:hidden">
