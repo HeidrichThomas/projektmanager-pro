@@ -203,16 +203,16 @@ export default function TravelOverview() {
         clonedElement.style.fontSize = '7px';
         clonedElement.style.lineHeight = '1';
         
-        // Make table ultra compact
+        // Make table compact and consistent
         const table = clonedElement.querySelector('table');
         if (table) {
-            table.style.fontSize = '7px';
-            table.style.lineHeight = '1';
+            table.style.fontSize = '8px';
+            table.style.lineHeight = '1.2';
             const cells = clonedElement.querySelectorAll('th, td');
             cells.forEach(cell => {
-                cell.style.padding = '1px 2px';
-                cell.style.fontSize = '7px';
-                cell.style.lineHeight = '1';
+                cell.style.padding = '3px';
+                cell.style.fontSize = '8px';
+                cell.style.lineHeight = '1.2';
             });
         }
         
@@ -286,8 +286,8 @@ export default function TravelOverview() {
             <CardContent ref={reportRef} className="print:!p-0">
                 <div id="travel-report-content">
                 <div className="mb-4 print:mb-1">
-                    <h2 className="text-xl font-bold text-slate-900 mb-1 print:text-xs print:mb-0 print:font-bold">Fahrtenbericht</h2>
-                    <p className="text-sm text-slate-600 print:text-[8px]">
+                    <h2 className="text-xl font-bold text-slate-900 mb-1 print:text-[10px] print:mb-0 print:font-bold">Fahrtenbericht</h2>
+                    <p className="text-sm text-slate-600 print:text-[8px] print:leading-tight">
                         {selectedMonth === "0" ? `Jahr ${selectedYear}` : 
                          selectedMonth === "Q1" ? `Q1 ${selectedYear}` :
                          selectedMonth === "Q2" ? `Q2 ${selectedYear}` :
@@ -358,14 +358,14 @@ export default function TravelOverview() {
                     </Select>
                 </div>
 
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-4 print:bg-slate-100 print:p-1 print:mb-1 print:rounded print:border print:border-slate-300">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-4 print:bg-slate-100 print:p-2 print:mb-2 print:rounded print:border print:border-slate-300">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <div className="text-sm text-slate-600 mb-1 print:text-[8px] print:mb-0 print:inline print:mr-2">Gesamt:</div>
-                            <div className="text-3xl font-bold text-blue-600 print:text-[10px] print:font-bold print:inline print:mr-2">
+                        <div className="print:flex print:items-center print:gap-2">
+                            <div className="text-sm text-slate-600 mb-1 print:text-[8px] print:mb-0 print:leading-tight">Gesamt:</div>
+                            <div className="text-3xl font-bold text-blue-600 print:text-[8px] print:font-bold print:leading-tight">
                                 {monthlyTotal.toFixed(1)} km
                             </div>
-                            <div className="text-xs text-slate-500 mt-1 print:text-[8px] print:mt-0 print:inline">
+                            <div className="text-xs text-slate-500 mt-1 print:text-[8px] print:mt-0 print:leading-tight">
                                 ({filteredActivities.length} Fahrten, {estimatedDeduction.toFixed(2)} € absetzbar)
                             </div>
                         </div>
@@ -374,16 +374,16 @@ export default function TravelOverview() {
                 </div>
 
                 <div className="border rounded-lg overflow-hidden print:border-slate-400 print:rounded-none">
-                    <Table className="print:!text-[7px]">
+                    <Table className="print:!text-[8px]">
                         <TableHeader>
                             <TableRow className="bg-slate-50 print:bg-slate-200">
-                                <TableHead className="w-28 py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Datum</TableHead>
-                                <TableHead className="py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Projekt</TableHead>
-                                <TableHead className="py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Kunde</TableHead>
-                                <TableHead className="py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Aktivität</TableHead>
-                                <TableHead className="text-right py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">km</TableHead>
-                                <TableHead className="text-right py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Satz</TableHead>
-                                <TableHead className="text-right py-6 print:!py-[2px] print:!px-[2px] print:!text-[7px] print:!font-bold print:!leading-[1]">Betrag</TableHead>
+                                <TableHead className="w-28 py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!font-bold print:!leading-tight">Datum</TableHead>
+                                <TableHead className="py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!font-bold print:!leading-tight">Projekt</TableHead>
+                                <TableHead className="py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!font-bold print:!leading-tight">Kunde</TableHead>
+                                <TableHead className="py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!font-bold print:!leading-tight">Aktivität</TableHead>
+                                <TableHead className="text-right py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!font-bold print:!leading-tight">km</TableHead>
+                                <TableHead className="text-right py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!font-bold print:!leading-tight">Satz</TableHead>
+                                <TableHead className="text-right py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!font-bold print:!leading-tight">Betrag</TableHead>
                                 <TableHead className="w-12 print:hidden"></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -399,33 +399,30 @@ export default function TravelOverview() {
                                     
                                     return (
                                         <TableRow key={`${item.type}-${item.id}`} className="hover:bg-slate-50 print:hover:bg-transparent">
-                                            <TableCell className="font-medium text-sm py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
+                                            <TableCell className="font-medium text-sm py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
                                                 <Calendar className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
                                                 {format(parseISO(item.date), "dd.MM.yy", { locale: de })}
                                             </TableCell>
-                                            <TableCell className="py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
+                                            <TableCell className="py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
                                                 <FolderKanban className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
-                                                <span className="break-words text-sm print:text-[7px]">{project?.name || 'N/A'}</span>
+                                                <span className="break-words text-sm print:text-[8px]">{project?.name || 'N/A'}</span>
                                             </TableCell>
-                                            <TableCell className="py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
+                                            <TableCell className="py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
                                                 <Building2 className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
-                                                <span className="break-words text-sm print:text-[7px]">{customer?.company || 'N/A'}</span>
+                                                <span className="break-words text-sm print:text-[8px]">{customer?.company || 'N/A'}</span>
                                             </TableCell>
-                                            <TableCell className="text-sm text-slate-600 py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
+                                            <TableCell className="text-sm text-slate-600 py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
                                                 <div className="break-words">{item.title}</div>
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[1px] print:!px-[2px] print:!text-[7px] print:!leading-[1]">
-                                                <Badge variant="secondary" className="font-mono print:border-0 print:bg-transparent print:p-0 print:text-[7px] print:font-normal">
+                                            <TableCell className="text-right py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight">
+                                                <Badge variant="secondary" className="font-mono print:border-0 print:bg-transparent print:p-0 print:text-[8px] print:font-normal">
                                                     {item.distance?.toFixed(1)}
                                                 </Badge>
-                                                <div className="text-xs text-slate-400 mt-1 print:hidden">
-                                                    ({(item.distance / 2).toFixed(1)} km × 2)
-                                                </div>
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[1px] print:!px-[2px] text-xs text-slate-500 print:!text-[7px] print:!leading-[1]">
+                                            <TableCell className="text-right py-6 print:!py-[3px] print:!px-[3px] text-xs text-slate-500 print:!text-[8px] print:!leading-tight">
                                                 {(rate * 100).toFixed(0)}
                                             </TableCell>
-                                            <TableCell className="text-right py-6 print:!py-[1px] print:!px-[2px] font-medium print:!text-[7px] print:!leading-[1] print:!font-semibold">
+                                            <TableCell className="text-right py-6 print:!py-[3px] print:!px-[3px] font-medium print:!text-[8px] print:!leading-tight print:!font-semibold">
                                                 {amount.toFixed(2)}
                                             </TableCell>
                                             <TableCell className="text-right py-6 print:hidden">
