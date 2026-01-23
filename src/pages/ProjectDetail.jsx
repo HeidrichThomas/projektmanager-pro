@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     ArrowLeft, Building2, Calendar, FolderKanban, 
-    Plus, Phone, FileText, CheckSquare, Pencil, Trash2, User, Clock, Euro
+    Plus, Phone, FileText, CheckSquare, Pencil, Trash2, User, Clock, Euro, Navigation
 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -342,6 +342,18 @@ export default function ProjectDetail() {
                         <Progress value={project.progress || 0} className="h-3" />
                         {project.description && (
                             <p className="mt-4 pt-4 border-t text-slate-600">{project.description}</p>
+                        )}
+                        {activities.some(a => a.own_travel && a.travel_distance_km) && (
+                            <div className="mt-4 pt-4 border-t flex items-center gap-2 text-slate-700">
+                                <Navigation className="w-4 h-4" />
+                                <span className="font-medium">Gesamtkilometer (eigene Fahrten):</span>
+                                <span className="text-lg font-bold text-blue-600">
+                                    {activities
+                                        .filter(a => a.own_travel && a.travel_distance_km)
+                                        .reduce((sum, a) => sum + (a.travel_distance_km || 0), 0)
+                                        .toFixed(1)} km
+                                </span>
+                            </div>
                         )}
                     </CardContent>
                 </Card>

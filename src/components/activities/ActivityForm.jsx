@@ -31,6 +31,7 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
         file_urls: [],
         file_names: [],
         requires_travel: false,
+        own_travel: false,
         start_location: "Gartenstraße 17, 89257 Illertissen",
         destination_address: "",
         travel_distance_km: null
@@ -57,6 +58,7 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                 ...activity,
                 activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16),
                 requires_travel: activity.requires_travel || false,
+                own_travel: activity.own_travel || false,
                 start_location: activity.start_location || "Gartenstraße 17, 89257 Illertissen",
                 destination_address: activity.destination_address || "",
                 travel_distance_km: activity.travel_distance_km || null
@@ -75,6 +77,7 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                 file_urls: [],
                 file_names: [],
                 requires_travel: false,
+                own_travel: false,
                 start_location: "Gartenstraße 17, 89257 Illertissen",
                 destination_address: "",
                 travel_distance_km: null
@@ -328,16 +331,30 @@ Beispiel: Wenn die Hinfahrt 25,3 km beträgt, gib 25.3 zurück (nicht 50.6)`,
 
                     {(formData.type === 'besuch' || formData.type === 'meeting') && (
                         <div className="border border-blue-200 bg-blue-50 rounded-lg p-4 space-y-4">
-                            <div className="flex items-center gap-2">
-                                <Checkbox
-                                    id="requires_travel"
-                                    checked={formData.requires_travel}
-                                    onCheckedChange={(checked) => setFormData({...formData, requires_travel: checked})}
-                                />
-                                <Label htmlFor="requires_travel" className="text-slate-700 font-medium cursor-pointer">
-                                    <MapPin className="w-4 h-4 inline mr-1" />
-                                    Fahrt erforderlich (außer Haus)
-                                </Label>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id="requires_travel"
+                                        checked={formData.requires_travel}
+                                        onCheckedChange={(checked) => setFormData({...formData, requires_travel: checked})}
+                                    />
+                                    <Label htmlFor="requires_travel" className="text-slate-700 font-medium cursor-pointer">
+                                        <MapPin className="w-4 h-4 inline mr-1" />
+                                        Fahrt erforderlich (außer Haus)
+                                    </Label>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id="own_travel"
+                                        checked={formData.own_travel}
+                                        onCheckedChange={(checked) => setFormData({...formData, own_travel: checked})}
+                                    />
+                                    <Label htmlFor="own_travel" className="text-slate-700 font-medium cursor-pointer">
+                                        <Navigation className="w-4 h-4 inline mr-1" />
+                                        Eigene Fahrt (selbst gefahren)
+                                    </Label>
+                                </div>
                             </div>
 
                             {formData.requires_travel && (
