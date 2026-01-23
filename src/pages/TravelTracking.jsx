@@ -81,11 +81,13 @@ export default function TravelTracking() {
         new Date(b.date) - new Date(a.date)
     );
 
-    // Filter by selected month
+    // Filter by selected year and month
     const filteredActivities = allTravelData.filter(item => {
         if (!item.date) return false;
         const date = parseISO(item.date);
-        return date.getFullYear() === selectedYear && date.getMonth() + 1 === selectedMonth;
+        const yearMatch = date.getFullYear() === selectedYear;
+        const monthMatch = selectedMonth === 0 || date.getMonth() + 1 === selectedMonth;
+        return yearMatch && monthMatch;
     });
 
     // Calculate totals
@@ -234,6 +236,7 @@ export default function TravelTracking() {
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="0">Ganzes Jahr</SelectItem>
                             {months.map(month => (
                                 <SelectItem key={month.value} value={String(month.value)}>
                                     {month.label}
@@ -256,7 +259,9 @@ export default function TravelTracking() {
                 <div className="grid md:grid-cols-3 gap-6 mb-8">
                     <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-200">
                         <CardHeader>
-                            <CardTitle className="text-sm font-medium text-slate-600">Monat ({months.find(m => m.value === selectedMonth)?.label})</CardTitle>
+                            <CardTitle className="text-sm font-medium text-slate-600">
+                                {selectedMonth === 0 ? `Jahr ${selectedYear}` : `${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-blue-600">
@@ -284,7 +289,9 @@ export default function TravelTracking() {
 
                     <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-200">
                         <CardHeader>
-                            <CardTitle className="text-sm font-medium text-slate-600">Steuerlich absetzbar</CardTitle>
+                            <CardTitle className="text-sm font-medium text-slate-600">
+                                Steuerlich absetzbar {selectedMonth === 0 ? '' : '(Monat)'}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-emerald-600">
