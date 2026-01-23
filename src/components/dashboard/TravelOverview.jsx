@@ -192,44 +192,57 @@ export default function TravelOverview() {
         const element = document.getElementById('travel-report-content');
         if (!element) return;
         
-        const canvas = await html2canvas(element, {
-            scale: 3,
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#ffffff',
-            width: element.scrollWidth,
-            height: element.scrollHeight
-        });
+        // Clone the element to avoid modifying the original
+        const clonedElement = element.cloneNode(true);
+        clonedElement.style.position = 'absolute';
+        clonedElement.style.left = '-9999px';
+        clonedElement.style.top = '0';
+        clonedElement.style.width = '1200px';
+        clonedElement.style.padding = '20px';
+        clonedElement.style.backgroundColor = '#ffffff';
+        document.body.appendChild(clonedElement);
         
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("l", "mm", "a4");
-        
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pdfWidth - 20;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        let heightLeft = imgHeight;
-        let position = 10;
-        
-        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 20);
-        
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight + 10;
-            pdf.addPage();
-            pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-            heightLeft -= (pdfHeight - 20);
+        try {
+            const canvas = await html2canvas(clonedElement, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                windowWidth: 1200,
+                windowHeight: clonedElement.scrollHeight
+            });
+            
+            const imgData = canvas.toDataURL("image/png", 1.0);
+            const pdf = new jsPDF("l", "mm", "a4");
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const imgWidth = pdfWidth - 30;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            let position = 15;
+            pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight);
+            
+            let heightLeft = imgHeight - (pdfHeight - 30);
+            
+            while (heightLeft > 0) {
+                pdf.addPage();
+                position = -(imgHeight - heightLeft) + 15;
+                pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight);
+                heightLeft -= (pdfHeight - 30);
+            }
+            
+            const periodLabel = selectedMonth === "0" ? `Jahr_${selectedYear}` :
+                               selectedMonth === "Q1" ? `Q1_${selectedYear}` :
+                               selectedMonth === "Q2" ? `Q2_${selectedYear}` :
+                               selectedMonth === "Q3" ? `Q3_${selectedYear}` :
+                               selectedMonth === "Q4" ? `Q4_${selectedYear}` :
+                               `${months.find(m => m.value === parseInt(selectedMonth))?.label}_${selectedYear}`;
+            
+            pdf.save(`Fahrtenbericht_${periodLabel}.pdf`);
+        } finally {
+            document.body.removeChild(clonedElement);
         }
-        
-        const periodLabel = selectedMonth === "0" ? `Jahr_${selectedYear}` :
-                           selectedMonth === "Q1" ? `Q1_${selectedYear}` :
-                           selectedMonth === "Q2" ? `Q2_${selectedYear}` :
-                           selectedMonth === "Q3" ? `Q3_${selectedYear}` :
-                           selectedMonth === "Q4" ? `Q4_${selectedYear}` :
-                           `${months.find(m => m.value === parseInt(selectedMonth))?.label}_${selectedYear}`;
-        
-        pdf.save(`Fahrtenbericht_${periodLabel}.pdf`);
     };
 
     return (
