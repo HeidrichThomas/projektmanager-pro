@@ -205,6 +205,12 @@ export default function TravelOverview() {
             btn.style.display = 'none';
         });
         
+        // Remove edit and delete buttons
+        const actionButtons = clonedElement.querySelectorAll('button');
+        actionButtons.forEach(btn => {
+            btn.style.display = 'none';
+        });
+        
         // Make table compact and consistent
         const table = clonedElement.querySelector('table');
         if (table) {
