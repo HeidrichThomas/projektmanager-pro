@@ -199,6 +199,12 @@ export default function TravelOverview() {
         clonedElement.style.fontSize = '7px';
         clonedElement.style.lineHeight = '1';
         
+        // Remove selects and replace with text
+        const selectContainers = clonedElement.querySelectorAll('button[role="combobox"]');
+        selectContainers.forEach(btn => {
+            btn.style.display = 'none';
+        });
+        
         // Make table compact and consistent
         const table = clonedElement.querySelector('table');
         if (table) {
