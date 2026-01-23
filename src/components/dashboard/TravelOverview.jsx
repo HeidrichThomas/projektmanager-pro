@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Navigation, Calendar, Building2, FolderKanban, TrendingUp, Printer, FileDown, Plus, Trash2, Edit2 } from "lucide-react";
+import { Navigation, Calendar, Building2, FolderKanban, TrendingUp, FileDown, Plus, Trash2, Edit2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
 import jsPDF from "jspdf";
@@ -184,10 +184,6 @@ export default function TravelOverview() {
 
     const years = [currentYear - 1, currentYear, currentYear + 1];
 
-    const handlePrint = () => {
-        window.print();
-    };
-
     const handleExportPDF = async () => {
         const element = document.getElementById('travel-report-content');
         if (!element) return;
@@ -210,9 +206,11 @@ export default function TravelOverview() {
             table.style.lineHeight = '1.2';
             const cells = clonedElement.querySelectorAll('th, td');
             cells.forEach(cell => {
-                cell.style.padding = '3px';
+                cell.style.padding = '4px 5px';
                 cell.style.fontSize = '8px';
-                cell.style.lineHeight = '1.2';
+                cell.style.lineHeight = '1.3';
+                cell.style.verticalAlign = 'middle';
+                cell.style.whiteSpace = 'normal';
             });
         }
         
@@ -271,10 +269,6 @@ export default function TravelOverview() {
                         <Button onClick={() => setShowManualEntryForm(true)} size="sm" className="print:hidden">
                             <Plus className="w-4 h-4 mr-2" />
                             Manuelle Fahrt
-                        </Button>
-                        <Button onClick={handlePrint} variant="outline" size="sm" className="print:hidden">
-                            <Printer className="w-4 h-4 mr-2" />
-                            Drucken
                         </Button>
                         <Button onClick={handleExportPDF} variant="outline" size="sm" className="print:hidden">
                             <FileDown className="w-4 h-4 mr-2" />
