@@ -31,6 +31,11 @@ export default function TravelOverview() {
         queryFn: () => base44.entities.Activity.list()
     });
 
+    const { data: themeActivities = [] } = useQuery({
+        queryKey: ['themeActivities'],
+        queryFn: () => base44.entities.ThemeActivity.list()
+    });
+
     const { data: manualEntries = [] } = useQuery({
         queryKey: ['manualTravelEntries'],
         queryFn: () => base44.entities.ManualTravelEntry.list()
@@ -39,6 +44,11 @@ export default function TravelOverview() {
     const { data: projects = [] } = useQuery({
         queryKey: ['projects'],
         queryFn: () => base44.entities.Project.list()
+    });
+
+    const { data: themes = [] } = useQuery({
+        queryKey: ['themes'],
+        queryFn: () => base44.entities.Theme.list()
     });
 
     const { data: customers = [] } = useQuery({
@@ -78,10 +88,17 @@ export default function TravelOverview() {
     };
 
     const travelActivities = useMemo(() => {
-        return activities
+        const projectActivities = activities
             .filter(a => a.requires_travel && a.travel_distance_km)
+            .map(a => ({ ...a, source: 'project' }));
+        
+        const businessActivities = themeActivities
+            .filter(a => a.requires_travel && a.travel_distance_km)
+            .map(a => ({ ...a, source: 'theme' }));
+        
+        return [...projectActivities, ...businessActivities]
             .sort((a, b) => new Date(b.activity_date) - new Date(a.activity_date));
-    }, [activities]);
+    }, [activities, themeActivities]);
 
     const allTravelData = useMemo(() => {
         const activities = travelActivities.map(a => ({
@@ -411,7 +428,11 @@ export default function TravelOverview() {
                                             </TableCell>
                                             <TableCell className="text-sm py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
                                                <FolderKanban className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
-                                               <span className="break-words">{project?.name || 'N/A'}</span>
+                                               <span className="break-words">
+                                                   {item.source === 'theme' 
+                                                       ? themes.find(t => t.id === item.theme_id)?.name || 'Business'
+                                                       : project?.name || 'N/A'}
+                                               </span>
                                             </TableCell>
                                             <TableCell className="text-sm py-6 print:!py-[3px] print:!px-[3px] print:!text-[8px] print:!leading-tight print:!font-normal">
                                                <Building2 className="w-3 h-3 text-slate-400 print:hidden inline mr-1" />
