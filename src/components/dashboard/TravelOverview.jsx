@@ -126,7 +126,11 @@ export default function TravelOverview() {
             const date = parseISO(item.date);
             const month = date.getMonth() + 1;
             const yearMatch = date.getFullYear() === selectedYear;
-            const projectMatch = filterProject === "all" || item.project_id === filterProject;
+            
+            // Skip project filter for theme activities
+            const projectMatch = filterProject === "all" || 
+                                 item.source === 'theme' || 
+                                 item.project_id === filterProject;
             
             let periodMatch;
             if (selectedMonth === "0") {
@@ -147,9 +151,12 @@ export default function TravelOverview() {
             if (filterCustomer !== "all") {
                 if (item.type === 'manual' && item.customer_id) {
                     customerMatch = item.customer_id === filterCustomer;
-                } else if (item.type === 'activity') {
+                } else if (item.type === 'activity' && item.source === 'project') {
                     const project = projects.find(p => p.id === item.project_id);
                     customerMatch = project && project.customer_id === filterCustomer;
+                } else if (item.source === 'theme') {
+                    // Theme activities: check if company_id matches
+                    customerMatch = item.company_id === filterCustomer;
                 }
             }
             
@@ -414,9 +421,16 @@ export default function TravelOverview() {
                             {filteredActivities.length > 0 ? (
                                 filteredActivities.map(item => {
                                     const project = item.project_id ? getProject(item.project_id) : null;
-                                    const customer = item.type === 'manual' && item.customer_id 
-                                        ? getCustomer(item.customer_id)
-                                        : project ? getCustomer(project.customer_id) : null;
+                                    
+                                    let customer = null;
+                                    if (item.type === 'manual' && item.customer_id) {
+                                        customer = getCustomer(item.customer_id);
+                                    } else if (item.source === 'theme' && item.company_id) {
+                                        customer = getCustomer(item.company_id);
+                                    } else if (project) {
+                                        customer = getCustomer(project.customer_id);
+                                    }
+                                    
                                     const rate = calculateTaxRate(item.date);
                                     const amount = item.distance * rate;
                                     
