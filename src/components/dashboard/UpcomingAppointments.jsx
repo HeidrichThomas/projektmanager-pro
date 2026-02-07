@@ -20,6 +20,16 @@ export default function UpcomingAppointments() {
         queryFn: () => base44.entities.PrivateAppointment.list()
     });
 
+    const { data: activities = [] } = useQuery({
+        queryKey: ['activities'],
+        queryFn: () => base44.entities.Activity.list()
+    });
+
+    const { data: themeActivities = [] } = useQuery({
+        queryKey: ['themeActivities'],
+        queryFn: () => base44.entities.ThemeActivity.list()
+    });
+
     const { data: themes = [] } = useQuery({
         queryKey: ['themes'],
         queryFn: () => base44.entities.Theme.list()
@@ -28,6 +38,11 @@ export default function UpcomingAppointments() {
     const { data: privateThemes = [] } = useQuery({
         queryKey: ['privateThemes'],
         queryFn: () => base44.entities.PrivateTheme.list()
+    });
+
+    const { data: projects = [] } = useQuery({
+        queryKey: ['projects'],
+        queryFn: () => base44.entities.Project.list()
     });
 
     const upcomingAppointments = React.useMemo(() => {
@@ -42,6 +57,7 @@ export default function UpcomingAppointments() {
             .map(a => ({
                 ...a,
                 type: 'theme',
+                start_date: a.start_date,
                 theme: themes.find(t => t.id === a.theme_id)
             }));
 
@@ -53,13 +69,42 @@ export default function UpcomingAppointments() {
             .map(a => ({
                 ...a,
                 type: 'private',
+                start_date: a.start_date,
                 theme: privateThemes.find(t => t.id === a.theme_id)
             }));
 
-        return [...themeAppts, ...privateAppts]
+        const projectAppts = activities
+            .filter(a => a.appointment_date)
+            .filter(a => {
+                const appointmentDate = parseISO(a.appointment_date);
+                return isFuture(appointmentDate) && appointmentDate <= next30Days;
+            })
+            .map(a => ({
+                ...a,
+                type: 'project',
+                start_date: a.appointment_date,
+                title: a.title,
+                project: projects.find(p => p.id === a.project_id)
+            }));
+
+        const businessAppts = themeActivities
+            .filter(a => a.appointment_date)
+            .filter(a => {
+                const appointmentDate = parseISO(a.appointment_date);
+                return isFuture(appointmentDate) && appointmentDate <= next30Days;
+            })
+            .map(a => ({
+                ...a,
+                type: 'business',
+                start_date: a.appointment_date,
+                title: a.title,
+                theme: themes.find(t => t.id === a.theme_id)
+            }));
+
+        return [...themeAppts, ...privateAppts, ...projectAppts, ...businessAppts]
             .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
             .slice(0, 8);
-    }, [themeAppointments, privateAppointments, themes, privateThemes]);
+    }, [themeAppointments, privateAppointments, activities, themeActivities, themes, privateThemes, projects]);
 
     return (
         <Card className="shadow-sm">
@@ -73,9 +118,25 @@ export default function UpcomingAppointments() {
                 {upcomingAppointments.length > 0 ? (
                     upcomingAppointments.map((appt) => {
                         const startDate = parseISO(appt.start_date);
-                        const linkUrl = appt.type === 'theme' 
-                            ? createPageUrl("ThemeDetail") + `?id=${appt.theme_id}`
-                            : createPageUrl("PrivateThemeDetail") + `?id=${appt.theme_id}`;
+                        
+                        let linkUrl, contextLabel, contextIcon;
+                        if (appt.type === 'theme') {
+                            linkUrl = createPageUrl("ThemeDetail") + `?id=${appt.theme_id}`;
+                            contextLabel = appt.theme?.name;
+                            contextIcon = '🏢';
+                        } else if (appt.type === 'private') {
+                            linkUrl = createPageUrl("PrivateThemeDetail") + `?id=${appt.theme_id}`;
+                            contextLabel = appt.theme?.name;
+                            contextIcon = '👤';
+                        } else if (appt.type === 'project') {
+                            linkUrl = createPageUrl("ProjectDetail") + `?id=${appt.project_id}`;
+                            contextLabel = appt.project?.name;
+                            contextIcon = '📁';
+                        } else if (appt.type === 'business') {
+                            linkUrl = createPageUrl("ThemeDetail") + `?id=${appt.theme_id}`;
+                            contextLabel = appt.theme?.name;
+                            contextIcon = '💼';
+                        }
                         
                         return (
                             <Link key={`${appt.type}-${appt.id}`} to={linkUrl}>
@@ -85,10 +146,9 @@ export default function UpcomingAppointments() {
                                             <h4 className="font-semibold text-slate-900 group-hover:text-purple-600 transition-colors mb-1">
                                                 {appt.title}
                                             </h4>
-                                            {appt.theme && (
+                                            {contextLabel && (
                                                 <p className="text-xs text-slate-500 mb-2">
-                                                    {appt.type === 'theme' ? '🏢 ' : '👤 '}
-                                                    {appt.theme.name}
+                                                    {contextIcon} {contextLabel}
                                                 </p>
                                             )}
                                         </div>
