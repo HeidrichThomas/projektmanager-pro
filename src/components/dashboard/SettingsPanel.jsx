@@ -13,7 +13,8 @@ export default function SettingsPanel({ open, onClose }) {
         travelRate2026: 0.38,
         defaultStartLocation: "Gartenstraße 17, 89257 Illertissen",
         cutoffDate: "2026-01-01",
-        theme: "light"
+        theme: "light",
+        displayStyle: "modern"
     });
 
     useEffect(() => {
@@ -77,6 +78,23 @@ export default function SettingsPanel({ open, onClose }) {
                                         Dunkler Modus
                                     </div>
                                 </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="displayStyle">Anzeigeart</Label>
+                        <Select
+                            value={settings.displayStyle}
+                            onValueChange={(value) => setSettings({...settings, displayStyle: value})}
+                        >
+                            <SelectTrigger id="displayStyle">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="classic">Klassisch</SelectItem>
+                                <SelectItem value="modern">Modern</SelectItem>
+                                <SelectItem value="windows">Windows-Stil</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
