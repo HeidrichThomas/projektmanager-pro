@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Loader2, Navigation } from "lucide-react";
 import FileDropzone from "@/components/ui/file-dropzone";
+import RouteSelector from "@/components/travel/RouteSelector";
 
 const activityTypes = {
     notiz: { label: "Notiz", icon: FileText, color: "text-slate-600" },
@@ -44,6 +45,7 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
     const [showAddContact, setShowAddContact] = useState(false);
     const [newContact, setNewContact] = useState({ name: "", position: "", phone: "", email: "" });
     const [calculatingDistance, setCalculatingDistance] = useState(false);
+    const [showRouteSelector, setShowRouteSelector] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -449,15 +451,11 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                                             <Button
                                                 type="button"
                                                 variant="outline"
-                                                onClick={handleCalculateDistance}
-                                                disabled={calculatingDistance || !formData.start_location || !formData.destination_address}
+                                                onClick={() => setShowRouteSelector(true)}
+                                                disabled={!formData.start_location || !formData.destination_address}
                                             >
-                                                {calculatingDistance ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    <Navigation className="w-4 h-4" />
-                                                )}
-                                                <span className="ml-2">Berechnen</span>
+                                                <Navigation className="w-4 h-4" />
+                                                <span className="ml-2">Routen anzeigen</span>
                                             </Button>
                                         </div>
                                         <p className="text-xs text-slate-500 mt-1">
@@ -532,6 +530,17 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
                     </div>
                 </form>
             </DialogContent>
+
+            <RouteSelector
+                open={showRouteSelector}
+                onClose={() => setShowRouteSelector(false)}
+                startLocation={formData.start_location}
+                destination={formData.destination_address}
+                onSelectRoute={(routeData) => {
+                    setFormData({...formData, travel_distance_km: routeData.distance_km});
+                    toast.success(`Route ausgewählt: ${routeData.distance_km} km (Hin & Zurück)`);
+                }}
+            />
         </Dialog>
     );
 }
