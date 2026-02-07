@@ -16,6 +16,8 @@ import { de } from "date-fns/locale";
 import ActiveTimers from "@/components/dashboard/ActiveTimers";
 import DateTimeWeather from "@/components/dashboard/DateTimeWeather";
 import TravelOverview from "@/components/dashboard/TravelOverview";
+import UpcomingAppointments from "@/components/dashboard/UpcomingAppointments";
+import SettingsPanel from "@/components/dashboard/SettingsPanel";
 
 export default function Dashboard() {
     const { data: customers = [], isLoading: loadingCustomers } = useQuery({
@@ -236,6 +238,12 @@ export default function Dashboard() {
                             )}
                         </CardContent>
                     </Card>
+                </div>
+
+                {/* Upcoming Appointments */}
+                <div className="mt-8 grid lg:grid-cols-2 gap-8 print:hidden">
+                    <UpcomingAppointments />
+                    <SettingsPanel />
                 </div>
 
                 {/* Travel Overview */}
