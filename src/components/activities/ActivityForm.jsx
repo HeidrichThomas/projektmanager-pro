@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Phone, Mail, Users, FileText, StickyNote, Upload, Save, X, Loader2, Handshake, Plus, Trash2, MapPin, Navigation } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import FileDropzone from "@/components/ui/file-dropzone";
+import RouteSelector from "@/components/travel/RouteSelector";
 
 const typeConfig = {
     telefonat: { label: "Telefonat", icon: Phone, color: "text-green-600" },
@@ -42,6 +43,7 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
     const [contactPersonsList, setContactPersonsList] = useState([]);
     const [calculatingDistance, setCalculatingDistance] = useState(false);
     const [project, setProject] = useState(null);
+    const [showRouteSelector, setShowRouteSelector] = useState(false);
 
     const { data: customers = [] } = useQuery({
         queryKey: ['customers'],
@@ -432,16 +434,12 @@ Beispiel: Wenn die Hinfahrt 25,3 km beträgt, gib 25.3 zurück (nicht 50.6)`,
                                             />
                                             <Button
                                                 type="button"
-                                                onClick={calculateDistance}
-                                                disabled={calculatingDistance || !formData.start_location || !formData.destination_address}
+                                                onClick={() => setShowRouteSelector(true)}
+                                                disabled={!formData.start_location || !formData.destination_address}
                                                 variant="outline"
                                             >
-                                                {calculatingDistance ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                                ) : (
-                                                    <Navigation className="w-4 h-4 mr-2" />
-                                                )}
-                                                Berechnen
+                                                <Navigation className="w-4 h-4 mr-2" />
+                                                Routen anzeigen
                                             </Button>
                                         </div>
                                         <p className="text-xs text-slate-500 mt-1">
@@ -517,6 +515,16 @@ Beispiel: Wenn die Hinfahrt 25,3 km beträgt, gib 25.3 zurück (nicht 50.6)`,
                     </div>
                 </form>
             </DialogContent>
+
+            <RouteSelector
+                open={showRouteSelector}
+                onClose={() => setShowRouteSelector(false)}
+                startLocation={formData.start_location}
+                destination={formData.destination_address}
+                onSelectRoute={(routeData) => {
+                    setFormData({...formData, travel_distance_km: routeData.distance_km});
+                }}
+            />
         </Dialog>
     );
 }
