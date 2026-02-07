@@ -21,12 +21,13 @@ export default function SettingsPanel({ open, onClose }) {
         const saved = localStorage.getItem('app-settings');
         if (saved) {
             try {
-                setSettings(JSON.parse(saved));
+                const loadedSettings = JSON.parse(saved);
+                setSettings(loadedSettings);
             } catch (e) {
                 console.error('Failed to load settings', e);
             }
         }
-    }, []);
+    }, [open]);
 
     const handleSave = () => {
         localStorage.setItem('app-settings', JSON.stringify(settings));
@@ -38,8 +39,16 @@ export default function SettingsPanel({ open, onClose }) {
             document.documentElement.classList.remove('dark');
         }
         
-        toast.success('Einstellungen gespeichert');
-        onClose();
+        // Apply display style
+        document.documentElement.classList.remove('style-classic', 'style-modern', 'style-windows');
+        document.documentElement.classList.add(`style-${settings.displayStyle}`);
+        
+        toast.success('Einstellungen gespeichert - Seite wird aktualisiert...');
+        
+        // Reload page to apply all styles
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
     };
 
     return (

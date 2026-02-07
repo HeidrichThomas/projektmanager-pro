@@ -35,6 +35,31 @@ export default function Layout({ children, currentPageName }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [showSearchResults, setShowSearchResults] = useState(false);
 
+    // Load and apply settings on mount
+    useEffect(() => {
+        const saved = localStorage.getItem('app-settings');
+        if (saved) {
+            try {
+                const settings = JSON.parse(saved);
+                
+                // Apply theme
+                if (settings.theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                
+                // Apply display style
+                document.documentElement.classList.remove('style-classic', 'style-modern', 'style-windows');
+                if (settings.displayStyle) {
+                    document.documentElement.classList.add(`style-${settings.displayStyle}`);
+                }
+            } catch (e) {
+                console.error('Failed to load settings', e);
+            }
+        }
+    }, []);
+
     const { data: customers = [] } = useQuery({
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
