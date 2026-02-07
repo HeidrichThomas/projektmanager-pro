@@ -146,6 +146,16 @@ export default function UpcomingAppointments() {
                                             <h4 className="font-semibold text-slate-900 group-hover:text-purple-600 transition-colors mb-1">
                                                 {appt.title}
                                             </h4>
+                                            {appt.description && (
+                                                <p className="text-sm text-slate-600 mb-2 line-clamp-2">
+                                                    {appt.description}
+                                                </p>
+                                            )}
+                                            {appt.content && !appt.description && (
+                                                <p className="text-sm text-slate-600 mb-2 line-clamp-2">
+                                                    {appt.content}
+                                                </p>
+                                            )}
                                             {contextLabel && (
                                                 <p className="text-xs text-slate-500 mb-2">
                                                     {contextIcon} {contextLabel}
