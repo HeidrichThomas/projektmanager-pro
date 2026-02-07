@@ -28,6 +28,7 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
         content: "",
         contact_person: "",
         activity_date: new Date().toISOString().slice(0, 16),
+        appointment_date: "",
         file_urls: [],
         file_names: [],
         requires_travel: false,
@@ -57,6 +58,7 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
             setFormData({
                 ...activity,
                 activity_date: activity.activity_date ? activity.activity_date.slice(0, 16) : new Date().toISOString().slice(0, 16),
+                appointment_date: activity.appointment_date ? activity.appointment_date.slice(0, 16) : "",
                 requires_travel: activity.requires_travel || false,
                 own_travel: activity.own_travel || false,
                 start_location: activity.start_location || "Gartenstraße 17, 89257 Illertissen",
@@ -74,6 +76,7 @@ export default function ActivityForm({ open, onClose, onSave, activity, projectI
                 content: "",
                 contact_person: "",
                 activity_date: new Date().toISOString().slice(0, 16),
+                appointment_date: "",
                 file_urls: [],
                 file_names: [],
                 requires_travel: false,
@@ -327,6 +330,19 @@ Beispiel: Wenn die Hinfahrt 25,3 km beträgt, gib 25.3 zurück (nicht 50.6)`,
                             onChange={(e) => setFormData({...formData, activity_date: e.target.value})}
                             className="mt-1.5"
                         />
+                    </div>
+
+                    <div>
+                        <Label className="text-slate-700 font-medium">Zukünftiger Termin (optional)</Label>
+                        <Input
+                            type="datetime-local"
+                            value={formData.appointment_date}
+                            onChange={(e) => setFormData({...formData, appointment_date: e.target.value})}
+                            className="mt-1.5"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">
+                            Für geplante Folgetermine oder Meetings
+                        </p>
                     </div>
 
                     {(formData.type === 'besuch' || formData.type === 'meeting') && (
