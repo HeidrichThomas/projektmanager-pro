@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     Building2, FolderKanban, CheckSquare, Calendar, 
-    ArrowRight, Clock, AlertCircle, TrendingUp
+    ArrowRight, Clock, AlertCircle, TrendingUp, Settings
 } from "lucide-react";
 import { format, isToday, isTomorrow, isPast } from "date-fns";
 import { de } from "date-fns/locale";
@@ -18,8 +18,10 @@ import DateTimeWeather from "@/components/dashboard/DateTimeWeather";
 import TravelOverview from "@/components/dashboard/TravelOverview";
 import UpcomingAppointments from "@/components/dashboard/UpcomingAppointments";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
+    const [showSettings, setShowSettings] = React.useState(false);
     const { data: customers = [], isLoading: loadingCustomers } = useQuery({
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
@@ -121,6 +123,11 @@ export default function Dashboard() {
                             </Card>
                         </Link>
                     ))}
+                </div>
+
+                {/* Upcoming Appointments - moved up */}
+                <div className="mb-8 print:hidden">
+                    <UpcomingAppointments />
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-8 print:hidden">
@@ -240,16 +247,25 @@ export default function Dashboard() {
                     </Card>
                 </div>
 
-                {/* Upcoming Appointments */}
-                <div className="mt-8 grid lg:grid-cols-2 gap-8 print:hidden">
-                    <UpcomingAppointments />
-                    <SettingsPanel />
-                </div>
-
                 {/* Travel Overview */}
                 <div className="mt-8">
                     <TravelOverview />
                 </div>
+
+                {/* Settings Button - bottom right */}
+                <div className="fixed bottom-8 right-8 print:hidden">
+                    <Button
+                        onClick={() => setShowSettings(true)}
+                        size="lg"
+                        className="rounded-full shadow-lg bg-slate-800 hover:bg-slate-900"
+                    >
+                        <Settings className="w-5 h-5 mr-2" />
+                        Einstellungen
+                    </Button>
+                </div>
+
+                {/* Settings Dialog */}
+                <SettingsPanel open={showSettings} onClose={() => setShowSettings(false)} />
             </div>
         </div>
     );
