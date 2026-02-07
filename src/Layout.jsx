@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
     LayoutDashboard, Building2, FolderKanban, Database,
-    Menu, ChevronRight, CheckCircle2, Lightbulb, Search, X, User, Layers, Navigation
+    Menu, ChevronRight, CheckCircle2, Lightbulb, Search, X, User, Layers, Navigation, Settings
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
 import MiniActivityCalendar from "@/components/layout/MiniActivityCalendar";
+import SettingsPanel from "@/components/dashboard/SettingsPanel";
 
 const navigation = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -34,6 +35,7 @@ export default function Layout({ children, currentPageName }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [showSearchResults, setShowSearchResults] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
 
     // Load and apply settings on mount
     useEffect(() => {
@@ -260,8 +262,25 @@ export default function Layout({ children, currentPageName }) {
 
             {/* Main Content */}
             <main className="lg:pl-72">
+                <div className="sticky top-0 z-30 bg-white border-b border-slate-200 print:hidden">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+                        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+                        <Button
+                            onClick={() => setShowSettings(true)}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                        >
+                            <Settings className="w-4 h-4" />
+                            Einstellungen
+                        </Button>
+                    </div>
+                </div>
                 {children}
             </main>
+
+            {/* Settings Dialog */}
+            <SettingsPanel open={showSettings} onClose={() => setShowSettings(false)} />
 
             {/* Search Results Dialog */}
             <Dialog open={showSearchResults} onOpenChange={setShowSearchResults}>
