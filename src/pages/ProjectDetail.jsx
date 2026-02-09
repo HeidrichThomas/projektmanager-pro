@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     ArrowLeft, Building2, Calendar, FolderKanban, 
-    Plus, Phone, FileText, CheckSquare, Pencil, Trash2, User, Clock, Euro, Navigation
+    Plus, Phone, FileText, CheckSquare, Pencil, Trash2, User, Clock, Euro, Navigation, Download
 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -32,6 +32,7 @@ import BilledTimesList from "@/components/time/BilledTimesList";
 import EditTimeEntry from "@/components/time/EditTimeEntry";
 import TimeReport from "@/components/time/TimeReport";
 import FloatingTimer from "@/components/time/FloatingTimer";
+import jsPDF from 'jspdf';
 
 const statusConfig = {
     geplant: { label: "Geplant", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -253,6 +254,170 @@ export default function ProjectDetail() {
 
     const handleTimeEntrySave = (data) => {
         updateTimeEntryMutation.mutate({ id: editingTimeEntry.id, data });
+    };
+
+    const exportActivitiesToPDF = () => {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+        const margin = 15;
+        let yPos = 20;
+
+        // Titel
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Aktivitätsverlauf', margin, yPos);
+        
+        yPos += 10;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Projekt: ${project.name}`, margin, yPos);
+        
+        if (customer) {
+            yPos += 7;
+            doc.text(`Kunde: ${customer.company}`, margin, yPos);
+        }
+        
+        yPos += 7;
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.text(`Erstellt am: ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: de })}`, margin, yPos);
+        doc.setTextColor(0);
+        
+        yPos += 15;
+
+        // Aktivitäten
+        const sortedActivities = [...activities].sort((a, b) => 
+            new Date(b.activity_date) - new Date(a.activity_date)
+        );
+
+        const activityTypes = {
+            telefonat: { label: 'Telefonat', icon: '📞' },
+            meeting: { label: 'Meeting', icon: '👥' },
+            besuch: { label: 'Besuch', icon: '🏢' },
+            email: { label: 'E-Mail', icon: '📧' },
+            notiz: { label: 'Notiz', icon: '📝' },
+            dokument: { label: 'Dokument', icon: '📄' }
+        };
+
+        sortedActivities.forEach((activity, index) => {
+            // Seitenumbruch prüfen
+            if (yPos > pageHeight - 40) {
+                doc.addPage();
+                yPos = 20;
+            }
+
+            const activityType = activityTypes[activity.type] || { label: activity.type, icon: '•' };
+            
+            // Datum und Typ
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            const dateStr = format(new Date(activity.activity_date), "dd.MM.yyyy HH:mm", { locale: de });
+            doc.text(`${activityType.icon} ${activityType.label} - ${dateStr}`, margin, yPos);
+            
+            yPos += 7;
+            
+            // Titel
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            const titleLines = doc.splitTextToSize(activity.title, pageWidth - 2 * margin);
+            doc.text(titleLines, margin, yPos);
+            yPos += titleLines.length * 5;
+            
+            // Ansprechpartner
+            if (activity.contact_person) {
+                yPos += 3;
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.text(`Ansprechpartner: ${activity.contact_person}`, margin + 3, yPos);
+                yPos += 5;
+            }
+            
+            // Inhalt
+            if (activity.content) {
+                yPos += 2;
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                const contentLines = doc.splitTextToSize(activity.content, pageWidth - 2 * margin - 6);
+                doc.text(contentLines, margin + 3, yPos);
+                yPos += contentLines.length * 4.5;
+            }
+            
+            // Fahrt-Info
+            if (activity.requires_travel && activity.travel_distance_km) {
+                yPos += 3;
+                doc.setFontSize(8);
+                doc.setTextColor(100);
+                const travelText = `🚗 Fahrt: ${activity.start_location || 'Büro'} → ${activity.destination_address || 'Zielort'} (${activity.travel_distance_km} km)`;
+                doc.text(travelText, margin + 3, yPos);
+                yPos += 5;
+                doc.setTextColor(0);
+            }
+            
+            // Dateien
+            if (activity.file_names && activity.file_names.length > 0) {
+                yPos += 2;
+                doc.setFontSize(8);
+                doc.setTextColor(100);
+                doc.text(`📎 Dateien: ${activity.file_names.join(', ')}`, margin + 3, yPos);
+                yPos += 5;
+                doc.setTextColor(0);
+            }
+            
+            // Zukünftiger Termin
+            if (activity.appointment_date) {
+                yPos += 2;
+                doc.setFontSize(8);
+                doc.setTextColor(0, 100, 200);
+                const appointmentStr = format(new Date(activity.appointment_date), "dd.MM.yyyy HH:mm", { locale: de });
+                doc.text(`📅 Folgetermin: ${appointmentStr}`, margin + 3, yPos);
+                yPos += 5;
+                doc.setTextColor(0);
+            }
+            
+            // Trennlinie
+            yPos += 5;
+            doc.setDrawColor(200);
+            doc.line(margin, yPos, pageWidth - margin, yPos);
+            yPos += 10;
+        });
+
+        // Zusammenfassung am Ende
+        if (yPos > pageHeight - 60) {
+            doc.addPage();
+            yPos = 20;
+        }
+
+        yPos += 10;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Zusammenfassung', margin, yPos);
+        yPos += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Anzahl Aktivitäten: ${activities.length}`, margin, yPos);
+        
+        const travelActivities = activities.filter(a => a.own_travel && a.travel_distance_km);
+        if (travelActivities.length > 0) {
+            const totalKm = travelActivities.reduce((sum, a) => sum + (a.travel_distance_km || 0), 0);
+            const totalCost = travelActivities.reduce((sum, a) => {
+                const activityDate = new Date(a.activity_date);
+                const rate = activityDate < new Date('2026-01-01') ? 0.30 : 0.38;
+                return sum + (a.travel_distance_km * rate);
+            }, 0);
+            
+            yPos += 7;
+            doc.text(`Gesamtkilometer: ${totalKm.toFixed(1)} km`, margin, yPos);
+            yPos += 7;
+            doc.text(`Kilometerpauschale: ${totalCost.toFixed(2)} €`, margin, yPos);
+        }
+
+        // PDF speichern
+        const fileName = `Aktivitaetsverlauf_${project.name.replace(/[^a-z0-9]/gi, '_')}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+        doc.save(fileName);
+        
+        toast.success('PDF erfolgreich erstellt');
     };
 
     if (!project) {
@@ -491,10 +656,16 @@ export default function ProjectDetail() {
                             </TabsList>
                         
                         {activeTab === "activities" ? (
-                            <Button onClick={() => { setEditingActivity(null); setShowActivityForm(true); }} className="bg-slate-800 hover:bg-slate-900">
-                                <Plus className="w-4 h-4 mr-2" />
-                                Neue Aktivität
-                            </Button>
+                            <div className="flex gap-2">
+                                <Button onClick={() => { setEditingActivity(null); setShowActivityForm(true); }} className="bg-slate-800 hover:bg-slate-900">
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Neue Aktivität
+                                </Button>
+                                <Button onClick={exportActivitiesToPDF} variant="outline">
+                                    <Download className="w-4 h-4 mr-2" />
+                                    PDF Export
+                                </Button>
+                            </div>
                         ) : activeTab === "tasks" ? (
                             <Button onClick={() => { setEditingTask(null); setShowTaskForm(true); }} className="bg-slate-800 hover:bg-slate-900">
                                 <Plus className="w-4 h-4 mr-2" />
