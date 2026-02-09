@@ -292,12 +292,12 @@ export default function ProjectDetail() {
         );
 
         const activityTypes = {
-            telefonat: { label: 'Telefonat', icon: '📞' },
-            meeting: { label: 'Meeting', icon: '👥' },
-            besuch: { label: 'Besuch', icon: '🤝' },
-            email: { label: 'E-Mail', icon: '📧' },
-            notiz: { label: 'Notiz', icon: '📝' },
-            dokument: { label: 'Dokument', icon: '📄' }
+            telefonat: { label: 'Telefonat', icon: '☎' },
+            meeting: { label: 'Meeting', icon: '⚫' },
+            besuch: { label: 'Besuch', icon: '⚑' },
+            email: { label: 'E-Mail', icon: '✉' },
+            notiz: { label: 'Notiz', icon: '✎' },
+            dokument: { label: 'Dokument', icon: '⚏' }
         };
 
         sortedActivities.forEach((activity, index) => {
