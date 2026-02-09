@@ -307,13 +307,15 @@ export default function ProjectDetail() {
                 yPos = 20;
             }
 
-            const activityType = activityTypes[activity.type] || { label: activity.type, icon: '•' };
+            const activityType = activityTypes[activity.type] || { label: activity.type };
             
-            // Datum und Typ
+            // Datum und Typ mit farbigem Badge-Stil
             doc.setFontSize(11);
             doc.setFont('helvetica', 'bold');
             const dateStr = format(new Date(activity.activity_date), "dd.MM.yyyy HH:mm", { locale: de });
-            doc.text(`${activityType.icon} ${activityType.label} - ${dateStr}`, margin, yPos);
+            doc.text(`${activityType.label}`, margin, yPos);
+            doc.setFont('helvetica', 'normal');
+            doc.text(` - ${dateStr}`, margin + 30, yPos);
             
             yPos += 7;
             
