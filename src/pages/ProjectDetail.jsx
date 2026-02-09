@@ -292,12 +292,12 @@ export default function ProjectDetail() {
         );
 
         const activityTypes = {
-            telefonat: { label: 'Telefonat' },
-            meeting: { label: 'Meeting' },
-            besuch: { label: 'Besuch' },
-            email: { label: 'E-Mail' },
-            notiz: { label: 'Notiz' },
-            dokument: { label: 'Dokument' }
+            telefonat: { label: 'Telefonat', icon: '📞' },
+            meeting: { label: 'Meeting', icon: '👥' },
+            besuch: { label: 'Besuch', icon: '🤝' },
+            email: { label: 'E-Mail', icon: '📧' },
+            notiz: { label: 'Notiz', icon: '📝' },
+            dokument: { label: 'Dokument', icon: '📄' }
         };
 
         sortedActivities.forEach((activity, index) => {
@@ -307,13 +307,13 @@ export default function ProjectDetail() {
                 yPos = 20;
             }
 
-            const activityType = activityTypes[activity.type] || { label: activity.type };
+            const activityType = activityTypes[activity.type] || { label: activity.type, icon: '•' };
             
             // Datum und Typ
             doc.setFontSize(11);
             doc.setFont('helvetica', 'bold');
             const dateStr = format(new Date(activity.activity_date), "dd.MM.yyyy HH:mm", { locale: de });
-            doc.text(`${activityType.label} - ${dateStr}`, margin, yPos);
+            doc.text(`${activityType.icon} ${activityType.label} - ${dateStr}`, margin, yPos);
             
             yPos += 7;
             
