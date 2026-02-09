@@ -292,12 +292,12 @@ export default function ProjectDetail() {
         );
 
         const activityTypes = {
-            telefonat: { label: 'Telefonat', icon: '📞' },
-            meeting: { label: 'Meeting', icon: '👥' },
-            besuch: { label: 'Besuch', icon: '🏢' },
-            email: { label: 'E-Mail', icon: '📧' },
-            notiz: { label: 'Notiz', icon: '📝' },
-            dokument: { label: 'Dokument', icon: '📄' }
+            telefonat: { label: 'Telefonat', icon: '[T]' },
+            meeting: { label: 'Meeting', icon: '[M]' },
+            besuch: { label: 'Besuch', icon: '[B]' },
+            email: { label: 'E-Mail', icon: '[E]' },
+            notiz: { label: 'Notiz', icon: '[N]' },
+            dokument: { label: 'Dokument', icon: '[D]' }
         };
 
         sortedActivities.forEach((activity, index) => {
@@ -348,7 +348,7 @@ export default function ProjectDetail() {
                 yPos += 3;
                 doc.setFontSize(8);
                 doc.setTextColor(100);
-                const travelText = `🚗 Fahrt: ${activity.start_location || 'Büro'} → ${activity.destination_address || 'Zielort'} (${activity.travel_distance_km} km)`;
+                const travelText = `Fahrt: ${activity.start_location || 'Buero'} -> ${activity.destination_address || 'Zielort'} (${activity.travel_distance_km} km)`;
                 doc.text(travelText, margin + 3, yPos);
                 yPos += 5;
                 doc.setTextColor(0);
@@ -359,7 +359,7 @@ export default function ProjectDetail() {
                 yPos += 2;
                 doc.setFontSize(8);
                 doc.setTextColor(100);
-                doc.text(`📎 Dateien: ${activity.file_names.join(', ')}`, margin + 3, yPos);
+                doc.text(`Dateien: ${activity.file_names.join(', ')}`, margin + 3, yPos);
                 yPos += 5;
                 doc.setTextColor(0);
             }
@@ -370,7 +370,7 @@ export default function ProjectDetail() {
                 doc.setFontSize(8);
                 doc.setTextColor(0, 100, 200);
                 const appointmentStr = format(new Date(activity.appointment_date), "dd.MM.yyyy HH:mm", { locale: de });
-                doc.text(`📅 Folgetermin: ${appointmentStr}`, margin + 3, yPos);
+                doc.text(`Folgetermin: ${appointmentStr}`, margin + 3, yPos);
                 yPos += 5;
                 doc.setTextColor(0);
             }
