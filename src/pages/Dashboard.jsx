@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { 
     Building2, FolderKanban, CheckSquare, Calendar, 
-    ArrowRight, Clock, AlertCircle, TrendingUp, Settings
+    ArrowRight, Clock, AlertCircle, TrendingUp, Settings, Search, X, Lightbulb, User
 } from "lucide-react";
 import { format, isToday, isTomorrow, isPast } from "date-fns";
 import { de } from "date-fns/locale";
@@ -19,6 +20,7 @@ import TravelOverview from "@/components/dashboard/TravelOverview";
 import UpcomingAppointments from "@/components/dashboard/UpcomingAppointments";
 
 export default function Dashboard() {
+    const [searchQuery, setSearchQuery] = useState("");
     const { data: customers = [], isLoading: loadingCustomers } = useQuery({
         queryKey: ['customers'],
         queryFn: () => base44.entities.Customer.list()
@@ -34,6 +36,16 @@ export default function Dashboard() {
         queryFn: () => base44.entities.Task.list()
     });
 
+    const { data: themes = [] } = useQuery({
+        queryKey: ['themes'],
+        queryFn: () => base44.entities.Theme.list()
+    });
+
+    const { data: privateThemes = [] } = useQuery({
+        queryKey: ['privateThemes'],
+        queryFn: () => base44.entities.PrivateTheme.list()
+    });
+
     const isLoading = loadingCustomers || loadingProjects || loadingTasks;
 
     const activeProjects = projects.filter(p => p.status === 'in_arbeit');
@@ -45,6 +57,37 @@ export default function Dashboard() {
     });
 
     const getCustomer = (id) => customers.find(c => c.id === id);
+
+    // Search filtering
+    const searchResults = searchQuery.length > 1 ? {
+        customers: customers.filter(c => 
+            c.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.contact_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+        projects: projects.filter(p => 
+            p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+        tasks: tasks.filter(t => 
+            t.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            t.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+        themes: themes.filter(th => 
+            th.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            th.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+        privateThemes: privateThemes.filter(pt => 
+            pt.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            pt.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    } : null;
+
+    const totalResults = searchResults ? 
+        searchResults.customers.length + 
+        searchResults.projects.length + 
+        searchResults.tasks.length + 
+        searchResults.themes.length + 
+        searchResults.privateThemes.length : 0;
 
     const stats = [
         { 
@@ -84,6 +127,156 @@ export default function Dashboard() {
                     <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
                     <p className="text-slate-500 mt-1">Willkommen zurück! Hier ist Ihre Projektübersicht.</p>
                 </div>
+
+                {/* Search Bar */}
+                <Card className="mb-8 print:hidden">
+                    <CardContent className="pt-6">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <Input
+                                placeholder="Suche in Kunden, Projekten, Aufgaben, Themen..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-10 pr-10 h-12 text-base"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Search Results */}
+                {searchQuery.length > 1 && (
+                    <Card className="mb-8 print:hidden">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Search className="w-5 h-5" />
+                                Suchergebnisse ({totalResults})
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            {totalResults === 0 ? (
+                                <div className="text-center py-8 text-slate-500">
+                                    <Search className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                                    <p>Keine Ergebnisse für "{searchQuery}"</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {searchResults.customers.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                                <Building2 className="w-4 h-4" />
+                                                Kunden ({searchResults.customers.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {searchResults.customers.map(customer => (
+                                                    <Link key={customer.id} to={createPageUrl("Customers")}>
+                                                        <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                                                            <div className="font-medium text-slate-900">{customer.company}</div>
+                                                            {customer.contact_name && (
+                                                                <div className="text-sm text-slate-500">{customer.contact_name}</div>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {searchResults.projects.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                                <FolderKanban className="w-4 h-4" />
+                                                Projekte ({searchResults.projects.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {searchResults.projects.map(project => (
+                                                    <Link key={project.id} to={createPageUrl("ProjectDetail") + `?id=${project.id}`}>
+                                                        <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                                                            <div className="font-medium text-slate-900">{project.name}</div>
+                                                            {project.description && (
+                                                                <div className="text-sm text-slate-500 line-clamp-1">{project.description}</div>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {searchResults.tasks.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                                <CheckSquare className="w-4 h-4" />
+                                                Aufgaben ({searchResults.tasks.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {searchResults.tasks.map(task => (
+                                                    <Link key={task.id} to={createPageUrl("ProjectDetail") + `?id=${task.project_id}`}>
+                                                        <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                                                            <div className="font-medium text-slate-900">{task.title}</div>
+                                                            {task.description && (
+                                                                <div className="text-sm text-slate-500 line-clamp-1">{task.description}</div>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {searchResults.themes.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                                <Lightbulb className="w-4 h-4" />
+                                                Business Themen ({searchResults.themes.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {searchResults.themes.map(theme => (
+                                                    <Link key={theme.id} to={createPageUrl("ThemeDetail") + `?id=${theme.id}`}>
+                                                        <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                                                            <div className="font-medium text-slate-900">{theme.name}</div>
+                                                            {theme.description && (
+                                                                <div className="text-sm text-slate-500 line-clamp-1">{theme.description}</div>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {searchResults.privateThemes.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                                <User className="w-4 h-4" />
+                                                Private Themen ({searchResults.privateThemes.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {searchResults.privateThemes.map(theme => (
+                                                    <Link key={theme.id} to={createPageUrl("PrivateThemeDetail") + `?id=${theme.id}`}>
+                                                        <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                                                            <div className="font-medium text-slate-900">{theme.name}</div>
+                                                            {theme.description && (
+                                                                <div className="text-sm text-slate-500 line-clamp-1">{theme.description}</div>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Date, Time and Weather */}
                 <div className="print:hidden">
