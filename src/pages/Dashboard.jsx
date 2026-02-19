@@ -46,6 +46,21 @@ export default function Dashboard() {
         queryFn: () => base44.entities.PrivateTheme.list()
     });
 
+    const { data: privateActivities = [] } = useQuery({
+        queryKey: ['privateActivities'],
+        queryFn: () => base44.entities.PrivateActivity.list()
+    });
+
+    const { data: activities = [] } = useQuery({
+        queryKey: ['activities'],
+        queryFn: () => base44.entities.Activity.list()
+    });
+
+    const { data: themeActivities = [] } = useQuery({
+        queryKey: ['themeActivities'],
+        queryFn: () => base44.entities.ThemeActivity.list()
+    });
+
     const isLoading = loadingCustomers || loadingProjects || loadingTasks;
 
     const activeProjects = projects.filter(p => p.status === 'in_arbeit');
@@ -79,6 +94,18 @@ export default function Dashboard() {
         privateThemes: privateThemes.filter(pt => 
             pt.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             pt.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+        activities: activities.filter(a => 
+            a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            a.content?.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+        themeActivities: themeActivities.filter(ta => 
+            ta.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            ta.content?.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+        privateActivities: privateActivities.filter(pa => 
+            pa.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            pa.content?.toLowerCase().includes(searchQuery.toLowerCase())
         )
     } : null;
 
@@ -87,7 +114,10 @@ export default function Dashboard() {
         searchResults.projects.length + 
         searchResults.tasks.length + 
         searchResults.themes.length + 
-        searchResults.privateThemes.length : 0;
+        searchResults.privateThemes.length +
+        searchResults.activities.length +
+        searchResults.themeActivities.length +
+        searchResults.privateActivities.length : 0;
 
     const stats = [
         { 
@@ -269,6 +299,81 @@ export default function Dashboard() {
                                                         </div>
                                                     </Link>
                                                 ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {searchResults.activities.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                                <Calendar className="w-4 h-4" />
+                                                Projekt-Aktivitäten ({searchResults.activities.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {searchResults.activities.map(activity => {
+                                                    const project = projects.find(p => p.id === activity.project_id);
+                                                    return (
+                                                        <Link key={activity.id} to={createPageUrl("ProjectDetail") + `?id=${activity.project_id}`}>
+                                                            <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                                                                <div className="font-medium text-slate-900">{activity.title}</div>
+                                                                <div className="text-xs text-slate-400">{project?.name}</div>
+                                                                {activity.content && (
+                                                                    <div className="text-sm text-slate-500 line-clamp-1">{activity.content}</div>
+                                                                )}
+                                                            </div>
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {searchResults.themeActivities.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                                <Lightbulb className="w-4 h-4" />
+                                                Themen-Aktivitäten ({searchResults.themeActivities.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {searchResults.themeActivities.map(activity => {
+                                                    const theme = themes.find(t => t.id === activity.theme_id);
+                                                    return (
+                                                        <Link key={activity.id} to={createPageUrl("ThemeDetail") + `?id=${activity.theme_id}`}>
+                                                            <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                                                                <div className="font-medium text-slate-900">{activity.title}</div>
+                                                                <div className="text-xs text-slate-400">{theme?.name}</div>
+                                                                {activity.content && (
+                                                                    <div className="text-sm text-slate-500 line-clamp-1">{activity.content}</div>
+                                                                )}
+                                                            </div>
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {searchResults.privateActivities.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                                <User className="w-4 h-4" />
+                                                Private Aktivitäten ({searchResults.privateActivities.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {searchResults.privateActivities.map(activity => {
+                                                    const theme = privateThemes.find(t => t.id === activity.theme_id);
+                                                    return (
+                                                        <Link key={activity.id} to={createPageUrl("PrivateThemeDetail") + `?id=${activity.theme_id}`}>
+                                                            <div className="p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                                                                <div className="font-medium text-slate-900">{activity.title}</div>
+                                                                <div className="text-xs text-slate-400">{theme?.name}</div>
+                                                                {activity.content && (
+                                                                    <div className="text-sm text-slate-500 line-clamp-1">{activity.content}</div>
+                                                                )}
+                                                            </div>
+                                                        </Link>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
