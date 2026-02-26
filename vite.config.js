@@ -5,8 +5,8 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/projektmanager-pro/',
+
   logLevel: 'error', // Suppress warnings, only show errors
-  base: '/projektmanager-pro/',
   plugins: [
     base44({
       legacySDKImports: process.env.BASE44_LEGACY_SDK_IMPORTS === 'true',
