@@ -379,11 +379,35 @@ Beispiel: Wenn die Hinfahrt 25,3 km beträgt, gib 25.3 zurück (nicht 50.6)`,
                                 <>
                                     <div>
                                         <Label className="text-slate-700 font-medium">Start-Standort</Label>
+                                        <Select 
+                                            onValueChange={(value) => {
+                                                if (value === 'manual') return;
+                                                const customer = customers.find(c => c.id === value);
+                                                if (customer && customer.street && customer.city) {
+                                                    const address = `${customer.street}, ${customer.postal_code || ''} ${customer.city}`.trim();
+                                                    setFormData({...formData, start_location: address});
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger className="mt-1.5">
+                                                <SelectValue placeholder="Adresse aus Kundenliste wählen" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="manual">Manuell eingeben</SelectItem>
+                                                {customers
+                                                    .filter(c => c.street && c.city)
+                                                    .map(customer => (
+                                                        <SelectItem key={customer.id} value={customer.id}>
+                                                            {customer.company} - {customer.street}, {customer.city}
+                                                        </SelectItem>
+                                                    ))}
+                                            </SelectContent>
+                                        </Select>
                                         <Input
                                             value={formData.start_location}
                                             onChange={(e) => setFormData({...formData, start_location: e.target.value})}
-                                            placeholder="Gartenstraße 17, 89257 Illertissen"
-                                            className="mt-1.5"
+                                            placeholder="Oder hier manuell eingeben"
+                                            className="mt-2"
                                         />
                                     </div>
 
