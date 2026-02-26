@@ -25,7 +25,8 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
         activity_date: activity ? formatDateForInput(activity.activity_date) : new Date().toISOString().slice(0, 16),
         amount: activity?.amount || "",
         file_urls: activity?.file_urls || [],
-        file_names: activity?.file_names || []
+        file_names: activity?.file_names || [],
+        location_address: activity?.location_address || ""
     });
     const [uploading, setUploading] = useState(false);
     const [selectedCustomerId, setSelectedCustomerId] = useState("");
@@ -86,6 +87,7 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
             ...(formData.contact_person && { contact_person: formData.contact_person.trim() }),
             activity_date: formData.activity_date ? new Date(formData.activity_date).toISOString() : new Date().toISOString(),
             ...(formData.amount && { amount: parseFloat(formData.amount) }),
+            ...(formData.location_address && { location_address: formData.location_address.trim() }),
             ...(formData.file_urls.length > 0 && { 
                 file_urls: formData.file_urls,
                 file_names: formData.file_names
@@ -277,13 +279,81 @@ export default function PrivateActivityForm({ activity, onSave, onClose }) {
                     )}
 
                     <div>
-                        <Label>Beschreibung</Label>
-                        <Textarea
-                            value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            rows={4}
-                        />
+                       <Label>Beschreibung</Label>
+                       <Textarea
+                           value={formData.content}
+                           onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                           rows={4}
+                       />
                     </div>
+
+                    {(formData.type === 'besuch' || formData.type === 'termin') && (
+                       <div className="border rounded-lg p-4 bg-slate-50 space-y-3">
+                           <Label className="font-semibold">Standort/Adresse (optional)</Label>
+                           <div>
+                               <Label className="text-sm">Adresse wählen oder eingeben</Label>
+                               <Select 
+                                   onValueChange={(value) => {
+                                       if (value === 'manual') return;
+                                       const company = allCompanies.find(c => c.id === value);
+                                       if (company) {
+                                           let address = '';
+                                           if (company.type === 'customer') {
+                                               const customer = customers.find(c => c.id === value);
+                                               if (customer?.street && customer?.city) {
+                                                   address = `${customer.street}, ${customer.postal_code || ''} ${customer.city}`.trim();
+                                               }
+                                           } else {
+                                               const themeCompany = themeCompanies.find(c => c.id === value);
+                                               if (themeCompany?.street && themeCompany?.city) {
+                                                   address = `${themeCompany.street}, ${themeCompany.postal_code || ''} ${themeCompany.city}`.trim();
+                                               }
+                                           }
+                                           setFormData({ ...formData, location_address: address });
+                                       }
+                                   }}
+                               >
+                                   <SelectTrigger className="mt-1.5">
+                                       <SelectValue placeholder="Adresse aus Kundenliste wählen" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                       <SelectItem value="manual">Manuell eingeben</SelectItem>
+                                       {allCompanies
+                                           .filter(c => {
+                                               if (c.type === 'customer') {
+                                                   const customer = customers.find(cu => cu.id === c.id);
+                                                   return customer?.street && customer?.city;
+                                               } else {
+                                                   const tc = themeCompanies.find(tc => tc.id === c.id);
+                                                   return tc?.street && tc?.city;
+                                               }
+                                           })
+                                           .map(company => {
+                                               let addressPreview = '';
+                                               if (company.type === 'customer') {
+                                                   const customer = customers.find(c => c.id === company.id);
+                                                   addressPreview = `${customer?.street}, ${customer?.city}`;
+                                               } else {
+                                                   const tc = themeCompanies.find(c => c.id === company.id);
+                                                   addressPreview = `${tc?.street}, ${tc?.city}`;
+                                               }
+                                               return (
+                                                   <SelectItem key={company.id} value={company.id}>
+                                                       {company.name} - {addressPreview}
+                                                   </SelectItem>
+                                               );
+                                           })}
+                                   </SelectContent>
+                               </Select>
+                               <Input
+                                   value={formData.location_address || ""}
+                                   onChange={(e) => setFormData({ ...formData, location_address: e.target.value })}
+                                   placeholder="Oder hier manuell eingeben"
+                                   className="mt-2"
+                               />
+                           </div>
+                       </div>
+                    )}
 
                     <div>
                         <Label>Dateien anhängen</Label>

@@ -429,11 +429,35 @@ export default function ThemeActivityForm({ open, onClose, onSave, activity, the
 
                                     <div>
                                         <Label>Zieladresse</Label>
+                                        <Select 
+                                            onValueChange={(value) => {
+                                                if (value === 'manual') return;
+                                                const company = companies.find(c => c.id === value);
+                                                if (company && company.street && company.city) {
+                                                    const address = `${company.street}, ${company.postal_code || ''} ${company.city}`.trim();
+                                                    setFormData({...formData, destination_address: address});
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger className="mt-1.5">
+                                                <SelectValue placeholder="Adresse aus Firmenliste wählen" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="manual">Manuell eingeben</SelectItem>
+                                                {companies
+                                                    .filter(c => c.street && c.city)
+                                                    .map(company => (
+                                                        <SelectItem key={company.id} value={company.id}>
+                                                            {company.company_name} - {company.street}, {company.city}
+                                                        </SelectItem>
+                                                    ))}
+                                            </SelectContent>
+                                        </Select>
                                         <Input
                                             value={formData.destination_address}
                                             onChange={(e) => setFormData({...formData, destination_address: e.target.value})}
-                                            placeholder="z.B. Kundenadresse"
-                                            className="mt-1.5"
+                                            placeholder="Oder hier manuell eingeben"
+                                            className="mt-2"
                                         />
                                     </div>
 
