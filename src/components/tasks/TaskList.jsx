@@ -1,11 +1,12 @@
 import React, { useState } from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckSquare, Calendar, Bell, Clock, Pencil, Trash2, Plus, Flag } from "lucide-react";
+import { CheckSquare, Calendar, Bell, Clock, Pencil, Trash2, Plus, Flag, GripVertical } from "lucide-react";
 import { format, isToday, isTomorrow, isPast } from "date-fns";
 import { de } from "date-fns/locale";
 
