@@ -228,6 +228,15 @@ export default function ProjectDetail() {
         updateTaskMutation.mutate({ id: task.id, data: { ...task, ...data } });
     };
 
+    const handleTaskReorder = async (reorderedTasks) => {
+        await Promise.all(
+            reorderedTasks.map((task, index) =>
+                base44.entities.Task.update(task.id, { ...task, order: index })
+            )
+        );
+        queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+    };
+
     const handleTimeSave = (data) => {
         createTimeEntryMutation.mutate({
             ...data,
