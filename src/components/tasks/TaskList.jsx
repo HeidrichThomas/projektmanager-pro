@@ -76,100 +76,118 @@ export default function TaskList({ tasks, onEdit, onDelete, onStatusChange, onLo
 
     return (
         <>
-            <div className="space-y-3">
-                {tasks.map((task) => {
-                    const status = statusConfig[task.status] || statusConfig.offen;
-                    const priority = priorityConfig[task.priority] || priorityConfig.mittel;
-                    const dueLabel = getDueDateLabel(task.due_date);
-                    
-                    return (
-                        <Card key={task.id} className={`p-4 transition-all group ${task.status === 'erledigt' ? 'opacity-60' : ''}`}>
-                            <div className="flex items-start gap-3">
-                                <Checkbox
-                                    checked={task.status === 'erledigt'}
-                                    onCheckedChange={(checked) => onStatusChange(task, checked ? 'erledigt' : 'offen')}
-                                    className="mt-1"
-                                />
+            <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="task-list">
+                    {(provided) => (
+                        <div className="space-y-3" {...provided.droppableProps} ref={provided.innerRef}>
+                            {tasks.map((task, index) => {
+                                const status = statusConfig[task.status] || statusConfig.offen;
+                                const priority = priorityConfig[task.priority] || priorityConfig.mittel;
+                                const dueLabel = getDueDateLabel(task.due_date);
                                 
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div>
-                                            <h4 className={`font-medium ${task.status === 'erledigt' ? 'line-through text-slate-500' : 'text-slate-900'}`}>
-                                                {task.title}
-                                            </h4>
-                                            {task.description && (
-                                                <p className="text-sm text-slate-500 mt-1 line-clamp-2">
-                                                    {task.description}
-                                                </p>
-                                            )}
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-1 shrink-0">
-                                            <Flag className={`w-4 h-4 ${priority.color}`} />
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex flex-wrap items-center gap-2 mt-3">
-                                        <Badge variant="secondary" className={status.color}>
-                                            {status.label}
-                                        </Badge>
-                                        
-                                        {dueLabel && (
-                                            <Badge variant="outline" className={dueLabel.urgent ? 'border-red-300 text-red-600' : ''}>
-                                                <Calendar className="w-3 h-3 mr-1" />
-                                                {dueLabel.text}
-                                            </Badge>
+                                return (
+                                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                                        {(provided, snapshot) => (
+                                            <Card
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                className={`p-4 transition-all group ${task.status === 'erledigt' ? 'opacity-60' : ''} ${snapshot.isDragging ? 'shadow-lg ring-2 ring-slate-300' : ''}`}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div {...provided.dragHandleProps} className="mt-1 cursor-grab text-slate-300 hover:text-slate-500 shrink-0">
+                                                        <GripVertical className="w-4 h-4" />
+                                                    </div>
+                                                    <Checkbox
+                                                        checked={task.status === 'erledigt'}
+                                                        onCheckedChange={(checked) => onStatusChange(task, checked ? 'erledigt' : 'offen')}
+                                                        className="mt-1"
+                                                    />
+                                                    
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div>
+                                                                <h4 className={`font-medium ${task.status === 'erledigt' ? 'line-through text-slate-500' : 'text-slate-900'}`}>
+                                                                    {task.title}
+                                                                </h4>
+                                                                {task.description && (
+                                                                    <p className="text-sm text-slate-500 mt-1 line-clamp-2">
+                                                                        {task.description}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            <div className="flex items-center gap-1 shrink-0">
+                                                                <Flag className={`w-4 h-4 ${priority.color}`} />
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="flex flex-wrap items-center gap-2 mt-3">
+                                                            <Badge variant="secondary" className={status.color}>
+                                                                {status.label}
+                                                            </Badge>
+                                                            
+                                                            {dueLabel && (
+                                                                <Badge variant="outline" className={dueLabel.urgent ? 'border-red-300 text-red-600' : ''}>
+                                                                    <Calendar className="w-3 h-3 mr-1" />
+                                                                    {dueLabel.text}
+                                                                </Badge>
+                                                            )}
+                                                            
+                                                            {task.reminder_date && (
+                                                                <Badge variant="outline" className="border-amber-300 text-amber-600">
+                                                                    <Bell className="w-3 h-3 mr-1" />
+                                                                    Erinnerung
+                                                                </Badge>
+                                                            )}
+                                                            
+                                                            {task.worked_hours > 0 && (
+                                                                <Badge variant="outline">
+                                                                    <Clock className="w-3 h-3 mr-1" />
+                                                                    {task.worked_hours}h
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button size="sm" variant="ghost" onClick={() => openWorkLog(task)} title="Arbeitszeit erfassen">
+                                                            <Clock className="w-3 h-3" />
+                                                        </Button>
+                                                        <Button size="sm" variant="ghost" onClick={() => onEdit(task)}>
+                                                            <Pencil className="w-3 h-3" />
+                                                        </Button>
+                                                        <Button size="sm" variant="ghost" onClick={() => onDelete(task)} className="text-red-500 hover:text-red-700">
+                                                            <Trash2 className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                                
+                                                {task.work_log?.length > 0 && (
+                                                    <div className="mt-3 pt-3 border-t border-slate-100 ml-8">
+                                                        <p className="text-xs text-slate-500 mb-2">Arbeitsprotokoll:</p>
+                                                        <div className="space-y-1">
+                                                            {task.work_log.slice(-3).map((entry, i) => (
+                                                                <div key={i} className="text-xs text-slate-600 flex gap-2">
+                                                                    <span className="text-slate-400">
+                                                                        {format(new Date(entry.date), "dd.MM.yy", { locale: de })}
+                                                                    </span>
+                                                                    <span className="font-medium">{entry.hours}h</span>
+                                                                    {entry.note && <span>- {entry.note}</span>}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </Card>
                                         )}
-                                        
-                                        {task.reminder_date && (
-                                            <Badge variant="outline" className="border-amber-300 text-amber-600">
-                                                <Bell className="w-3 h-3 mr-1" />
-                                                Erinnerung
-                                            </Badge>
-                                        )}
-                                        
-                                        {task.worked_hours > 0 && (
-                                            <Badge variant="outline">
-                                                <Clock className="w-3 h-3 mr-1" />
-                                                {task.worked_hours}h
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </div>
-                                
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button size="sm" variant="ghost" onClick={() => openWorkLog(task)} title="Arbeitszeit erfassen">
-                                        <Clock className="w-3 h-3" />
-                                    </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => onEdit(task)}>
-                                        <Pencil className="w-3 h-3" />
-                                    </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => onDelete(task)} className="text-red-500 hover:text-red-700">
-                                        <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                </div>
-                            </div>
-                            
-                            {task.work_log?.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-slate-100 ml-8">
-                                    <p className="text-xs text-slate-500 mb-2">Arbeitsprotokoll:</p>
-                                    <div className="space-y-1">
-                                        {task.work_log.slice(-3).map((entry, i) => (
-                                            <div key={i} className="text-xs text-slate-600 flex gap-2">
-                                                <span className="text-slate-400">
-                                                    {format(new Date(entry.date), "dd.MM.yy", { locale: de })}
-                                                </span>
-                                                <span className="font-medium">{entry.hours}h</span>
-                                                {entry.note && <span>- {entry.note}</span>}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </Card>
-                    );
-                })}
-            </div>
+                                    </Draggable>
+                                );
+                            })}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+            </DragDropContext>
             
             <Dialog open={workLogOpen} onOpenChange={setWorkLogOpen}>
                 <DialogContent className="max-w-sm">
