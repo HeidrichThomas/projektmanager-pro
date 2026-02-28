@@ -729,7 +729,7 @@ export default function ProjectDetail() {
                             </div>
                         ) : (
                             <TaskList
-                                tasks={tasks}
+                                tasks={[...tasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))}
                                 onEdit={(task) => { setEditingTask(task); setShowTaskForm(true); }}
                                 onDelete={(task) => {
                                     if (confirm("Aufgabe wirklich löschen?")) {
@@ -738,6 +738,7 @@ export default function ProjectDetail() {
                                 }}
                                 onStatusChange={handleTaskStatusChange}
                                 onLogWork={handleTaskLogWork}
+                                onReorder={handleTaskReorder}
                             />
                         )}
                     </TabsContent>
