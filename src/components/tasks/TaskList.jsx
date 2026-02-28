@@ -22,10 +22,19 @@ const priorityConfig = {
     hoch: { label: "Hoch", color: "text-red-500" }
 };
 
-export default function TaskList({ tasks, onEdit, onDelete, onStatusChange, onLogWork }) {
+export default function TaskList({ tasks, onEdit, onDelete, onStatusChange, onLogWork, onReorder }) {
     const [workLogOpen, setWorkLogOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [workEntry, setWorkEntry] = useState({ hours: "", note: "" });
+
+    const handleDragEnd = (result) => {
+        if (!result.destination) return;
+        if (result.source.index === result.destination.index) return;
+        const reordered = Array.from(tasks);
+        const [moved] = reordered.splice(result.source.index, 1);
+        reordered.splice(result.destination.index, 0, moved);
+        onReorder && onReorder(reordered);
+    };
 
     const openWorkLog = (task) => {
         setSelectedTask(task);
