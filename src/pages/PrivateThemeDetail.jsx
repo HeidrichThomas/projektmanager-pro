@@ -37,7 +37,7 @@ export default function PrivateThemeDetail() {
 
     const { data: tasks = [] } = useQuery({
         queryKey: ['privateTasks', themeId],
-        queryFn: () => base44.entities.PrivateTask.filter({ theme_id: themeId })
+        queryFn: () => base44.entities.PrivateTask.filter({ theme_id: themeId }, 'order')
     });
 
     const { data: appointments = [] } = useQuery({
