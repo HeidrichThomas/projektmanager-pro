@@ -18,6 +18,7 @@ import ActiveTimers from "@/components/dashboard/ActiveTimers";
 import DateTimeWeather from "@/components/dashboard/DateTimeWeather";
 import TravelOverview from "@/components/dashboard/TravelOverview";
 import UpcomingAppointments from "@/components/dashboard/UpcomingAppointments";
+import MiniActivityCalendar from "@/components/layout/MiniActivityCalendar";
 
 export default function Dashboard() {
     const [searchQuery, setSearchQuery] = useState("");
