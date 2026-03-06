@@ -389,6 +389,11 @@ export default function Dashboard() {
                     <DateTimeWeather />
                 </div>
 
+                {/* Activity Calendar - mobile only */}
+                <div className="lg:hidden print:hidden mt-4">
+                    <MiniActivityCalendar />
+                </div>
+
                 {/* Active Timers */}
                 <div className="print:hidden">
                     <ActiveTimers projects={projects} />
