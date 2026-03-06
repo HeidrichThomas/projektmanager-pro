@@ -241,12 +241,19 @@ export default function Layout({ children, currentPageName }) {
                                 </div>
                             </div>
                             
-                            <nav className="flex-1 px-4 space-y-1">
+                            <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
                                 {navigation.map((item) => (
-                                    <NavLink key={item.name} item={item} mobile />
-                                ))}
-                                {themeNavigation.map((item) => (
-                                    <NavLink key={item.name} item={item} mobile />
+                                    <div key={item.name}>
+                                        <NavLink item={item} mobile />
+                                        {item.page === "Themes" && (
+                                            <div className="space-y-3">
+                                                <MiniActivityCalendar />
+                                                {themeNavigation.map((themeItem) => (
+                                                    <NavLink key={themeItem.name} item={themeItem} mobile />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                             </nav>
 
