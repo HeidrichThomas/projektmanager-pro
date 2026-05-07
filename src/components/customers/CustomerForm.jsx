@@ -5,7 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Building2, User, MapPin, Phone, Smartphone, Mail, Save, X, Plus, Trash2, Link2, Edit2 } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Save, X, Plus, Trash2, Link2, Edit2, Wand2, Loader2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 
 export default function CustomerForm({ open, onClose, onSave, customer }) {
     const [formData, setFormData] = useState({
@@ -34,6 +36,8 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
     });
     
     const [editingContactIndex, setEditingContactIndex] = useState(null);
+    const [pasteText, setPasteText] = useState("");
+    const [isParsing, setIsParsing] = useState(false);
 
     useEffect(() => {
         if (customer) {
@@ -97,6 +101,42 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
         }
     };
 
+    const handleParseAddress = async () => {
+        if (!pasteText.trim()) return;
+        setIsParsing(true);
+        const result = await base44.integrations.Core.InvokeLLM({
+            prompt: `Analysiere den folgenden Text und extrahiere alle verfügbaren Kontaktdaten. Gib die Daten als JSON zurück.
+Text:
+${pasteText}`,
+            response_json_schema: {
+                type: "object",
+                properties: {
+                    company: { type: "string" },
+                    contact_name: { type: "string" },
+                    street: { type: "string" },
+                    postal_code: { type: "string" },
+                    city: { type: "string" },
+                    country: { type: "string" },
+                    phone: { type: "string" },
+                    mobile_phone: { type: "string" },
+                    fax: { type: "string" },
+                    email: { type: "string" },
+                    website: { type: "string" },
+                    notes: { type: "string" }
+                }
+            }
+        });
+        setIsParsing(false);
+
+        const updated = { ...formData };
+        const fields = ['company','contact_name','street','postal_code','city','country','phone','mobile_phone','fax','email','notes'];
+        fields.forEach(f => { if (result[f]) updated[f] = result[f]; });
+        if (result.website) updated.link = result.website;
+        setFormData(updated);
+        setPasteText("");
+        toast.success("Adresse erfolgreich erkannt und eingetragen!");
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
@@ -112,6 +152,33 @@ export default function CustomerForm({ open, onClose, onSave, customer }) {
                     </DialogTitle>
                 </DialogHeader>
                 
+                {/* KI Adress-Erkennung */}
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                    <Label className="text-blue-800 font-medium flex items-center gap-2 mb-2">
+                        <Wand2 className="w-4 h-4" />
+                        Adresse automatisch erkennen (KI)
+                    </Label>
+                    <Textarea
+                        value={pasteText}
+                        onChange={(e) => setPasteText(e.target.value)}
+                        placeholder="Adresse hier einfügen – z.B. kopiert aus dem Internet oder einer E-Mail. Die KI erkennt automatisch Firma, Name, Adresse, Telefon, E-Mail, Website usw."
+                        className="min-h-[100px] bg-white text-sm"
+                    />
+                    <Button
+                        type="button"
+                        onClick={handleParseAddress}
+                        disabled={!pasteText.trim() || isParsing}
+                        className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        size="sm"
+                    >
+                        {isParsing ? (
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Wird erkannt...</>
+                        ) : (
+                            <><Wand2 className="w-4 h-4 mr-2" />Felder automatisch befüllen</>
+                        )}
+                    </Button>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-6 mt-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
