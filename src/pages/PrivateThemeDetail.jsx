@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, FileText, CheckSquare, Calendar, File } from "lucide-react";
+import { ArrowLeft, Plus, FileText, CheckSquare, Calendar, File, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import PrivateActivityForm from "@/components/private/PrivateActivityForm";
@@ -13,6 +13,7 @@ import PrivateTaskList from "@/components/private/PrivateTaskList";
 import PrivateAppointmentCalendar from "@/components/private/PrivateAppointmentCalendar";
 import PrivateAppointmentForm from "@/components/private/PrivateAppointmentForm";
 import PrivateDocumentManager from "@/components/private/PrivateDocumentManager";
+import PrivateChronologie from "@/components/private/PrivateChronologie";
 
 export default function PrivateThemeDetail() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -139,8 +140,12 @@ export default function PrivateThemeDetail() {
                     )}
                 </div>
 
-                <Tabs defaultValue="activities" className="space-y-6">
+                <Tabs defaultValue="chronologie" className="space-y-6">
                     <TabsList>
+                        <TabsTrigger value="chronologie">
+                            <Clock className="w-4 h-4 mr-2" />
+                            Chronologie
+                        </TabsTrigger>
                         <TabsTrigger value="activities">
                             <FileText className="w-4 h-4 mr-2" />
                             Aktivitäten
@@ -158,6 +163,31 @@ export default function PrivateThemeDetail() {
                             Dokumente
                         </TabsTrigger>
                     </TabsList>
+
+                    <TabsContent value="chronologie">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle>Chronologie</CardTitle>
+                                    <Button onClick={() => { setEditingActivity(null); setShowActivityForm(true); }}>
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        Neue Aktivität
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <PrivateChronologie
+                                    activities={activities}
+                                    onEdit={(activity) => { setEditingActivity(activity); setShowActivityForm(true); }}
+                                    onDelete={(activity) => {
+                                        if (confirm("Aktivität löschen?")) {
+                                            deleteActivityMutation.mutate(activity.id);
+                                        }
+                                    }}
+                                />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
 
                     <TabsContent value="activities">
                         <Card>
