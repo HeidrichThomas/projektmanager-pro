@@ -7,13 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, File, Image, Trash2, Download, Calendar } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Upload, File, FileText, Image as ImageIcon, Trash2, Download, Calendar, X, ZoomIn } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import FileDropzone from "@/components/ui/file-dropzone";
 
 export default function PrivateDocumentManager({ themeId, documents, activities = [] }) {
     const [uploading, setUploading] = useState(false);
+    const [previewDoc, setPreviewDoc] = useState(null);
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -71,9 +73,8 @@ export default function PrivateDocumentManager({ themeId, documents, activities 
         }
     };
 
-    const isImage = (filename) => {
-        return /\.(jpg|jpeg|png|gif|webp)$/i.test(filename);
-    };
+    const isImage = (filename) => /\.(jpg|jpeg|png|gif|webp)$/i.test(filename || "");
+    const isPdf = (filename) => /\.pdf$/i.test(filename || "");
 
     // Sammle Dokumente aus Aktivitäten
     const activityDocuments = [];
@@ -186,16 +187,36 @@ export default function PrivateDocumentManager({ themeId, documents, activities 
                         {allDocuments.map(doc => (
                             <Card key={doc.id} className="overflow-hidden group">
                                 {isImage(doc.file_name) ? (
-                                    <div className="aspect-video bg-slate-100 relative overflow-hidden">
+                                    <div
+                                        className="aspect-video bg-slate-100 relative overflow-hidden cursor-zoom-in"
+                                        onClick={() => setPreviewDoc(doc)}
+                                    >
                                         <img
                                             src={doc.file_url}
                                             alt={doc.title}
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
                                         />
+                                        <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
+                                            <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                                        </div>
+                                    </div>
+                                ) : isPdf(doc.file_name) ? (
+                                    <div
+                                        className="aspect-video bg-slate-50 relative overflow-hidden cursor-pointer border-b border-slate-100"
+                                        onClick={() => setPreviewDoc(doc)}
+                                    >
+                                        <iframe
+                                            src={`${doc.file_url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                            className="w-full h-full pointer-events-none"
+                                            title={doc.title}
+                                        />
+                                        <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors flex items-center justify-center">
+                                            <ZoomIn className="w-8 h-8 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" />
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="aspect-video bg-slate-100 flex items-center justify-center">
-                                        <File className="w-16 h-16 text-slate-400" />
+                                        <FileText className="w-16 h-16 text-slate-400" />
                                     </div>
                                 )}
                                 <div className="p-4">
@@ -240,6 +261,37 @@ export default function PrivateDocumentManager({ themeId, documents, activities 
                     </div>
                 )}
             </div>
+            {/* Vorschau-Dialog */}
+            <Dialog open={!!previewDoc} onOpenChange={() => setPreviewDoc(null)}>
+                <DialogContent className="max-w-4xl w-full p-2">
+                    <div className="flex items-center justify-between px-4 py-2 border-b">
+                        <span className="font-medium text-slate-900 truncate">{previewDoc?.title}</span>
+                        <div className="flex gap-2 shrink-0">
+                            <Button size="sm" variant="outline" asChild>
+                                <a href={previewDoc?.file_url} target="_blank" rel="noopener noreferrer">
+                                    <Download className="w-4 h-4 mr-1" />
+                                    Öffnen
+                                </a>
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="w-full" style={{ height: "75vh" }}>
+                        {previewDoc && isImage(previewDoc.file_name) ? (
+                            <img
+                                src={previewDoc.file_url}
+                                alt={previewDoc.title}
+                                className="w-full h-full object-contain"
+                            />
+                        ) : previewDoc && isPdf(previewDoc.file_name) ? (
+                            <iframe
+                                src={previewDoc.file_url}
+                                className="w-full h-full rounded"
+                                title={previewDoc?.title}
+                            />
+                        ) : null}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
