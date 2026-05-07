@@ -110,12 +110,34 @@ export default function CustomerActivityForm({ open, onClose, onSave, activity, 
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <Label>Ansprechpartner</Label>
-                            <Input
-                                className="mt-1"
-                                value={form.contact_person}
-                                onChange={e => set("contact_person", e.target.value)}
-                                placeholder="Name..."
-                            />
+                            {customer?.contact_persons?.length > 0 ? (
+                                <Select
+                                    value={form.contact_person}
+                                    onValueChange={v => set("contact_person", v === "__none__" ? "" : v)}
+                                >
+                                    <SelectTrigger className="mt-1">
+                                        <SelectValue placeholder="Auswählen..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="__none__">– Kein Ansprechpartner –</SelectItem>
+                                        {customer.contact_name && (
+                                            <SelectItem value={customer.contact_name}>{customer.contact_name}</SelectItem>
+                                        )}
+                                        {customer.contact_persons.map((cp, i) => (
+                                            <SelectItem key={i} value={cp.name}>
+                                                {cp.name}{cp.position ? ` (${cp.position})` : ""}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            ) : (
+                                <Input
+                                    className="mt-1"
+                                    value={form.contact_person}
+                                    onChange={e => set("contact_person", e.target.value)}
+                                    placeholder={customer?.contact_name || "Name..."}
+                                />
+                            )}
                         </div>
                         <div>
                             <Label>Datum & Uhrzeit</Label>
