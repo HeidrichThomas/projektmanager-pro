@@ -2,9 +2,9 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, User, MapPin, Phone, Smartphone, Mail, Pencil, Copy, Trash2, Link2 } from "lucide-react";
+import { Building2, User, MapPin, Phone, Smartphone, Mail, Pencil, Copy, Trash2, Link2, Clock } from "lucide-react";
 
-export default function CustomerCard({ customer, onEdit, onCopy, onDelete, projectCount, onShowProjects }) {
+export default function CustomerCard({ customer, onEdit, onCopy, onDelete, projectCount, onShowProjects, onShowTimeline }) {
     const typeConfig = {
         customer: { label: "Kunde", color: "bg-blue-50 text-blue-700 border-blue-200" },
         supplier: { label: "Lieferant", color: "bg-purple-50 text-purple-700 border-purple-200" },
@@ -110,6 +110,9 @@ export default function CustomerCard({ customer, onEdit, onCopy, onDelete, proje
                         <Link2 className="w-3 h-3" />
                     </Button>
                 )}
+                <Button size="sm" variant="outline" onClick={() => onShowTimeline && onShowTimeline(customer)} title="Chronologie">
+                    <Clock className="w-3 h-3" />
+                </Button>
                 <Button size="sm" variant="outline" onClick={() => onEdit(customer)} className="flex-1">
                     <Pencil className="w-3 h-3 mr-1" />
                     Bearbeiten

@@ -14,6 +14,7 @@ import CustomerCard from "@/components/customers/CustomerCard";
 import CustomerListItem from "@/components/customers/CustomerListItem";
 import CustomerProjectsDialog from "@/components/customers/CustomerProjectsDialog";
 import InactiveCustomersSidebar from "@/components/customers/InactiveCustomersSidebar";
+import CustomerTimeline from "@/components/customers/CustomerTimeline";
 
 export default function Customers() {
     const [showForm, setShowForm] = useState(false);
@@ -23,6 +24,8 @@ export default function Customers() {
     const [viewMode, setViewMode] = useState("grid");
     const [showProjectsDialog, setShowProjectsDialog] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [showTimeline, setShowTimeline] = useState(false);
+    const [timelineCustomer, setTimelineCustomer] = useState(null);
     const [orderedCustomers, setOrderedCustomers] = useState([]);
     const [inactiveCustomers, setInactiveCustomers] = useState([]);
 
@@ -115,6 +118,11 @@ export default function Customers() {
     const handleShowProjects = (customer) => {
         setSelectedCustomer(customer);
         setShowProjectsDialog(true);
+    };
+
+    const handleShowTimeline = (customer) => {
+        setTimelineCustomer(customer);
+        setShowTimeline(true);
     };
 
     const filteredCustomers = orderedCustomers.filter(c => {
@@ -257,12 +265,13 @@ export default function Customers() {
                                                     } transition-all`}
                                                 >
                                                     <CustomerCard
-                                                        customer={customer}
-                                                        onEdit={handleEdit}
-                                                        onCopy={handleCopy}
-                                                        onDelete={handleDelete}
-                                                        projectCount={getProjectCount(customer.id)}
-                                                        onShowProjects={handleShowProjects}
+                                                       customer={customer}
+                                                       onEdit={handleEdit}
+                                                       onCopy={handleCopy}
+                                                       onDelete={handleDelete}
+                                                       projectCount={getProjectCount(customer.id)}
+                                                       onShowProjects={handleShowProjects}
+                                                       onShowTimeline={handleShowTimeline}
                                                     />
                                                 </div>
                                             )}
@@ -323,6 +332,13 @@ export default function Customers() {
                 onClose={() => setShowProjectsDialog(false)}
                 customer={selectedCustomer}
                 projects={selectedCustomer ? getCustomerProjects(selectedCustomer.id) : []}
+            />
+
+            <CustomerTimeline
+                open={showTimeline}
+                onClose={() => setShowTimeline(false)}
+                customer={timelineCustomer}
+                projects={timelineCustomer ? getCustomerProjects(timelineCustomer.id) : []}
             />
         </DragDropContext>
     );
