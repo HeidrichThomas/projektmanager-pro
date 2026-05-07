@@ -125,6 +125,11 @@ export default function Customers() {
         setShowTimeline(true);
     };
 
+    const handleAddActivity = (customer) => {
+        setTimelineCustomer(customer);
+        setShowTimeline(true);
+    };
+
     const filteredCustomers = orderedCustomers.filter(c => {
         const matchesSearch = c.company?.toLowerCase().includes(search.toLowerCase()) ||
             c.contact_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -265,13 +270,14 @@ export default function Customers() {
                                                     } transition-all`}
                                                 >
                                                     <CustomerCard
-                                                       customer={customer}
-                                                       onEdit={handleEdit}
-                                                       onCopy={handleCopy}
-                                                       onDelete={handleDelete}
-                                                       projectCount={getProjectCount(customer.id)}
-                                                       onShowProjects={handleShowProjects}
-                                                       onShowTimeline={handleShowTimeline}
+                                                      customer={customer}
+                                                      onEdit={handleEdit}
+                                                      onCopy={handleCopy}
+                                                      onDelete={handleDelete}
+                                                      projectCount={getProjectCount(customer.id)}
+                                                      onShowProjects={handleShowProjects}
+                                                      onShowTimeline={handleShowTimeline}
+                                                      onAddActivity={handleAddActivity}
                                                     />
                                                 </div>
                                             )}

@@ -1,0 +1,50 @@
+{
+  "name": "CustomerActivity",
+  "type": "object",
+  "properties": {
+    "customer_id": {
+      "type": "string",
+      "description": "Zugeh\u00f6riger Kunde/Lieferant"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "telefonat",
+        "besuch",
+        "meeting",
+        "email",
+        "notiz",
+        "memo",
+        "dokument"
+      ],
+      "description": "Art der Aktivit\u00e4t"
+    },
+    "title": {
+      "type": "string",
+      "description": "Titel/Betreff"
+    },
+    "content": {
+      "type": "string",
+      "description": "Inhalt/Notiz"
+    },
+    "contact_person": {
+      "type": "string",
+      "description": "Ansprechpartner"
+    },
+    "activity_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Datum und Uhrzeit"
+    },
+    "appointment_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Folgetermin (optional)"
+    }
+  },
+  "required": [
+    "customer_id",
+    "type",
+    "title"
+  ]
+}
